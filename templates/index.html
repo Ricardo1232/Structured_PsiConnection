@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Diagnóstico</title>
+    <title>Mental Health Questionnaire</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .question {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        input[type="submit"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Formulario de Diagnóstico</h1>
+    <form action="{{ url_for('results') }}" method="post">
+        <h2>Trastorno de Ansiedad</h2>
+        <label>¿Siente una preocupación excesiva sobre diferentes aspectos de su vida? (sí/no)</label><br>
+        <input type="radio" name="preocupacion_excesiva" value="si"> Sí
+        <input type="radio" name="preocupacion_excesiva" value="no"> No
+        <br><br>
+        
+        <label>¿Se siente nervioso o está constantemente en alerta? (sí/no)</label><br>
+        <input type="radio" name="nerviosismo" value="si"> Sí
+        <input type="radio" name="nerviosismo" value="no"> No
+        <br><br>
+
+        <label>¿Se siente fatigado la mayor parte del tiempo? (sí/no)</label><br>
+        <input type="radio" name="fatiga" value="si"> Sí
+        <input type="radio" name="fatiga" value="no"> No
+        <br><br>
+
+        <label>¿Tiene problemas de concentración? (sí/no)</label><br>
+        <input type="radio" name="problemas_concentracion" value="si"> Sí
+        <input type="radio" name="problemas_concentracion" value="no"> No
+        <br><br>
+
+        <label>¿Se irrita fácilmente? (sí/no)</label><br>
+        <input type="radio" name="irritabilidad" value="si"> Sí
+        <input type="radio" name="irritabilidad" value="no"> No
+        <br><br>
+
+        <label>¿Siente tensión muscular? (sí/no)</label><br>
+        <input type="radio" name="tension_muscular" value="si"> Sí
+        <input type="radio" name="tension_muscular" value="no"> No
+        <br><br>
+
+        <label>¿Tiene problemas para conciliar el sueño? (sí/no)</label><br>
+        <input type="radio" name="problemas_sueno" value="si"> Sí
+        <input type="radio" name="problemas_sueno" value="no"> No
+        <br><br>
+        
+        <h2>Depresión</h2>
+        <label>¿Experimenta sentimientos de tristeza profunda? (sí/no)</label><br>
+        <input type="radio" name="sentimientos_tristeza" value="si"> Sí
+        <input type="radio" name="sentimientos_tristeza" value="no"> No
+        <br><br>
+
+        <label>¿Ha perdido interés en actividades que solía disfrutar? (sí/no)</label><br>
+        <input type="radio" name="perdida_interes" value="si"> Sí
+        <input type="radio" name="perdida_interes" value="no"> No
+        <br><br>
+
+        <label>¿Ha experimentado cambios en su apetito o peso recientemente? (sí/no)</label><br>
+        <input type="radio" name="cambios_apetito_peso" value="si"> Sí
+        <input type="radio" name="cambios_apetito_peso" value="no"> No
+        <br><br>
+
+        <label>¿Ha tenido pensamientos de suicidio? (sí/no)</label><br>
+        <input type="radio" name="pensamientos_suicidio" value="si"> Sí
+        <input type="radio" name="pensamientos_suicidio" value="no"> No
+        <br><br>
+        
+        <h2>TDAH</h2>
+        <label>¿Tiene dificultades para mantener la atención en una tarea? (sí/no)</label><br>
+        <input type="radio" name="dificultad_atencion" value="si"> Sí
+        <input type="radio" name="dificultad_atencion" value="no"> No
+        <br><br>
+
+        <label>¿Se considera una persona hiperactiva? (sí/no)</label><br>
+        <input type="radio" name="hiperactividad" value="si"> Sí
+        <input type="radio" name="hiperactividad" value="no"> No
+        <br><br>
+
+        <label>¿Suele actuar impulsivamente? (sí/no)</label><br>
+        <input type="radio" name="impulsividad" value="si"> Sí
+        <input type="radio" name="impulsividad" value="no"> No
+        <br><br>
+
+        <label>¿Encuentra dificultades para seguir instrucciones? (sí/no)</label><br>
+        <input type="radio" name="dificultades_instrucciones" value="si"> Sí
+        <input type="radio" name="dificultades_instrucciones" value="no"> No
+        <br><br>
+        
+        <h2>Parkinson</h2>
+        <label>¿Experimenta temblores cuando está en reposo? (sí/no)</label><br>
+        <input type="radio" name="temblor_reposo" value="si"> Sí
+        <input type="radio" name="temblor_reposo" value="no"> No
+        <br><br>
+
+        <label>¿Siente rigidez muscular? (sí/no)</label><br>
+        <input type="radio" name="rigidez_muscular" value="si"> Sí
+        <input type="radio" name="rigidez_muscular" value="no"> No
+        <br><br>
+
+        <label>¿Ha notado lentitud en sus movimientos? (sí/no)</label><br>
+        <input type="radio" name="lentitud_movimientos" value="si"> Sí
+        <input type="radio" name="lentitud_movimientos" value="no"> No
+        <br><br>
+
+        <label>¿Tiene problemas de equilibrio o coordinación? (sí/no)</label><br>
+        <input type="radio" name="problemas_equilibrio_coordinacion" value="si"> Sí
+        <input type="radio" name="problemas_equilibrio_coordinacion" value="no"> No
+        <br><br>
+
+        <label>¿Tiene dificultades para hablar o escribir? (sí/no)</label><br>
+        <input type="radio" name="dificultad_hablar_escribir" value="si"> Sí
+        <input type="radio" name="dificultad_hablar_escribir" value="no"> No
+        <br><br>
+        
+        <h2>Alzheimer</h2>
+        <label>¿Ha experimentado pérdida de memoria recientemente? (sí/no)</label><br>
+        <input type="radio" name="perdida_memoria" value="si"> Sí
+        <input type="radio" name="perdida_memoria" value="no"> No
+        <br><br>
+
+        <label>¿Encuentra dificultades para encontrar palabras en conversaciones? (sí/no)</label><br>
+        <input type="radio" name="dificultad_palabras_conversaciones" value="si"> Sí
+        <input type="radio" name="dificultad_palabras_conversaciones" value="no"> No
+        <br><br>
+
+        <label>¿Se siente desorientado(a) en tiempo o espacio? (sí/no)</label><br>
+        <input type="radio" name="desorientacion_espacial_temporal" value="si"> Sí
+        <input type="radio" name="desorientacion_espacial_temporal" value="no"> No
+        <br><br>
+
+        <label>¿Ha experimentado cambios en su estado de ánimo o comportamiento? (sí/no)</label><br>
+        <input type="radio" name="cambios_estado_animo_comportamiento" value="si"> Sí
+        <input type="radio" name="cambios_estado_animo_comportamiento" value="no"> No
+        <br><br>
+
+        <label>¿Encuentra dificultades para realizar tareas cotidianas? (sí/no)</label><br>
+        <input type="radio" name="dificultad_tareas_cotidianas" value="si"> Sí
+        <input type="radio" name="dificultad_tareas_cotidianas" value="no"> No
+        <br><br>
+        
+        <h2>Trastorno Bipolar</h2>
+        <label>¿Experimenta episodios de manía? (sí/no)</label><br>
+        <input type="radio" name="episodios_mania" value="si"> Sí
+        <input type="radio" name="episodios_mania" value="no"> No
+        <br><br>
+
+        <label>¿Experimenta episodios de depresión? (sí/no)</label><br>
+        <input type="radio" name="episodios_depresion" value="si"> Sí
+        <input type="radio" name="episodios_depresion" value="no"> No
+        <br><br>
+
+        <label>¿Experimenta cambios bruscos en su humor o actividad? (sí/no)</label><br>
+        <input type="radio" name="cambios_bruscos_humor_actividad" value="si"> Sí
+        <input type="radio" name="cambios_bruscos_humor_actividad" value="no"> No
+        <br><br>
+        
+        <h2>Trastorno Obsesivo-Compulsivo (TOC)</h2>
+        <label>¿Experimenta obsesiones recurrentes? (sí/no)</label><br>
+        <input type="radio" name="obsesiones" value="si"> Sí
+        <input type="radio" name="obsesiones" value="no"> No
+        <br><br>
+
+        <label>¿Siente la necesidad de realizar compulsiones para aliviar la ansiedad? (sí/no)</label><br>
+        <input type="radio" name="compulsiones" value="si"> Sí
+        <input type="radio" name="compulsiones" value="no"> No
+        <br><br>
+
+        <label>¿Reconoce la ineficacia de sus intentos por controlar sus pensamientos o comportamientos obsesivos? (sí/no)</label><br>
+        <input type="radio" name="reconocimiento_ineficacia_control" value="si"> Sí
+        <input type="radio" name="reconocimiento_ineficacia_control" value="no"> No
+        <br><br>
+        
+        <h2>Misofonía</h2>
+        <label>¿Se siente irritado(a) ante ciertos sonidos? (sí/no)</label><br>
+        <input type="radio" name="irritabilidad_misofonia" value="si"> Sí
+        <input type="radio" name="irritabilidad_misofonia" value="no"> No
+        <br><br>
+
+        <label>¿Se enfada fácilmente debido a sonidos específicos? (sí/no)</label><br>
+        <input type="radio" name="enfado" value="si"> Sí
+        <input type="radio" name="enfado" value="no"> No
+        <br><br>
+
+        <label>¿Experimenta ansiedad intensa ante ciertos sonidos? (sí/no)</label><br>
+        <input type="radio" name="ansiedad" value="si"> Sí
+        <input type="radio" name="ansiedad" value="no"> No
+        <br><br>
+
+        <label>¿Siente náuseas ante ciertos sonidos? (sí/no)</label><br>
+        <input type="radio" name="nauseas" value="si"> Sí
+        <input type="radio" name="nauseas" value="no"> No
+        <br><br>
+
+        <label>¿Experimenta sudoración excesiva ante ciertos sonidos? (sí/no)</label><br>
+        <input type="radio" name="sudoracion" value="si"> Sí
+        <input type="radio" name="sudoracion" value="no"> No
+        <br><br>
+
+        <label>¿Siente la necesidad de escapar de ciertos sonidos? (sí/no)</label><br>
+        <input type="radio" name="necesidad_escapar" value="si"> Sí
+        <input type="radio" name="necesidad_escapar" value="no"> No
+        <br><br>
+
+        <label>¿Ciertos sonidos desencadenan reacciones negativas en usted? (sí/no)</label><br>
+        <input type="radio" name="sonidos_desencadenantes" value="si"> Sí
+        <input type="radio" name="sonidos_desencadenantes" value="no"> No
+        <br><br>
+        
+        <h2>Trastorno Antisocial</h2>
+        <label>¿Ha violado los derechos de los demás, como engañar, robar o agredir físicamente? (sí/no)</label><br>
+        <input type="radio" name="violacion_derechos" value="si"> Sí
+        <input type="radio" name="violacion_derechos" value="no"> No
+        <br><br>
+
+        <label>¿Desprecia o viola las normas sociales y legales, mostrando indiferencia por la seguridad propia o de los demás? (sí/no)</label><br>
+        <input type="radio" name="desprecio_normas" value="si"> Sí
+        <input type="radio" name="desprecio_normas" value="no"> No
+        <br><br>
+
+        <label>¿Muestra irresponsabilidad consistente, como no cumplir con obligaciones laborales o financieras? (sí/no)</label><br>
+        <input type="radio" name="irresponsabilidad" value="si"> Sí
+        <input type="radio" name="irresponsabilidad" value="no"> No
+        <br><br>
+
+        <label>¿Presenta falta de remordimiento, indiferencia o justificación de haber dañado, maltratado o robado a otras personas? (sí/no)</label><br>
+        <input type="radio" name="falta_remordimiento" value="si"> Sí
+        <input type="radio" name="falta_remordimiento" value="no"> No
+        <br><br>
+        
+        <input type="submit" value="Enviar">
+    </form>
+</body>
+</html>
+

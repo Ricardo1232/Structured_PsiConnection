@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Questionnaire Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mental Health Questionnaire Results</h1>
+        {% if diagnoses_p %}
+            <h2>Possible Diagnoses:</h2>
+            <ul>
+            {% for disorder, percentage in diagnoses_p.items() %}
+                <li>{{ disorder }}: {{ percentage|round(2) }}% of symptoms present</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No specific disorder was identified based on the reported symptoms.</p>
+        {% endif %}
+        
+        
+        {% if diagnoses_s %}
+            <h2>Other trends:</h2>
+            <ul>
+            {% for disorder, percentage in diagnoses_s.items() %}
+                <li>{{ disorder }}: {{ percentage|round(2) }}% of symptoms present</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No specific disorder was identified based on the reported symptoms.</p>
+        {% endif %}
+        <p>Please note that this is not a professional medical diagnosis. Consult with a qualified mental health professional for proper evaluation and treatment.</p>
+    </div>
+</body>
+</html>
