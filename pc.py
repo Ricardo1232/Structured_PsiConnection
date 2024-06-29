@@ -1,7 +1,15 @@
-from flask import Flask, request, render_template
-from typing import List, Dict
+from flask                  import Flask, render_template, request, redirect, url_for, session, flash, make_response
+from flask_mysqldb          import MySQL, MySQLdb
+from typing                 import List, Dict
 
-app = Flask(__name__)
+app     = Flask(__name__)
+mysql   = MySQL(app)
+app.config['MYSQL_HOST']              = 'localhost'
+app.config['MYSQL_USER']              = 'root'
+app.config['MYSQL_PASSWORD']          = 'root'
+app.config['MYSQL_DB']                = 'prueba'
+
+
 
 # Define symptoms for each disorder
 SYMPTOMS = {
@@ -68,7 +76,24 @@ def results():
     diagnoses_p , diagnoses_s = diagnose(reported_symptoms)
     print(diagnoses_p)
     print(diagnoses_s)
-    return render_template('resultado.html', diagnoses_p=diagnoses_p, diagnoses_s=diagnoses_s)
+    cur = mysql.connection.cursor()
+    nombre = request.form['nombre']
+    correo = request.form['correo']
+    
+    
+    cur.execute("INSERT INTO usuarios(nombre, correo,respuestas, sint_pri, sint_sec) VALUES(%s,%s,%s,%s,%s)",
+                 (nombre, correo, ','.join(reported_symptoms), diagnoses_p, diagnoses_s))
+    mysql.connection.commit()
+    
+    cur.execute(" SELECT * FROM usuarios")
+    pacientes = []
+    column_names = [desc[0] for desc in cur.description]
+    
+    for row in cur.fetchall():
+        pacientes.append(dict(zip(column_names, row)))
+
+    cur.close()
+    return render_template('resultado.html', diagnoses_p=diagnoses_p, diagnoses_s=diagnoses_s, pacientes=pacientes)
 
 
 if __name__ == '__main__':
