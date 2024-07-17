@@ -1,0 +1,242 @@
+@import url("https://use.fontawesome.com/releases/v5.0.11/css/all.css");        
+            
+    ::-webkit-scrollbar {
+                                  width: 8px;
+                                }
+                                /* Track */
+                                ::-webkit-scrollbar-track {
+                                  background: #f1f1f1; 
+                                }
+                                 
+                                /* Handle */
+                                ::-webkit-scrollbar-thumb {
+                                  background: #888; 
+                                }
+                                
+                                /* Handle on hover */
+                                ::-webkit-scrollbar-thumb:hover {
+                                  background: #555; 
+                                } body {
+    color: #000;
+    overflow-x: hidden;
+    height: 100%;
+    background: linear-gradient(180deg, #2196F3 250px, #FFF 250px);
+    background-repeat: no-repeat;
+}
+
+
+
+.card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #E0F7FA;
+    border: 1px solid #E0F7FA;
+    box-shadow: 0 6px 12px 0 rgba(0,0,0,0.2);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    transform: translateX(100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.card.show {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    z-index: 2;
+}
+
+.card.previous {
+    transform: translateX(-100%);
+    z-index: 1;
+}
+
+.card:first-child {
+    /*opacity: 1;*/
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+.step-container {
+    border-top: 1px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+    width: 99.85%;
+    margin-top: 70px;
+    margin-bottom: 50px;
+}
+
+.fa-circle {
+    background-color: lightgrey;
+    color: #fff;
+    padding: 2px 3.1555px;
+    border-radius: 50%;
+}
+
+.step-box {
+    padding: 10px;
+    border-left: 1px solid lightgrey;
+    border-right: 1px solid lightgrey;
+    background-color: #fff;
+}
+
+.active {
+    background-color: #2196F3;
+    color: #fff !important;
+    border-left: 1px solid #2196F3;
+    border-right: 1px solid #2196F3;
+}
+
+.active .fa-circle {
+    background-color: #fff !important;
+    color: #2196F3;
+}
+
+.fa-check {
+    border-radius: 50%;
+    background-color: #00C853;
+    color: #fff;
+    padding: 3px;
+}
+
+.step-title-0 {
+    margin-bottom: 0px;
+}
+
+.step-title {
+    font-size: 13px;
+    position: relative;
+    margin-left: 4px;
+}
+
+.heading {
+    margin-bottom: 40px;
+}
+
+input, textarea, button {
+    padding: 8px 15px 8px 15px;
+    border-radius: 0px;
+    margin-bottom: 25px;
+    margin-top: 2px;
+    width: 100%;
+    box-sizing: border-box;
+    color: #2C3E50;
+    background-color: #ECEFF1;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+input:focus, textarea:focus {
+    -moz-box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    border: 1px solid skyblue !important;
+    outline-width: 0;
+}
+
+button:focus {
+    -moz-box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    border: 1px solid green !important;
+    outline-width: 0;
+}
+
+textarea {
+    height: 100px;
+}
+
+button {
+    display: inline-block !important;
+    width: 134px;
+    letter-spacing: 2px;
+}
+
+.fit-image {
+    width: 100%; 
+    object-fit: cover;
+}
+
+.subcard {
+    display: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    transform: translateX(20px);
+    pointer-events: none;
+}
+
+.subcard.activee {
+    display: block;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+.subcard.previous {
+    transform: translateX(-100%);
+}
+
+
+.toggle {
+    display: inline-flex;
+    align-items: center;
+}
+
+.toggle input[type="radio"] + .label-text:before{
+	content: "\f204";
+	font-family: "Font Awesome 5 Free";
+	
+	font-style: normal;
+	font-weight: 900;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	-webkit-font-smoothing:antialiased;
+	width: 1em;
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.toggle input[type="radio"]:checked + .label-text:before{
+	content: "\f205";
+	color: #16a085;
+	animation: effect 250ms ease-in;
+}
+
+.toggle input[type="radio"]:disabled + .label-text{
+	color: #aaa;
+}
+
+.toggle input[type="radio"]:disabled + .label-text:before{
+	content: "\f204";
+	color: #ccc;
+}
+
+label{
+	position: relative;
+	cursor: pointer;
+	color: #666;
+	
+}
+
+input[type="checkbox"], input[type="radio"]{
+	position: absolute;
+	right: 9000px;
+}
+
+
+@keyframes effect{
+	0%{transform: scale(0);}
+	25%{transform: scale(1.3);}
+	75%{transform: scale(1.4);}
+	100%{transform: scale(1);}
+}
+
+@media screen and (max-width: 768px) {
+    .break-line {
+        display: block;
+        float: none;
+    }
+}

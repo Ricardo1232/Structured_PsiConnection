@@ -1,0 +1,96 @@
+<header class="section">
+    <img class="imagen" src="/Admin/static/img/Fondos-de-pantalla-de-paisajes-naturales29.jpg" alt="Fondo superior">
+    <section class="preloader">
+        <div class="spinner">
+            <span class="spinner-rotate"></span>
+        </div>
+    </section>
+    <nav class="navbar navbar-expand-lg">
+
+        <div class="container">
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+
+            
+            <a href="/templates/practicante/index_practicante.html" class="navbar-brand mx-auto mx-lg-0"><img
+                class="Letras-Fondo" src="/static/img/LETRAS-NO-FONDO.png" alt="PsiConnection"
+                href="/templates/paciente/index_pacientes.html"></a>
+
+            
+            <div class="collapse navbar-collapse barNav" id="navbarNav">
+                <ul class="navbar-nav ms-lg-5">
+                    <li class="nav-item">
+                        <a class="nav-link click-scroll" href="/templates/practicante/index_practicante.html">Home</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="d-lg-flex align-items-center ms-auto dropdown">
+                <button class="dropbtn">
+                    Nombre
+                </button>
+                <div class="dropdown-content">
+                    <div class="inte-content">
+                        <p>
+                            {{username}}
+                        </p>
+                        <p>
+                            {{email}}
+                        </p>
+                        <a class="btn btn-a float-right mr-3" href=" {{ url_for('logout') }}"
+                            style="background-color:  #007b81; color: white;">Cerrar sesion
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <script>
+                function switchElements() {
+                    const navbar = document.querySelector('.barNav');
+                    const dropdown = document.querySelector('.dropdown');
+                    if (window.innerWidth >= 992) {
+                        dropdown.parentNode.insertBefore(dropdown, navbar.nextSibling);
+                    } else {
+                        navbar.parentNode.insertBefore(navbar, dropdown.nextSibling);
+                    }
+                }
+
+                window.addEventListener('resize', switchElements);
+            </script>
+        </div>
+    </nav>
+
+
+    <section class=" d-flex justify-content-center align-items-center">
+
+        <div class="container">
+            <div class="row">
+
+               
+                <!-- Esta clase solo debe de estar en los index -->
+                <div class="col-lg-7 col-12">
+                    <div class="hero-text">
+                        <div class="espacio"></div>
+                        <div class="hero-title-wrap d-flex align-items-center mb-4">
+                            <h1 class="hero-title ms-3 mb-0">Bienvenido!</h1>
+                        </div>
+                        <h2 class="text-center">{{username}}</h2>
+                    </div>
+                </div>
+
+
+                <div class="custom-shape-divider-top-1682744544">
+                    <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"
+                        preserveAspectRatio="none">
+                        <path
+                            d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
+                            class="shape-fill"></path>
+                    </svg>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</header>

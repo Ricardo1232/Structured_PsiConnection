@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PsiConnection</title>
+    <link rel="icon" href="/static/img/logo_Psi.png">
+
+    <!-- Extras -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap">
+
+    <!-- Bootsrap -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-icons.css">
+
+    <!-- CSS FILES -->
+    <link rel="stylesheet" href="/static/css/personal.css">
+    <link rel="stylesheet" href="/static/css/templatemo-first-portfolio-style.css">
+    <link rel="stylesheet" href="/static/css/magnific-popup.css">
+
+    <!--------------------------->
+
+
+
+    <!--------------------------->
+</head>
+
+<body class="fondo">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for message in messages %}
+        <li class="error">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    <header class="section">
+        <img class="imagen" src="/static/img/Fondos-de-pantalla-de-paisajes-naturales29.jpg" alt="Fondo superior">
+        <section class="preloader">
+            <div class="spinner">
+                <span class="spinner-rotate"></span>
+            </div>
+        </section>
+        <nav class="navbar navbar-expand-lg">
+
+            <div class="container">
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <a href="/VerPracticantesSupervisor" class="navbar-brand mx-auto mx-lg-0"><img class="Letras-Fondo"
+                        src="/static/img/LETRAS-NO-FONDO.png" alt="PsiConnection"></a>
+
+                <div class="collapse navbar-collapse barNav" id="navbarNav">
+                    <ul class="navbar-nav ms-lg-5">
+                        <li class="nav-item">
+                            <a class="nav-link click-scroll" href="/VerPracticantesSupervisor">Inicio</a>
+                        </li>
+
+                    </ul>
+                </div>
+                <div class="d-lg-flex align-items-center ms-auto dropdown">
+                    <button class="dropbtn">
+                        {{username}}
+                    </button>
+                    <div class="dropdown-content">
+                        <div class="inte-content">
+                            <p>
+                                {{username}}
+                            </p>
+                            <p>
+                                {{email}}
+                            </p>
+                            <a class="btn btn-a float-right mr-3" href=" {{ url_for('logout') }}"
+                                style="background-color: #007b81; color: white;">Cerrar sesion
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    function switchElements() {
+                        const navbar = document.querySelector('.barNav');
+                        const dropdown = document.querySelector('.dropdown');
+                        if (window.innerWidth >= 992) {
+                            dropdown.parentNode.insertBefore(dropdown, navbar.nextSibling);
+                        } else {
+                            navbar.parentNode.insertBefore(navbar, dropdown.nextSibling);
+                        }
+                    }
+
+                    window.addEventListener('resize', switchElements);
+                </script>
+            </div>
+        </nav>
+
+
+        <section class=" d-flex justify-content-center align-items-center">
+
+            <div class="container">
+                <div class="row">
+
+
+                    <!-- Esta clase solo debe de estar en los index -->
+                    <div class="col-lg-7 col-12">
+                        <div class="hero-text">
+                            <div class="espacio"></div>
+                            <div class="hero-title-wrap d-flex align-items-center mb-4">
+                                <h1 class="hero-title ms-3 mb-0">Bienvenido!</h1>
+                            </div>
+                            <h2 class="text-center">{{username}}</h2>
+                        </div>
+                    </div>
+
+                    <div class="custom-shape-divider-top-1682744544">
+                        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"
+                            preserveAspectRatio="none">
+                            <path
+                                d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
+                                class="shape-fill"></path>
+                        </svg>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </header>
+
+    <main>
+        <!-- Esto es para las figuras de fondo -->
+        <div class="svg-background">
+            <!-- SVG 1 -->
+            <div class="svg1"></div>
+            <!-- SVG 2 -->
+            <div class="svg2"></div>
+            <!-- SVG 3 -->
+            <div class="svg2"></div>
+        </div>
+
+        <section class="sect">
+
+            <!--***Este section es lo que debe de cambiar en todos los html *****-->
+
+            <h2 class="text-center">Encuesta de Satisfacción</h2>
+
+            <p class="form-control preg">
+                <label for="pregunta-1" class="labeEncuestaPaci">1. ¿Cómo calificaría su nivel de satisfacción general
+                    con el servicio
+                    proporcionado por
+                    el psicólogo?</label>
+            <p>Respuesta: {{resu.pregunta1Encu}}</p>
+            </p>
+
+            <p class="form-control preg">
+                <label for="pregunta-2" class="labeEncuestaPaci">2. ¿El psicólogo escuchó atentamente sus preocupaciones
+                    y dudas durante las
+                    sesiones?</label>
+            <p>Respuesta: {{resu.pregunta2Encu}}</p>
+            </p>
+
+            <p class="form-control preg">
+                <label for="pregunta-3" class="labeEncuestaPaci">3. ¿Se sintió cómodo compartiendo sus pensamientos y
+                    sentimientos con el
+                    psicólogo?</label>
+            <p>Respuesta: {{resu.pregunta3Encu}}</p>
+            </p>
+
+
+            <p class="form-control preg">
+                <label for="pregunta-4" class="labeEncuestaPaci">4. ¿El psicólogo mostró empatía y comprensión hacia sus
+                    problemas?</label>
+            <p>Respuesta: {{resu.pregunta4Encu}}</p>
+            </p>
+
+            <p class="form-control preg">
+                <label for="pregunta-5" class="labeEncuestaPaci">5. ¿Sintió que el tratamiento fue efectivo para abordar
+                    sus problemas o
+                    preocupaciones?</label>
+            <p>Respuesta: {{resu.pregunta5Encu}}</p>
+            </p>
+
+            <p class="form-control preg">
+                <label for="pregunta-6" class="labeEncuestaPaci">6. ¿Cómo calificaría la calidad y la organización del
+                    psicólogo en cuanto a
+                    las citas y la
+                    comunicación?</label>
+            <p>Respuesta: {{resu.pregunta6Encu}}</p>
+            </p>
+
+            <p class="form-control preg">
+                <label for="pregunta-7" class="labeEncuestaPaci">7. ¿Recomendaría a este psicólogo a amigos o familiares
+                    que necesiten
+                    servicios de salud
+                    mental?</label>
+            <p>Respuesta: {{resu.pregunta7Encu}}</p>
+            </p>
+            <p class="form-control preg">
+                <label for="pregunta-8" class="labeEncuestaPaci">8. ¿Tiene algún comentario adicional o sugerencias para
+                    mejorar la
+                    experiencia con el
+                    psicólogo?</label><br>
+            <p>Respuesta: {{resu.pregunta8Encu}}</p>
+            </p>
+            <div class="text-center">
+
+                <!--**** Este section es lo que debe de cambiar en todos los html ******-->
+
+        </section>
+    </main>
+
+    <footer class="footer text-center text-lg-start text-white">
+        <!-- Grid container -->
+        <div class="container pt-2 pl-4 pr-4 textoclaro">
+            <!--Grid row-->
+            <div class="row my-4 ">
+                <div class="col-lg-6 col-md-6 mb-4 mb-md-0">
+
+                    <div class="rounded-circle bg-white shadow-1-strong d-flex align-items-center justify-content-center mb-4 mx-auto"
+                        style="width: 150px; height: 150px;">
+                        <img src="/static/img/logo_Psi.png" height="70" alt="" loading="lazy" />
+                    </div>
+
+                    <p class="text-center textoclaro">PsiConnection es un sistema de citas para consultas de psicología
+                        presencial
+                        o en línea. Conectamos a nuestros usuarios con psicólogos altamente capacitados y
+                        experimentados. En Psiconnection, valoramos la privacidad y la confidencialidad de nuestros
+                        usuarios y nos aseguramos de que todas las consultas sean seguras y protegidas. ¡Permítenos
+                        ayudarte a encontrar la ayuda que necesitas!</p>
+
+                    <ul class="list-unstyled d-flex flex-row justify-content-center">
+                        <li>
+                            <a class="text-white px-2" href="https://www.facebook.com/udgcucei" target="_blank">
+                                <img id="FabIcono" src="/static/img/facebook.svg" alt="">
+                            </a>
+                        </li>
+                        <li>
+                            <a class="text-white px-2 textoclaro" href="http://www.cucei.udg.mx/" target="_blank">
+                                CUCEI
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+                <!--Grid column-->
+
+                <!--Grid column-->
+                <div class="col-lg-6 col-md-6 mt-5 mb-md-0">
+                    <h5 class="text-uppercase mb-4 textoclaro">Contacto</h5>
+
+                    <ul class="list-unstyled">
+                        <li>
+                            <p class="textoclaro">
+                                <img class="FotIcono" src="/static/img/location-dot-solid.svg" alt="">
+                                Blvd. Marcelino García Barragán #1421, esq.
+                                Calz. Olímpica, C.P. 44430
+                                Guadalajara, Jalisco, México
+                            </p>
+                        </li>
+                        <li>
+                            <p class="textoclaro">
+                                <img class="FotIcono" src="/static/img/phone-solid.svg" alt="">
+                                + 52 33 1378 5900
+                            </p>
+                        </li>
+                        <li>
+                            <p class="textoclaro">
+                                <img class="FotIcono" src="/static/img/envelope-solid.svg" alt="">
+                                <a id="linkMail" href="mailto:psi.connection09@gmail.com">psi.connection09@gmail.com</a>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+                <!--Grid column-->
+            </div>
+            <!--Grid row-->
+        </div>
+        <!-- Grid container -->
+
+        <!-- Copyright -->
+        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">
+            © 2023 Copyright:
+            <a class="text-white" href="/templates/paciente/index_pacientes.html">psiconnection.com</a>
+        </div>
+        <!-- Copyright -->
+    </footer>
+
+    <!-- JAVASCRIPT FILES -->
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.sticky.js"></script>
+    <script src="/static/js/click-scroll.js"></script>
+    <script src="/static/js/jquery.magnific-popup.min.js"></script>
+    <script src="/static/js/magnific-popup-options.js"></script>
+    <script src="/static/js/custom.js"></script>
+    <script src="https://kit.fontawesome.com/bcd45c0483.js" crossorigin="anonymous"></script>
+
+    <script src="{{ url_for('static', filename= 'js/ordenado.js')   }}"></script>
+
+</body>
+
+</html>
+
+<!-- {% block customJS %}
+<script src="{{ url_for('static', filename= 'js/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename= 'js/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename= 'js/jquery.sticky.js') }}"></script>
+<script src="{{ url_for('static', filename= 'js/click-scroll.js') }}"></script>
+<script src="{{ url_for('static', filename= 'js/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ url_for('static', filename= 'js/magnific-popup-options.js') }}"></script>
+<script src="{{ url_for('static', filename= 'js/custom.js') }}"></script>
+<script src="https://kit.fontawesome.com/bcd45c0483.js" crossorigin="anonymous"></script>
+
+<script src="{{ url_for('static', filename='js/jspersonal.js')}}"></script>
+{% endblock %}
+
+
+{% block customJS1 %}
+<link rel="icon" href="{{ url_for('static', filename= 'img/logo_Psi.png') }}">
+
+<!-- Extras 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap">
+
+<!-- Bootsrap 
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/bootstrap-icons.css') }}">
+
+<!-- CSS FILES 
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/personal.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/templatemo-first-portfolio-style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/magnific-popup.css') }}">
+{% endblock  %} -->

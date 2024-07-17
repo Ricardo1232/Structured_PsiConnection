@@ -1,0 +1,210 @@
+{% extends '/layoutsurvey.html' %}
+
+{% block title %}
+    Encuesta
+{% endblock %}
+
+{% block customCSSs %}
+{% endblock %}
+
+{% block body %}
+<body className='snippet-body'>
+    <div class="container-fluid px-1 py-5 mx-auto">
+        <div class="row d-flex justify-content-center text-center">
+            <div class="col-lg-9 col-md-10">
+                <form id="surveyForm" action="{{ url_for('results') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+
+                    <!-- CARD TERMINOS Y CONDICIONES -->
+                    <div class="card b-0 rounded-0 show">
+                        <div
+                            class="row justify-content-center mx-auto step-container">
+                            <div class="col-md-3 col-4 step-box active">
+                                <h6 class="step-title-0">
+                                    <span class="fa fa-circle"></span>
+                                    <span class="break-line"></span>
+                                    <span class="step-title">TERMINOS Y
+                                        CONDICIONES</span></h6>
+                            </div>
+                            <div class="col-md-3 col-4 step-box">
+                                <h6 class="step-title-0">
+                                    <span class="fa fa-circle"></span>
+                                    <span class="break-line"></span>
+                                    <span
+                                        class="step-title">ENCUESTA</span></h6>
+                            </div>
+                            <div class="col-md-3 col-4 step-box">
+                                <h6 class="step-title-0">
+                                    <span class="fa fa-circle"></span>
+                                    <span class="break-line"></span>
+                                    <span class="step-title">CONFIRMACION</span>
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="p-3 justify-content-center text-center">
+                            <h4 class="heading">Terminos y Condiciones</h4>
+                            <div class="row justify-content-center">
+                                <div class="col-lg-3 col-md-1 col-0"></div>
+                                <div
+                                    class="col-lg-9 col-md-11 col-12 list text-left">
+                                    <div
+                                        class="custom-control custom-checkbox mb-4">
+                                        <input id="customCheck1" type="checkbox"
+                                            class="custom-control-input"
+                                            checked="1">
+                                        <label for="customCheck1"
+                                            class="custom-control-label">He
+                                            leído y acepto los siguientes
+                                            Términos y Condiciones</label>
+                                    </div>
+                                    <ol type="1"
+                                        class="pr-5 pl-3 text-muted mb-5 text-justify w-75">
+                                        <li class="pb-2">Los servicios son
+                                            proporcionados por practicantes de
+                                            psicología de la Universidad de
+                                            Guadalajara.</li>
+                                        <li class="pb-2">Los servicios son
+                                            gratuitos y dirigidos a estudiantes
+                                            de la universidad.</li>
+                                        <li class="pb-2">La encuesta es parte de
+                                            un sistema experto para un
+                                            diagnóstico temprano, y sus
+                                            resultados serán utilizados por los
+                                            expertos.</li>
+                                        <li class="pb-2">Los resultados de la
+                                            encuesta no
+                                            constituyen un diagnóstico
+                                            profesional y son utilizados
+                                            exclusivamente para fines de
+                                            análisis por parte del equipo de
+                                            expertos.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <button name="next" id="next1"
+                                class="btn btn-success rounded-0 mb-5 next">INICIAR</button>
+                        </div>
+                    </div>
+
+                    
+                    <div class="card b-0 rounded-0">
+                        <div
+                            class="row justify-content-center mx-auto step-container">
+                            <div class="col-md-3 col-4 step-box">
+                                <h6 class="step-title-0">
+                                    <span class="fa fa-check"></span>
+                                    <span class="break-line"></span>
+                                    <span class="step-title">TERMINOS Y
+                                        CONDICIONES</span>
+                                </h6>
+                            </div>
+                            <div class="col-md-3 col-4 step-box active">
+                                <h6 class="step-title-0">
+                                    <span class="fa fa-circle"></span>
+                                    <span class="break-line"></span>
+                                    <span class="step-title">ENCUESTA</span>
+                                </h6>
+                            </div>
+                            <div class="col-md-3 col-4 step-box">
+                                <h6 class="step-title-0">
+                                    <span class="fa fa-circle"></span>
+                                    <span class="break-line"></span>
+                                    <span class="step-title">CONFIRMACION</span>
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="p-3 justify-content-center text-center">
+                            <h4 class="heading">Encuesta</h4>
+                            
+                            
+                                <div id="survey-container">
+                                    <!-- Subcards will be dynamically inserted here -->
+                                </div>
+                                <button type="button" class="btn btn-success rounded-0 mb-5 prev">ATRAS</button>
+                                <button id="next2" type="button" class="btn btn-success rounded-0 mb-5 next" onclick="validateSurvey()">CONFIRMAR</button>                            
+                        </div>
+                    </div>
+
+                    <div class="card b-0 rounded-0">
+                        <div
+                            class="row justify-content-center mx-auto step-container">
+                            <div class="col-md-3 col-4 step-box">
+                                <h6 class="step-title-0">
+                                    <span class="fa fa-check"></span>
+                                    <span class="break-line"></span>
+                                    <span class="step-title">TERMINOS Y
+                                        CONDICIONES</span>
+                                </h6>
+                            </div>
+                            <div class="col-md-3 col-4 step-box">
+                                <h6 class="step-title-0">
+                                    <span class="fa fa-check"></span>
+                                    <span class="break-line"></span>
+                                    <span class="step-title">ENCUESTA</span>
+                                </h6>
+                            </div>
+                            <div class="col-md-3 col-4 step-box active">
+                                <h6 class="step-title-0">
+                                    <span class="fa fa-circle"></span>
+                                    <span class="break-line"></span>
+                                    <span class="step-title">CONFIRMACION</span>
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="p-3 justify-content-center text-center">
+                            <h4 class="heading">CONFIRMACION</h4>
+                            <div class="row d-flex justify-content-center">
+                                <div class="mb-4">
+                                    <h6 class="confirm">Verifique todas las
+                                        respuestas ingresadas y presione
+                                        confirmar</h6>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-success rounded-0 mb-5 prev">ATRAS</button>
+                            <button id="next3" type="button" class="btn btn-success rounded-0 mb-5 next">ENVIAR</button>
+                        </div>
+                    </div>
+
+                    <div class="card b-0 rounded-0">
+                        <div
+                            class="row justify-content-center mx-auto step-container">
+                            <div class="col-md-3 col-4 step-box">
+                                <h6 class="step-title-0">
+                                    <span class="fa fa-check"></span>
+                                    <span class="break-line"></span>
+                                    <span class="step-title">TERMINOS Y
+                                        CONDICIONES</span>
+                                </h6>
+                            </div>
+                            <div class="col-md-3 col-4 step-box">
+                                <h6 class="step-title-0">
+                                    <span class="fa fa-check"></span>
+                                    <span class="break-line"></span>
+                                    <span class="step-title">ENCUESTA</span>
+                                </h6>
+                            </div>
+                            <div class="col-md-3 col-4 step-box">
+                                <h6 class="step-title-0">
+                                    <span class="fa fa-check"></span>
+                                    <span class="break-line"></span>
+                                    <span class="step-title">CONFIRMACION</span>
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="p-3 justify-content-center text-center">
+                            <h3 class="heading">Thank You for your
+                                Feedback!</h3>
+                            <div class="row justify-content-center">
+                                <div class>
+                                    <img src="/static/img/4Y9xMCF.gif"
+                                        class="fit-image mb-5">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}

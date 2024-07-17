@@ -1,0 +1,149 @@
+{% extends '/layoutlogin.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block customCSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/login.css')
+   }}">
+{% endblock %}
+
+{% block body %}
+<!-- partial:index.partial.html -->
+<div class="container">
+
+   {% with messages = get_flashed_messages() %}
+   {% if messages %}
+   <ul class="flashes">
+      {% for message in messages %}
+      <li class="error">{{ message }}</li>
+      {% endfor %}
+   </ul>
+   {% endif %}
+   {% endwith %}
+
+
+   <section id="formHolder">
+
+      <div class="row">
+
+         <!-- Brand Box -->
+         <div class="col-sm-6 brand">
+            <a href="#" class="logo">Universidad de Guadalajara <span>.</span></a>
+            <div class="heading">
+               <h2>PsiConnection</h2>
+               <p>Your Right Choice</p>
+            </div>
+
+            <div class="success-msg">
+               <p>Great! You are one of our members now</p>
+
+            </div>
+         </div>
+
+
+         <!-- Form Box -->
+         <div class="col-sm-6 form">
+
+            <!-- Login Form -->
+            <div class="login form-peice ">
+               <form action="{{ url_for('auth') }}" method="post">
+                  <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+                  <input type="hidden" name="action" value="login">
+                  <div class="form-group">
+                     <label for="loginemail">Correo Electronico</label>
+                     <input type="email" name="email" id="email" required>
+                  </div>
+
+                  <div class="form-group">
+                     <label for="loginPassword">Contraseña</label>
+                     <input type="password" name="password" id="password" required>
+                  </div>
+
+                  <div class="CTA">
+                     <input type="submit" value="Iniciar Sesion">
+                     <a href="#" class="switch">Soy nuevo</a>
+                  </div>
+               </form>
+            </div><!-- End Login Form -->
+
+
+            <!-- Signup Form -->
+            <div class="signup form-peice switched">
+               <form class="signup-form" action="{{ url_for('auth') }}" method="post">
+                  <input type="hidden" name="csrf_token" value="{{csrf_token()
+                     }}">
+                  <input type="hidden" name="action" value="register">
+
+                  <div class="form-group signupName">
+                     <label for="name">Nombre(s)</label>
+                     <input type="text" name="name" id="name" class="name">
+                     <span class="error"></span>
+                  </div>
+
+                  <div class="apellidocontainer">
+                     <div class="form-group">
+                        <label for="apellidop ">Apellido Paterno</label>
+                        <input type="text" name="apellidop" id="apellidop" class="apellidop">
+                        <span class="error"></span>
+                     </div>
+
+                     <div class="form-group apellidoM">
+                        <label for="apellidom">Apellido Materno</label>
+                        <input type="text" name="apellidom" id="apellidom" class="apellidom">
+                        <span class="error"></span>
+                     </div>
+                  </div>
+
+                  <div class="form-group">
+                     <label for="fecha_nacimiento">Fecha de Nacimiento</label>
+                     <input type="date" name="fecha_nacimiento" id="fecha_nacimiento" class="fecha_nacimiento"
+                        placeholder="">
+                     <span class="error"></span>
+                  </div>
+
+                  <div class="form-group">
+                     <label for="gender" class="invisible-label">Gender</label>
+                     <select name="gender" id="gender" class="gender">
+                        <option value="" selected disabled hidden>Genero</option>
+                        <option value="male">Masculino</option>
+                        <option value="female">Femenino</option>
+                        <option value="not-specified">Prefiero no decirlo</option>
+                     </select>
+                     <span class="error"></span>
+                  </div>
+
+                  <div class="form-group">
+                     <label for="email">Correo Electronico</label>
+                     <input type="email" name="email" id="email" class="email">
+                     <span class="error"></span>
+                  </div>
+
+                  <div class="form-group">
+                     <label for="password">Contraseña</label>
+                     <input type="password" name="password" id="password" class="pass">
+                     <span class="error"></span>
+                  </div>
+
+                  <div class="form-group">
+                     <label for="passwordCon">Confirmar Contraseña</label>
+                     <input type="password" name="passwordCon" id="passwordCon" class="passConfirm" required>
+                     <span class="error"></span>
+                  </div>
+
+                  <div class="CTA">
+                     <input type="submit" value="Registrarme" id="submit">
+                     <a href="#" class="switch">Ya tengo cuenta</a>
+
+                  </div>
+               </form>
+            </div><!-- End Signup Form -->
+         </div>
+      </div>
+
+   </section>
+
+</div>
+
+
+
+{% endblock %}

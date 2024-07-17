@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PsiConnection - Supervisores</title>
+    <link rel="icon" href="/static/img/logo_Psi.png">
+
+    <!-- Extras -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap">
+
+    <!-- Bootsrap -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-icons.css">
+
+    <!-- CSS FILES -->
+    <link rel="stylesheet" href="/static/css/personal.css">
+    <link rel="stylesheet" href="/static/css/templatemo-first-portfolio-style.css">
+    <link rel="stylesheet" href="/static/css/magnific-popup.css">
+
+</head>
+
+<body class="fondo">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for message in messages %}
+        <li class="error">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    <header class="section">
+        <img class="imagen" src="/static/img/Fondos-de-pantalla-de-paisajes-naturales29.jpg" alt="Fondo superior">
+        <section class="preloader">
+            <div class="spinner">
+                <span class="spinner-rotate"></span>
+            </div>
+        </section>
+        <nav class="navbar navbar-expand-lg">
+
+            <div class="container">
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <a href="/IndexAdministrador" class="navbar-brand mx-auto mx-lg-0"><img class="Letras-Fondo"
+                        src="/static/img/LETRAS-NO-FONDO.png" alt="PsiConnection"></a>
+
+                <div class="collapse navbar-collapse barNav" id="navbarNav">
+                    <ul class="navbar-nav ms-lg-5">
+                        <ul class="navbar-nav ms-lg-5">
+                            <li class="nav-item">
+                                <a class="nav-link click-scroll" href="{{url_for('indexAdministrador')}}">Inicio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link click-scroll" href="{{url_for('verPacientesAdm')}}">Pacientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link click-scroll"
+                                    href="{{url_for('verPracticantesAdm')}}">Practicantes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link click-scroll" href="{{url_for('verSupervisor')}}">Supervisores</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link click-scroll"
+                                    href=" {{ url_for('verAdministrador') }} ">Administradores</a>
+                            </li>
+                        </ul>
+                    </ul>
+                </div>
+                <div class="d-lg-flex align-items-center ms-auto dropdown">
+                    <button class="dropbtn">
+                        {{username}}
+                    </button>
+                    <div class="dropdown-content">
+                        <div class="inte-content">
+                            <p>
+                                {{username}}
+                            </p>
+                            <p>
+                                {{email}}
+                            </p>
+                            <a class="btn btn-a float-right mr-3" href=" {{ url_for('logout') }}"
+                                style="background-color: #007b81; color: white;">Cerrar sesion
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    function switchElements() {
+                        const navbar = document.querySelector('.barNav');
+                        const dropdown = document.querySelector('.dropdown');
+                        if (window.innerWidth >= 992) {
+                            dropdown.parentNode.insertBefore(dropdown, navbar.nextSibling);
+                        } else {
+                            navbar.parentNode.insertBefore(navbar, dropdown.nextSibling);
+                        }
+                    }
+
+                    window.addEventListener('resize', switchElements);
+                </script>
+            </div>
+        </nav>
+
+
+        <section class=" d-flex justify-content-center align-items-center">
+
+            <div class="container">
+                <div class="row">
+
+
+                    <!-- Esta clase solo debe de estar en los index -->
+                    <div class="col-lg-7 col-12">
+                        <div class="hero-text">
+                            <div class="espacio"></div>
+                            <div class="hero-title-wrap d-flex align-items-center mb-4">
+                                <h1 class="hero-title ms-3 mb-0">¡Bienvenido!</h1>
+                            </div>
+                            <h2 class="text-center">{{username}}</h2>
+                        </div>
+                    </div>
+
+
+                    <div class="custom-shape-divider-top-1682744544">
+                        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"
+                            preserveAspectRatio="none">
+                            <path
+                                d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
+                                class="shape-fill"></path>
+                        </svg>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </header>
+
+    <main>
+        <!-- Esto es para las figuras de fondo -->
+        <div class="svg-background">
+            <!-- SVG 1 -->
+            <div class="svg1"></div>
+            <!-- SVG 2 -->
+            <div class="svg2"></div>
+            <!-- SVG 3 -->
+            <div class="svg2"></div>
+        </div>
+
+        <!-- Este section es lo que debe de cambiar en todos los html -->
+
+        <section class="sect">
+            <div class="container">
+                <div class="table-wrapper">
+                    <div class="table-title">
+
+                        <div class="d-flex align-items-center mb-4">
+
+                            <div>
+                                <h2 class="textoPresentacion">Supervisores</h2>
+                            </div>
+
+                            <div class="ms-4">
+                                <a href="" class="btn btn-success align-items-center" data-bs-toggle="modal"
+                                    data-bs-target="#addEmployeeModal">
+                                    <img class="align-items-center" src="/static/img/plus.svg" alt="" width="20px"
+                                        height="20px" style="margin-top:-2px;">
+                                    <span>Agregar supervisor</span></a>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+
+                            <th>Nombre</th>
+                            <th>Apellido paterno</th>
+                            <th>Apellido materno</th>
+                            <th>Correo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sup in datosSup %}
+                        <tr data-id="{{sup.idSup}}">
+
+                            <td>{{sup.nombreSup}}</td>
+                            <td>{{sup.apellidoPSup}}</td>
+                            <td>{{sup.apellidoMSup}}</td>
+                            <td>{{sup.correoSup}}</td>
+                            <td>
+                                <a href="#editEmployeeModal" class="btn-edit edit linkIcono" data-bs-toggle="modal">
+                                    <img class="Icono" src="/static/img/edit.svg" alt="Editar">
+                                </a>
+                                <a href="#deleteEmployeeModal" class="delete linkIcono" data-bs-toggle="modal">
+                                    <img class="Icono" src="/static/img/trash.svg" alt="Editar">
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- add Modal HTML -->
+        <div id="addEmployeeModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="staticBackdropLabel">Agregar supervisor</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="row g-3" action="/CrearCuentaSupervisor" id="AgregarSupervisor" method="POST"
+                            enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
+
+                            <div class="form-group">
+                                <label for="nombreSup" class="form-label">Nombre</label>
+                                <input name="nombreSup" type="text" class="form-control border border-dark"
+                                    id="nombreSup" value="" required
+                                    pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,35}"
+                                    title="Solo letras Minimo 2 Maximo 35" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label for="apellidoPSup" class="form-label">Apellido Paterno</label>
+                                <input name="apellidoPSup" type="text" class="form-control border border-dark"
+                                    id="apellidoPSup" value="" required
+                                    pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,25}"
+                                    title="Solo letras Minimo 2 Maximo 25" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label for="apellidoMSup" class="form-label">Apellido Materno</label>
+                                <input name="apellidoMSup" type="text" class="form-control border border-dark"
+                                    id="apellidoMSup" value="" required
+                                    pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,25}"
+                                    title="Solo letras Minimo 2 Maximo 25" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label for="correoSup" class="form-group">Correo</label>
+
+                                <div id="correo-conrtainer">
+
+                                    <input name="input-editable" id="input-editable" type="text"
+                                        class="left-input form-control border border-dark"
+                                        placeholder="Nombre de usuario" pattern="^[a-z]+\.[a-z]+\d{4}$" required
+                                        title="Correo invalido">
+
+                                    <input name="input-readonly" id="input-readonly" type="text"
+                                        class="right-input form-control border border-dark" value="@alumnos.udg.mx"
+                                        readonly />
+
+                                    <input type="hidden" name="correoSup" id="correoSup">
+                                </div>
+                            </div>
+
+                            <div class="form-group password-toggle-container">
+                                <label for="contraSup" class="form-group">Contraseña</label>
+                                <input name="contraSup" id="contraSup" type="password"
+                                    class="form-control border border-dark"
+                                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{'?/:;.,]).{8,}" required
+                                    title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
+                                <button type="button" id="togglePassword" class="password-toggle-button"
+                                    onclick="togglePasswordVisibility('contraSup', 'togglePassword')">Mostrar</button>
+
+                            </div>
+
+                            <div class="form-group password-toggle-container">
+                                <label for="contraSup_confirm" class="form-group">confirmar Contraseña</label>
+                                <input name="contraSup_confirm" id="contraSup_confirm" type="password"
+                                    class="form-control border border-dark"
+                                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{'?/:;.,]).{8,}" required
+                                    oninput="checkPasswordMatch()"
+                                    title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
+                                <button type="button" id="toggleConfirmPassword" class="password-toggle-button"
+                                    onclick="togglePasswordVisibility('contraSup_confirm', 'toggleConfirmPassword')">Mostrar</button>
+                            </div>
+
+                            <div class="modal-footer">
+                                <input type="button" class="btn btn-default" data-bs-dismiss="modal" value="Cancelar">
+                                <input type="submit" class="btn btn-info" value="Guardar">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Edit Modal HTML -->
+        <div id="editEmployeeModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="staticBackdropLabel">Editar supervisor</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <form id="editSup" action="/EditarCuentaSupervisor" method="POST" enctype="multipart/form-data">
+
+                            <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
+                            <input type="hidden" name="idSup">
+
+                            <h2 class="textoPresentacion text-center">Datos Personales</h2>
+
+                            <div class="form-group">
+                                <label for="nombreSup" class="form-label">Nombre</label>
+                                <input name="nombreSup" type="text" class="form-control border border-dark"
+                                    id="nombreSup" value="" required
+                                    pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,35}"
+                                    title="Solo letras Minimo 2 Maximo 35" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label for="apellidoPSup" class="form-label">Apellido Paterno</label>
+                                <input name="apellidoPSup" type="text" class="form-control border border-dark"
+                                    id="apellidoPSup" value="" required
+                                    pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,25}"
+                                    title="Solo letras Minimo 2 Maximo 25" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label for="apellidoMSup" class="form-label">Apellido Materno</label>
+                                <input name="apellidoMSup" type="text" class="form-control border border-dark"
+                                    id="apellidoMSup" value="" required
+                                    pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,25}"
+                                    title="Solo letras Minimo 2 Maximo 25" class="form-control" />
+                            </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <input type="button" class="btn btn-default" data-bs-dismiss="modal" value="Cancelar">
+                        <input type="submit" class="btn btn-info" value="Guardar">
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal HTML -->
+        <div id="deleteEmployeeModal" class="modal fade" class="modal fade" tabindex="-1" data-bs-backdrop="static"
+            data-bs-keyboard="false" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="staticBackdropLabel">Eliminar supervisor</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="deleteSup" action="/EliminarCuentaSupervisor" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
+                            <input type="hidden" name="idSup" value="">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <img src="/static/img/PELIGRO 2@2x.png" alt="Ver Expediente" width="80px"
+                                            style=" float: left; margin-right: 30px; margin-left: 20px;">
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <p>¿Esta seguro de eliminar este registro?</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <p id="nombreModal"></p>
+                            <p class="text-warning"><small>Esta accion no se puede deshacer.</small></p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <input type="button" class="btn btn-default" data-bs-dismiss="modal" value="Cancelar">
+                        <input type="submit" class="btn btn-danger" value="Borrar">
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer text-center text-lg-start text-white">
+        <!-- Grid container -->
+        <div class="container pt-2 pl-4 pr-4 textoclaro">
+            <!--Grid row-->
+            <div class="row my-4 ">
+                <div class="col-lg-6 col-md-6 mb-4 mb-md-0">
+
+                    <div class="rounded-circle bg-white shadow-1-strong d-flex align-items-center justify-content-center mb-4 mx-auto"
+                        style="width: 150px; height: 150px;">
+                        <img src="/static/img/logo_Psi.png" height="70" alt="" loading="lazy" />
+                    </div>
+
+                    <p class="text-center textoclaro">PsiConnection es un sistema de citas para consultas de psicología
+                        presencial
+                        o en línea. Conectamos a nuestros usuarios con psicólogos altamente capacitados y
+                        experimentados. En Psiconnection, valoramos la privacidad y la confidencialidad de nuestros
+                        usuarios y nos aseguramos de que todas las consultas sean seguras y protegidas. ¡Permítenos
+                        ayudarte a encontrar la ayuda que necesitas!</p>
+
+                    <ul class="list-unstyled d-flex flex-row justify-content-center">
+                        <li>
+                            <a class="text-white px-2" href="https://www.facebook.com/udgcucei" target="_blank">
+                                <img id="FabIcono" src="/static/img/facebook.svg" alt="">
+                            </a>
+                        </li>
+                        <li>
+                            <a class="text-white px-2 textoclaro" href="http://www.cucei.udg.mx/" target="_blank">
+                                CUCEI
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+                <!--Grid column-->
+
+                <!--Grid column-->
+                <div class="col-lg-6 col-md-6 mt-5 mb-md-0">
+                    <h5 class="text-uppercase mb-4 textoclaro">Contacto</h5>
+
+                    <ul class="list-unstyled">
+                        <li>
+                            <p class="textoclaro">
+                                <img class="FotIcono" src="/static/img/location-dot-solid.svg" alt="">
+                                Blvd. Marcelino García Barragán #1421, esq.
+                                Calz. Olímpica, C.P. 44430
+                                Guadalajara, Jalisco, México
+                            </p>
+                        </li>
+                        <li>
+                            <p class="textoclaro">
+                                <img class="FotIcono" src="/static/img/phone-solid.svg" alt="">
+                                + 52 33 1378 5900
+                            </p>
+                        </li>
+                        <li>
+                            <p class="textoclaro">
+                                <img class="FotIcono" src="/static/img/envelope-solid.svg" alt="">
+                                <a id="linkMail" href="mailto:psi.connection09@gmail.com">psi.connection09@gmail.com</a>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+                <!--Grid column-->
+            </div>
+            <!--Grid row-->
+        </div>
+        <!-- Grid container -->
+
+        <!-- Copyright -->
+        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">
+            © 2023 Copyright:
+            <a class="text-white" href="/templates/admin/index_admin.html">psiconnection.com</a>
+        </div>
+        <!-- Copyright -->
+    </footer>
+
+    <!-- JAVASCRIPT FILES -->
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.sticky.js"></script>
+    <script src="/static/js/click-scroll.js"></script>
+    <script src="/static/js/jquery.magnific-popup.min.js"></script>
+    <script src="/static/js/magnific-popup-options.js"></script>
+    <script src="/static/js/custom.js"></script>
+    <script src="https://kit.fontawesome.com/bcd45c0483.js" crossorigin="anonymous"></script>
+
+    <script src="{{ url_for('static', filename= 'js/ordenado.js')   }}"></script>
+</body>
+
+</html>

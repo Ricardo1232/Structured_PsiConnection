@@ -1,0 +1,21 @@
+Generalizacion de formato de comentarios en pc2, faltan generalizar los tipos de sentencias sql, se termino los editar, se corrigieron errores de retorno
+
+####################################################################################################################################        
+Error al editar nombre
+    max caracteres es de 15 
+    Causa error en la base de datos
+    Cambiar en la base de datos a maximo 120 caracteres cuando es codificada en los nombres
+
+    Cambiar html en editar
+    En nombre maximo 20
+    apellidos maximo 15
+
+    adm_adm   --
+    adm_pac   --
+    adm_super --
+    amd_pract --
+    indx_sup  --
+
+Login cambiar el minimo de caracteres
+
+Agregar los close despues de los commit
