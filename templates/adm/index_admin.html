@@ -1,0 +1,58 @@
+{% extends "layaouts/layaout_adm.html" %}
+{% block title %}PsiConnection - Inicio{% endblock %}
+{% block content %}
+
+        <!-- Este section es lo que debe de cambiar en todos los html -->
+        <div class="pb-4 pt-4"></div>
+        <section class="sectmycardAdm">
+
+            <div class="mycard card">
+                <div class="nombre ">
+                    <img class="img-otro" src="/static/img/users-solid.svg">
+                    <h2>Pacientes</h2>
+                    <hr>
+                    <div>
+                        <a href="{{url_for('verPacientesAdm')}}" class="saber">Acceder</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mycard">
+                <div class="nombre ">
+                    <img class="img-otro" src="/static/img/user-nurse-solid.svg">
+                    <h2>Practicantes</h2>
+                    <hr>
+                    <div>
+                        <a href="{{url_for('verPracticantesAdm')}}" class="saber">Acceder</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mycard ">
+                <div class="nombre ">
+                    <img class="img-otro" src="/static/img/user-tie-solid.svg">
+                    <h2>Supervisores</h2>
+                    <hr>
+                    <div>
+                        <a href="{{url_for('verSupervisor')}}" class="saber">Acceder</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mycard ">
+                <div class="nombre ">
+                    <img class="img-otro" src="/static/img/user-secret-solid.svg">
+                    <h2>Administradores</h2>
+                    <hr>
+                    <div>
+                        <a href="{{ url_for('verAdministrador') }}" class="saber">Acceder</a>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+        <br>
+
+        </section>
+        <br>
+{% endblock %}

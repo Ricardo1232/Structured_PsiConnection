@@ -1,0 +1,98 @@
+{% extends "layaouts/layaout.html" %}
+{% block title %}PsiConnection - Agendar cita{% endblock %}
+{% block content %}
+
+        <section class="sect">
+
+            <!--***Este section es lo que debe de cambiar en todos los html *****-->
+            <h2 class="text-center">Elija al practicante</h2>
+            <div class="sectmycard2 row">
+
+                {% for cita in datosPrac %}
+                <a data-id="{{cita.idPrac}},{{cita.correoPrac}}" href="#Elegi" class="link-card-practicante"
+                    data-bs-toggle="modal" data-bs-target="#Elegi">
+                    <div class="card card-practicante">
+                        <img src="/static/img/{{cita.fotoPrac}}" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h5 class="card-title text-center">Practicante</h5>
+
+                            <p id="nombrePrac" class="text-center mt-2">{{cita.nombrePrac}}</p>
+                            <p id="apellidoPPrac" class="text-center mt-2">{{cita.apellidoPPrac}}</p>
+                            <p id="apellidoMPrac" class="text-center mt-2">{{cita.apellidoMPrac}}</p>
+
+                            <p id="correoPrac" class="text-center mt-2">{{cita.correoPrac}}</p>
+                            <p id="correoPaci" class="text-center mt-2">{{cita.correoPaci}}</p>
+
+                            <p id="idPaci" display="none;">{{cita.idPaci}}</p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+
+
+                <!-- Edit Modal HTML -->
+                <div id="Elegi" class="modal fade">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Elija su Cita</h4>
+                                <button type="button" class="btn-close a" data-bs-dismiss="modal"
+                                    aria-hidden="true"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="elegir" action="CrearCita" method="POST" enctype="multipart/form-data">
+
+                                    <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
+
+                                    <!-- IDs -->
+
+                                    <input type="hidden" name="idPrac" value="">
+
+                                    <!-- Correos -->
+                                    <input type="hidden" name="correoPrac" value="">
+
+
+                                    <p id="Fnombre" class="text-center"></p>
+                                    <p id="FapellidoPPrac" class="text-center"></p>
+
+
+                                    <div class="form-group mb-3">
+                                        <label for="fechaCita" class="form-label">Fecha de Cita</label>
+                                        <input id="fechaCita" name="fechaCita" type="date"
+                                            class="form-control border border-dark" value="" required>
+
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="horaCita" class="form-label">Hora de Cita</label>
+                                        <input type="time" name="horaCita" id="horaCita"
+                                            class="form-control border border-dark" required step="3600" value="08:00"
+                                            min="08:00" max="20:00">
+                                        <p id="time-error"
+                                            style="color: rgba(255, 0, 0, 0.879); display: none; margin-top: 5px;">La
+                                            hora debe estar entre las 8:00am a 08:00pm</p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="tipoCita" class="form-label">Modalidad</label>
+                                        <select id="tipoCita" name="tipoCita"
+                                            class="form-select form-select-sm form-control border border-dark"
+                                            aria-label="form-select-sm example" required>
+                                            <option selected disabled value="">Elija un opcion:</option>
+                                            <option value="Presencial">Presencial</option>
+                                            <option value="Virtual">Virtual</option>
+                                        </select>
+                                    </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <input type="button" class="btn btn-default" data-bs-dismiss="modal" value="Cancelar">
+                                <input type="submit" class="btn btn-info" value="Guardar" id="submit-btn">
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!--**** Este section es lo que debe de cambiar en todos los html ******-->
+        </section>
+
+{% endblock %}

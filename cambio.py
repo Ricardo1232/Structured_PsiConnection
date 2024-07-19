@@ -17,6 +17,7 @@ def auth_user(bcrypt, password, encriptar, session, cur, user, email, flash):
                 session['name']  = name
                 session[u[1]] = data[u[1]]
                 session['verificado'] = data[u[3]]
+                session.permanent = True
                 if u[0] == 'paciente':
                     session['survey'] = data.get(u[10])
                     print(f"Dentro de auth: {session['survey']}")

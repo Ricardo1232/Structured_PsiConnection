@@ -38,7 +38,7 @@ mysql                                   = MySQL(PCapp)
 csrf=CSRFProtect()
 PCapp.config['MYSQL_HOST']              = 'localhost'
 PCapp.config['MYSQL_USER']              = 'root'
-PCapp.config['MYSQL_PASSWORD']          = ''
+PCapp.config['MYSQL_PASSWORD']          = 'root'
 PCapp.config['MYSQL_DB']                = 'psiconnection'
 PCapp.config['MYSQL_CURSORCLASS']       = 'DictCursor'
 PCapp.config['UPLOAD_FOLDER']           = './static/img/'
@@ -59,11 +59,22 @@ bcryptObj = Bcrypt(PCapp)
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
+
+##### FUNCIONES DECORADOR
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'login' not in session:
+            flash("Por favor, inicia sesión para continuar", 'warning')
             return redirect(url_for('auth'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def already_logged_in(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'login' in session:
+            return redirect(url_for('home'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -77,17 +88,79 @@ def verified_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
+# if 'verificado' not in session or session['verificado'] != 2:
+#     flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
+#     return redirect(url_for('verify'))
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'loginAdmin' not in session:
+            flash("No tienes permiso para acceder a esta página", 'danger')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def supervisor_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'loginSup' not in session:
+            flash("No tienes permiso para acceder a esta página", 'danger')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def practicante_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'loginPrac' not in session:
+            flash("No tienes permiso para acceder a esta página", 'danger')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def paciente_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'loginPaci' not in session:
+            flash("No tienes permiso para acceder a esta página", 'danger')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Diagnostico requerido
 def survey_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'survey' not in session:
-            return redirect(url_for('SurveyV2modcopy'))
+        if 'survey' not in session or session['survey'] != 1:
+            return redirect(url_for('survey_v2'))
         return f(*args, **kwargs)
     return decorated_function
+
+# Diagnostico hecho
+def done_survey_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if  session['survey'] == 1:
+            flash("Diagnostico ya hecho", 'danger')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def require_post(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if request.method != 'POST':
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
+##################################################################3
 
 #El Def auth controla si inicia sesion o es nuevo usuario
 
 @PCapp.route('/pythonlogin/', methods=['GET', 'POST'])
+@already_logged_in
 def auth():
     if request.method == 'POST':
         encriptar = encriptado()
@@ -102,7 +175,7 @@ def auth():
             dicc_user = {
                 'paciente'      : ['paciente',     'correoPaci',  'activoPaci',  'veriPaci',  0,  'contraPaci',  'loginPaci',  'idPaci',  'nombrePaci',  'indexPacientes', 'veriSurvey'           ],
                 'practicante'   : ['practicante',  'correoPrac',  'activoPrac',  'veriPrac',  1,  'contraPrac',  'loginPrac',  'idPrac',  'nombrePrac',  'indexPracticantes'        ],
-                'supervisor'    : ['supervisor',   'correoSup',   'activoSup',   'veriSup',   1,  'contraSup',   'loginSup',   'idSup',   'nombreSup',   'verPracticantesSupervisor'],
+                'supervisor'    : ['supervisor',   'correoSup',   'activoSup',   'veriSup',   1,  'contraSup',   'loginSup',   'idSup',   'nombreSup',   'indexSupervisor'],
                 'admin'         : ['admin',        'correoAd',    'activoAd',    'veriAd',    1,  'contraAd',    'loginAdmin', 'idAd',    'nombreAd',    'indexAdministrador'       ]
             }
             # BUSCA EL USUARIO AUTENTIFICAR
@@ -290,16 +363,19 @@ def diagnose(reported_symptoms: List[str]) -> Dict[str, float]:
 
 
 @PCapp.route('/SurveyV2modcopy')
+@login_required
+@verified_required
+@paciente_required
+@done_survey_required
 def survey_v2():
-    return render_template('SurveyV2modcopy.html')
+    return render_template('paci/SurveyV2modcopy.html')
 
 
-    
-    
 @PCapp.route('/results', methods=['POST'])
+@require_post
 def results():
         reported_symptoms = [symptom for symptom, value in request.form.items() if value == 'si']
-        print(f"{reported_symptoms}ESTOY VACIO??")
+        print(f"{reported_symptoms}")
         diagnoses_p, diagnoses_s = diagnose(reported_symptoms)
         print(diagnoses_p)
         print(diagnoses_s)
@@ -389,117 +465,104 @@ def encriptado():
 
 ################### - Crear Cuenta administradores - ###########################
 @PCapp.route('/CrearCuentaAdmin', methods=["GET", "POST"])
+@login_required
+@verified_required
+@admin_required
 def crearCuentaAdmin():
-    if 'login' in session:
-        if session['verificado'] == 2:
-            if 'loginAdmin' in session:
-                if request.method == 'POST':
-                    #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
-                    encriptar = encriptado()
-                    
-                    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-                    list_campos = ['nombreAd', 'apellidoPAd', 'apellidoMAd']
-                    
-                    # SE RECIBE LA INFORMACION
-                    nombreAdCC, apellidoPAdCC , apellidoMAdCC = get_information_3_attributes(encriptar, request, list_campos)
+   
+    if request.method == 'POST':
+        #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
+        encriptar = encriptado()
+        
+        # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
+        list_campos = ['nombreAd', 'apellidoPAd', 'apellidoMAd']
+        
+        # SE RECIBE LA INFORMACION
+        nombreAdCC, apellidoPAdCC , apellidoMAdCC = get_information_3_attributes(encriptar, request, list_campos)
 
-                    # CONFIRMAR CORREO CON LA BD
-                    correoAd        = request.form['correoAd']
+        # CONFIRMAR CORREO CON LA BD
+        correoAd        = request.form['correoAd']
 
-                    contraAd        = request.form['contraAd']
-                    
-                    hashed_password = bcryptObj.generate_password_hash(contraAd).decode('utf-8')
+        contraAd        = request.form['contraAd']
+        
+        hashed_password = bcryptObj.generate_password_hash(contraAd).decode('utf-8')
 
-                    # CODIGO DE SEGURIDAD 
-                    codVeriAd   = security_code()
-                    activoAd    = 0
-                    veriAd      = 1
-                    priviAd     = 1
-                    
-                    # Verificar si el correo ya está registrado en la base de datos
-                    cur = mysql.connection.cursor()
-                    result = cur.execute("SELECT * FROM admin WHERE correoAd=%s AND activoAd IS NOT NULL", [correoAd,])
-                    if result > 0:
-                        # Si el correo ya está registrado, mostrar un mensaje de error
-                        flash("El correo ya está registrado", 'danger')
-                        cur.close()
-                        return redirect(url_for('verAdministrador'))
+        # CODIGO DE SEGURIDAD 
+        codVeriAd   = security_code()
+        activoAd    = 0
+        veriAd      = 1
+        priviAd     = 1
+        
+        # Verificar si el correo ya está registrado en la base de datos
+        cur = mysql.connection.cursor()
+        result = cur.execute("SELECT * FROM admin WHERE correoAd=%s AND activoAd IS NOT NULL", [correoAd,])
+        if result > 0:
+            # Si el correo ya está registrado, mostrar un mensaje de error
+            flash("El correo ya está registrado", 'danger')
+            cur.close()
+            return redirect(url_for('verAdministrador'))
 
-                    regAdmin = mysql.connection.cursor()
-                    regAdmin.execute("INSERT INTO admin (nombreAd, apellidoPAd, apellidoMAd, correoAd, contraAd, codVeriAd, activoAd, veriAd, priviAd) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                                        (nombreAdCC, apellidoPAdCC, apellidoMAdCC, correoAd, hashed_password, codVeriAd, activoAd, veriAd, priviAd))
-                    mysql.connection.commit()
+        regAdmin = mysql.connection.cursor()
+        regAdmin.execute("INSERT INTO admin (nombreAd, apellidoPAd, apellidoMAd, correoAd, contraAd, codVeriAd, activoAd, veriAd, priviAd) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            (nombreAdCC, apellidoPAdCC, apellidoMAdCC, correoAd, hashed_password, codVeriAd, activoAd, veriAd, priviAd))
+        mysql.connection.commit()
 
-                    # MANDAR CORREO CON CODIGO DE VERIRIFICACION
-                    idAd                = regAdmin.lastrowid
-                    
-                    selAd               = mysql.connection.cursor()
-                    selAd.execute("SELECT nombreAd FROM admin WHERE idAd=%s",(idAd,))
-                    ad                  = selAd.fetchone()
-                    
+        # MANDAR CORREO CON CODIGO DE VERIRIFICACION
+        idAd                = regAdmin.lastrowid
+        
+        selAd               = mysql.connection.cursor()
+        selAd.execute("SELECT nombreAd FROM admin WHERE idAd=%s",(idAd,))
+        ad                  = selAd.fetchone()
+        
 
-                    nombr = ad.get('nombreAd')
-                    nombr = nombr.encode()
-                    nombr = encriptar.decrypt(nombr)
-                    nombr = nombr.decode()
+        nombr = ad.get('nombreAd')
+        nombr = nombr.encode()
+        nombr = encriptar.decrypt(nombr)
+        nombr = nombr.decode()
 
-                    
-                    # SE MANDA EL CORREO
-                    msg = Message('Código de verificación', sender=PCapp.config['MAIL_USERNAME'], recipients=[correoAd])
-                    msg.body = render_template('layoutmail.html', name=nombr, verification_code=codVeriAd)
-                    msg.html = render_template('layoutmail.html', name=nombr, verification_code=codVeriAd)
-                    mail.send(msg)
-                    
+        
+        # SE MANDA EL CORREO
+        msg = Message('Código de verificación', sender=PCapp.config['MAIL_USERNAME'], recipients=[correoAd])
+        msg.body = render_template('layoutmail.html', name=nombr, verification_code=codVeriAd)
+        msg.html = render_template('layoutmail.html', name=nombr, verification_code=codVeriAd)
+        mail.send(msg)
+        
 
-                    flash("Revisa tu correo electrónico para ver los pasos para completar tu registro!", 'success')        
-                    #MANDAR A UNA VENTANA PARA QUE META EL CODIGO DE VERFICIACION
-                    return redirect(url_for('verAdministrador'))
-                else:
-                    flash("Error al crear la cuenta", 'danger')
-                    return redirect(url_for('verAdministrador'))  
-            else:
-                flash("No tienes permiso para acceder a esta página", 'danger')
-                return redirect(url_for('home'))
-        else:
-            flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-            return redirect(url_for('verify'))
+        flash("Revisa tu correo electrónico para ver los pasos para completar tu registro!", 'success')        
+        #MANDAR A UNA VENTANA PARA QUE META EL CODIGO DE VERFICIACION
+        return redirect(url_for('verAdministrador'))
     else:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
+        flash("Error al crear la cuenta", 'danger')
+        return redirect(url_for('verAdministrador'))  
 
     
 #~~~~~~~~~~~~~~~~~~~ Ver Adminsitradores ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/VerAdministrador', methods=['GET', 'POST'])
+@login_required
+@verified_required
+@admin_required
 def verAdministrador():
-    if 'login' in session:
-        if session['verificado'] == 2:
-            if 'loginAdmin' in session:
-                    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
-                    encriptar = encriptado()
-                    
-                    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-                    list_consult = ['admin', 'activoAd']
-                    list_campo = ['nombreAd', 'apellidoPAd', 'apellidoMAd']
-                    
-                    # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
-                    ad, datosAd = obtener_datos(list_campo, list_consult, mysql, encriptar, 1)
+    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
+    encriptar = encriptado()
+    
+    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
+    list_consult = ['admin', 'activoAd']
+    list_campo = ['nombreAd', 'apellidoPAd', 'apellidoMAd']
+    
+    # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
+    ad, datosAd = obtener_datos(list_campo, list_consult, mysql, encriptar, 1)
 
-                    return render_template('adm_adm.html', admin = ad, datosAd = datosAd, username=session['name'], email=session['correoAd'])    
-            else:
-                flash("No tienes permiso para acceder a esta página", 'danger')
-                return redirect(url_for('home'))
-        else:
-            flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-            return redirect(url_for('verify'))
-    else:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
+    return render_template('adm/adm_adm.html', admin = ad, datosAd = datosAd, username=session['name'], email=session['correoAd'])    
+
 
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Adminsitradores ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCuentaAdmin', methods=["GET", "POST"])
+@login_required
+@verified_required
+@admin_required
+@require_post
 def eliminarCuentaAdmin():
-    
     list_consult = ['idAd', 'admin', 'activoAd']
     eliminarCuenta(request, mysql, list_consult)
 
@@ -509,6 +572,10 @@ def eliminarCuentaAdmin():
 
 #~~~~~~~~~~~~~~~~~~~ Editar Adminsitradores ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EditarCuentaAdmin', methods=["GET", "POST"])
+@login_required
+@verified_required
+@admin_required
+@require_post
 def editarCuentaAdmin():
     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
     encriptar = encriptado()
@@ -527,86 +594,77 @@ def editarCuentaAdmin():
     
 
 #~~~~~~~~~~~~~~~~~~~ Index Pacientes ~~~~~~~~~~~~~~~~~~~#
-@PCapp.route('/indexPacientes', methods=['GET', 'POST'])
+@PCapp.route('/IndexPacientes', methods=['GET', 'POST'])
+@login_required
+@verified_required
+@paciente_required
+@survey_required
 def indexPacientes():
-    if 'login' in session:
-        if session['verificado'] == 2:
-            if session['survey'] == 1:
-                if 'loginPaci' in session:
-                    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
-                    encriptar = encriptado()
+    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
+    encriptar = encriptado()
 
-                    # USAR EL SESSION PARA OBTENER EL ID DEL PACIENTE
-                    idPaci = session['idPaci']
+    # USAR EL SESSION PARA OBTENER EL ID DEL PACIENTE
+    idPaci = session['idPaci']
 
+    # FALTA PROBAR ESTO
+    selecCita       =   mysql.connection.cursor()
+    selecCita.execute("SELECT * FROM citas C INNER JOIN practicante PR ON C.idCitaPrac = PR.idPrac INNER JOIN paciente PA ON C.idCitaPaci = PA.idPaci WHERE idCitaPaci=%s AND estatusCita=%s",(idPaci,1))
+    cit              =   selecCita.fetchone()
 
-                    # FALTA PROBAR ESTO
-                    selecCita       =   mysql.connection.cursor()
-                    selecCita.execute("SELECT * FROM citas C INNER JOIN practicante PR ON C.idCitaPrac = PR.idPrac INNER JOIN paciente PA ON C.idCitaPaci = PA.idPaci WHERE idCitaPaci=%s AND estatusCita=%s",(idPaci,1))
-                    cit              =   selecCita.fetchone()
+    if cit is not None:
+        fechaCita = cit.get('fechaCita')
+        horaCita = cit.get('horaCita')
+        # Formatear la fecha como una cadena
+        fechaCita = fechaCita.strftime('%Y-%m-%d')
+        # Crear un objeto datetime arbitrario para usar como referencia
+        ref = datetime.datetime(2000, 1, 1)
+        # Sumar el timedelta al datetime para obtener otro datetime
+        horaCita = ref + horaCita
+        # Formatear la hora como una cadena
+        horaCita = horaCita.strftime('%H:%M:%S')
+        fechaCita = datetime.datetime.strptime(fechaCita, '%Y-%m-%d').date()
 
-                    if cit is not None:
-                        fechaCita = cit.get('fechaCita')
-                        horaCita = cit.get('horaCita')
-                        # Formatear la fecha como una cadena
-                        fechaCita = fechaCita.strftime('%Y-%m-%d')
-                        # Crear un objeto datetime arbitrario para usar como referencia
-                        ref = datetime.datetime(2000, 1, 1)
-                        # Sumar el timedelta al datetime para obtener otro datetime
-                        horaCita = ref + horaCita
-                        # Formatear la hora como una cadena
-                        horaCita = horaCita.strftime('%H:%M:%S')
-                        fechaCita = datetime.datetime.strptime(fechaCita, '%Y-%m-%d').date()
+        # Convertir la cadena de hora a objeto datetime
+        horaCita = datetime.datetime.strptime(horaCita, '%H:%M:%S').time()
+        # Obtener la fecha y hora actual
+        fecha_actual = datetime.datetime.now().date()
+        hora_actual = datetime.datetime.now().time()
 
-                        # Convertir la cadena de hora a objeto datetime
-                        horaCita = datetime.datetime.strptime(horaCita, '%H:%M:%S').time()
-                        # Obtener la fecha y hora actual
-                        fecha_actual = datetime.datetime.now().date()
-                        hora_actual = datetime.datetime.now().time()
+        # Sumar una hora a la hora de la cita
+        horaCita_fin = (datetime.datetime.combine(datetime.date.today(), horaCita) +
+                        datetime.timedelta(hours=1)).time()
 
-                        # Sumar una hora a la hora de la cita
-                        horaCita_fin = (datetime.datetime.combine(datetime.date.today(), horaCita) +
-                                        datetime.timedelta(hours=1)).time()
+        # Combinar la fecha actual con la hora actual
+        fecha_hora_actual = datetime.datetime.combine(fecha_actual, hora_actual)
 
-                        # Combinar la fecha actual con la hora actual
-                        fecha_hora_actual = datetime.datetime.combine(fecha_actual, hora_actual)
-
-                        # Combinar la fecha de la cita con la hora de finalización de la cita
-                        fecha_hora_fin_cita = datetime.datetime.combine(fechaCita, horaCita_fin)
-                        # Comparar la fecha y hora actual con la fecha y hora de finalización de la cita
-                        if fecha_hora_actual >= fecha_hora_fin_cita:
-                            citaRealizada = 1
-                            print("La cita ya ha pasado.")
-                        else:
-                            citaRealizada = 2
-                            print("La cita aún no ha pasado.")
-                    
-                    else:
-                        citaRealizada = 1
-
-                    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-                    #                   0     1        2               3               4          5   
-                    list_consult = ['citas', 'C', 'C.idCitaPrac', 'C.idCitaPaci', 'idCitaPaci', idPaci]
-                    list_campo = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci', 'nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
-                    
-                    # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
-                    hc, datosCitas = obtener_datos(list_campo, list_consult, mysql, encriptar, 2)
-
-                    return render_template('index_pacientes.html', hc = hc, datosCitas = datosCitas, cit = cit, citaRealizada = citaRealizada, username=session['name'], email=session['correoPaci'])
-                
-                else:
-                    flash("No tienes permiso para acceder a esta página", 'danger')
-                    return redirect(url_for('home'))
-            else:
-                return redirect(url_for('survey_v2'))
+        # Combinar la fecha de la cita con la hora de finalización de la cita
+        fecha_hora_fin_cita = datetime.datetime.combine(fechaCita, horaCita_fin)
+        # Comparar la fecha y hora actual con la fecha y hora de finalización de la cita
+        if fecha_hora_actual >= fecha_hora_fin_cita:
+            citaRealizada = 1
+            print("La cita ya ha pasado.")
         else:
-            flash("Verifica tu correo electrónico para poder iniciar sesión", 'danger')
-            return redirect(url_for('verify'))
+            citaRealizada = 2
+            print("La cita aún no ha pasado.")
+    
     else:
-        flash("Inicia sesión para continuar", 'danger')
-        return redirect(url_for('auth'))
+        citaRealizada = 1
+
+    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
+    #                   0     1        2               3               4          5   
+    list_consult = ['citas', 'C', 'C.idCitaPrac', 'C.idCitaPaci', 'idCitaPaci', idPaci]
+    list_campo = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci', 'nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
+    
+    # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
+    hc, datosCitas = obtener_datos(list_campo, list_consult, mysql, encriptar, 2)
+
+    return render_template('paci/index_pacientes.html', hc = hc, datosCitas = datosCitas, cit = cit, citaRealizada = citaRealizada, username=session['name'], email=session['correoPaci'])
 
 
+
+######################## Falta
+########################
+########################
 # ~~~~~~~~~~~~~~~~~~~ Ver Pacientes ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/VerPacientes', methods=['GET', 'POST'])
 def verPacientes():
@@ -622,37 +680,30 @@ def verPacientes():
     
     return render_template('verPaciente.html', paci = pac, datosPaci = datosPaci)
 
-
+##########################################
+##########################################
+##########################################
 
 @PCapp.route('/VerPacientesAdm', methods=['GET', 'POST'])
+@login_required
+@verified_required
+@admin_required
 def verPacientesAdm():
-    if 'login' in session:
-        if session['verificado'] == 2:
-            if 'loginAdmin' in session:
-                # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
-                encriptar = encriptado()
-   
-                # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-                list_consult = ['paciente', 'activoPaci']
-                list_campo = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
+    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
+    encriptar = encriptado()
 
-                # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
-                pac, datosPaci = obtener_datos(list_campo, list_consult, mysql, encriptar, 1)
+    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
+    list_consult = ['paciente', 'activoPaci']
+    list_campo = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
 
-                return render_template('adm_pacie.html', paci = pac, datosPaci = datosPaci, username=session['name'], email=session['correoAd'])
-            else:
-                flash("No tienes permiso para acceder a esta página", 'danger')
-                return redirect(url_for('home'))
-        else:
-            flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-            return redirect(url_for('verify'))
-    else:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
+    # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
+    pac, datosPaci = obtener_datos(list_campo, list_consult, mysql, encriptar, 1)
+
+    return render_template('adm/adm_pacie.html', paci = pac, datosPaci = datosPaci, username=session['name'], email=session['correoAd'])
 
 
 @PCapp.route('/CrearCita', methods=["GET", "POST"])
-@PCapp.route('/CrearCita', methods=["GET", "POST"])
+@require_post
 def crearCita():
 
         let = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -814,166 +865,179 @@ def crearCita():
                 print('An error occurred: %s' % error)
         
 #~~~~~~~~~~~~~~~~~~~ Contestar Encuesta ~~~~~~~~~~~~~~~~~~~#
-@PCapp.route('/EncuestaPaciente')
+@PCapp.route('/EncuestaPaciente', methods=["GET"])
+@login_required
+@verified_required
+@paciente_required
 def encuestaPaciente():
-    if 'login' in session:
-        if session['verificado'] == 2:
-            if 'loginPaci' in session:
-                # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
-                encriptar = encriptado()
+    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
+    encriptar = encriptado()
 
-                # USAR EL SESSION PARA OBTENER EL ID DEL PACIENTE
-                idPaci = session['idPaci']
-                datosCitas      =   []
+    # USAR EL SESSION PARA OBTENER EL ID DEL PACIENTE
+    idPaci = session['idPaci']
+    datosCitas      =   []
 
-                # FALTA PROBAR ESTO
-                selecCita       =   mysql.connection.cursor()
-                selecCita.execute("SELECT * FROM citas C INNER JOIN practicante PR ON C.idCitaPrac = PR.idPrac INNER JOIN paciente PA ON C.idCitaPaci = PA.idPaci WHERE idCitaPaci=%s AND estatusCita=%s",(idPaci,1))
-                cit              =   selecCita.fetchone()
+    # FALTA PROBAR ESTO
+    selecCita       =   mysql.connection.cursor()
+    selecCita.execute("SELECT * FROM citas C INNER JOIN practicante PR ON C.idCitaPrac = PR.idPrac INNER JOIN paciente PA ON C.idCitaPaci = PA.idPaci WHERE idCitaPaci=%s AND estatusCita=%s",(idPaci,1))
+    cit              =   selecCita.fetchone()
 
-                # SE CREA UNA LISTA CON LOS NOMBRES DE LOS CAMPOS
-                list_campo = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci', 'nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
-                
-                # SE AGREGA A UN DICCIONARIO
-                noCita = select_and_decode_atribute(cit, list_campo, encriptar)
-                
-                idCita = cit.get('idCita')
-                idPrac = cit.get('idPrac')
-                nombrPR = noCita.get('nombrePrac')
-                apelpPR = noCita.get('apellidoPPrac')
-                apelmPR = noCita.get('apellidoMPrac')
+    # SE CREA UNA LISTA CON LOS NOMBRES DE LOS CAMPOS
+    list_campo = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci', 'nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
+    
+    # SE AGREGA A UN DICCIONARIO
+    noCita = select_and_decode_atribute(cit, list_campo, encriptar)
+    
+    idCita = cit.get('idCita')
+    idPrac = cit.get('idPrac')
+    nombrPR = noCita.get('nombrePrac')
+    apelpPR = noCita.get('apellidoPPrac')
+    apelmPR = noCita.get('apellidoMPrac')
 
-                # SE ACTUALIZA EL DICCIONARIO QUE MANDA LA BD
-                cit.update(noCita)
+    # SE ACTUALIZA EL DICCIONARIO QUE MANDA LA BD
+    cit.update(noCita)
 
-                
-                # SE AGREGA A UNA LISTA ANTERIORMENTE CREADA
-                datosCitas.append(cit)
-            
-                # LA LISTA LA CONVERTIMOS A TUPLE PARA PODER USARLA CON MAYOR COMODIDAD EN EL FRONT
-                datosCitas = tuple(datosCitas)
-                print(datosCitas)
+    # SE AGREGA A UNA LISTA ANTERIORMENTE CREADA
+    datosCitas.append(cit)
 
-                return render_template('encuesta_paciente.html', nombrePrac = nombrPR, apellidoPPrac = apelpPR, apellidoMPrac = apelmPR, idCita = idCita, idPrac = idPrac, username=session['name'], email=session['correoPaci'])
-            else:
-                flash("No tienes permiso para acceder a esta página", 'danger')
-                return redirect(url_for('home'))
-        else:
-            flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-            return redirect(url_for('verify')) 
-    else:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
+    # LA LISTA LA CONVERTIMOS A TUPLE PARA PODER USARLA CON MAYOR COMODIDAD EN EL FRONT
+    datosCitas = tuple(datosCitas)
+    print(datosCitas)
 
+    return render_template('paci/encuesta_paciente.html', nombrePrac = nombrPR, apellidoPPrac = apelpPR, apellidoMPrac = apelmPR, idCita = idCita, idPrac = idPrac, username=session['name'], email=session['correoPaci'])
 
 
 #~~~~~~~~~~~~~~~~~~~ Respuestas Encuesta ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/ContestarEncuesta', methods=["GET", "POST"])
+@login_required
+@verified_required
+@paciente_required
 def contestarEncuesta():
-    if 'login' in session:
-        if session['verificado'] == 2:
-            if 'loginPaci' in session:
-                # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
-                #encriptar = encriptado()
+    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
+    #encriptar = encriptado()
 
-                # USAR EL SESSION PARA OBTENER EL ID DEL PACIENTE
-                idPaci = session['idPaci']
-                idPrac = request.form['idPrac']
-                idCita = request.form['idCita']
-                pregunta1 = request.form['calificacion-1']
-                pregunta2 = request.form['calificacion-2']
-                pregunta3 = request.form['calificacion-3']
-                pregunta4 = request.form['calificacion-4']
-                pregunta5 = request.form['calificacion-5']
-                pregunta6 = request.form['calificacion-6']
-                pregunta7 = request.form['calificacion-7']
-                pregunta8 = request.form['calificacion-8']
+    # USAR EL SESSION PARA OBTENER EL ID DEL PACIENTE
+    idPaci = session['idPaci']
+    idPrac = request.form['idPrac']
+    idCita = request.form['idCita']
+    pregunta1 = request.form['calificacion-1']
+    pregunta2 = request.form['calificacion-2']
+    pregunta3 = request.form['calificacion-3']
+    pregunta4 = request.form['calificacion-4']
+    pregunta5 = request.form['calificacion-5']
+    pregunta6 = request.form['calificacion-6']
+    pregunta7 = request.form['calificacion-7']
+    pregunta8 = request.form['calificacion-8']
 
+    
+    regEncuesta = mysql.connection.cursor()
+    regEncuesta.execute("INSERT INTO encuesta (pregunta1Encu, pregunta2Encu, pregunta3Encu, pregunta4Encu, pregunta5Encu, pregunta6Encu, pregunta7Encu, pregunta8Encu, idEncuPaci, idEncuPrac) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                (pregunta1, pregunta2, pregunta3, pregunta4, pregunta5, pregunta6, pregunta7, pregunta8, idPaci, idPrac,))
+    mysql.connection.commit()
+
+    idEncuesta = regEncuesta.lastrowid
+
+    regEncuestaCita = mysql.connection.cursor()
+    regEncuestaCita.execute("UPDATE citas SET idEncuestaCita=%s, estatusCita=%s WHERE idCita=%s", (idEncuesta, 4, idCita,))
                 
-                regEncuesta = mysql.connection.cursor()
-                regEncuesta.execute("INSERT INTO encuesta (pregunta1Encu, pregunta2Encu, pregunta3Encu, pregunta4Encu, pregunta5Encu, pregunta6Encu, pregunta7Encu, pregunta8Encu, idEncuPaci, idEncuPrac) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                            (pregunta1, pregunta2, pregunta3, pregunta4, pregunta5, pregunta6, pregunta7, pregunta8, idPaci, idPrac,))
-                mysql.connection.commit()
+    mysql.connection.commit()
 
-                idEncuesta = regEncuesta.lastrowid
+    flash('Encuesta contestada con exito.')
+    return redirect(url_for('indexPacientes'))
 
-                regEncuestaCita = mysql.connection.cursor()
-                regEncuestaCita.execute("UPDATE citas SET idEncuestaCita=%s, estatusCita=%s WHERE idCita=%s", (idEncuesta, 4, idCita,))
-                            
-                mysql.connection.commit()
 
-                flash('Encuesta contestada con exito.')
-                return redirect(url_for('indexPacientes'))
-            else:
-                flash("No tienes permiso para acceder a esta página", 'danger')
-                return redirect(url_for('home'))
-        else:
-            flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-            return redirect(url_for('verify')) 
-    else:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
+@PCapp.route('/Calendario', methods=['GET', 'POST'])
+def calendario():
+    return render_template('calendario.html')
 
 
 # ~~~~~~~~~~~~~~~~~~~ Ver Encuestas de Practicantes ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/VerEncuestasPracticante/<string:idPrac>', methods=['GET', 'POST'])
+@login_required
+@verified_required
+@supervisor_required
 def verEncuestasPracticante(idPrac):
-    if 'login' in session:
-        if session['verificado'] == 2:
-            if 'loginSup' in session:
+    # USAR SESSION PARA OBTENER EL ID DE SUPERVISOR
+    idSup = session['idSup']
+    
+    
+    # Verificar que el practicante pertenece al supervisor
+    verificarPracticante = mysql.connection.cursor()
+    verificarPracticante.execute("""
+        SELECT * 
+        FROM practicante
+        WHERE idPrac=%s AND idSupPrac=%s
+    """, (idPrac, idSup))
+    
+    pract = verificarPracticante.fetchone()
+    
+    if not pract:
+        flash("No tienes permiso para ver estas encuestas.")
+        return redirect(url_for('home'))
+    
+    
+    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
+    encriptar = encriptado()
 
-                # USAR SESSION PARA OBTENER EL ID DE SUPERVISOR
-                idSup = session['idSup']
-                # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
-                encriptar = encriptado()
-      
-                # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-                #                   0        1        2               3              4             5   
-                list_consult = ['encuesta', 'E', 'E.idEncuPrac', 'E.idEncuPaci', 'idEncuPrac', idPrac]
-                list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
-                
-                # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
-                encu, datosEncu = obtener_datos(list_campo, list_consult, mysql, encriptar, 2)
-                
-                return render_template('encuesta_practicante.html', datosEncu = datosEncu, username=session['name'], email=session['correoSup'])
-            else:
-                flash("No tienes permiso para acceder a esta página", 'danger')
-                return redirect(url_for('home'))
-        else:
-            flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-            return redirect(url_for('verify'))
-    else:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
+    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
+    #                   0        1        2               3              4             5   
+    list_consult = ['encuesta', 'E', 'E.idEncuPrac', 'E.idEncuPaci', 'idEncuPrac', idPrac]
+    list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
+    
+    # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
+    encu, datosEncu = obtener_datos(list_campo, list_consult, mysql, encriptar, 2)
+    
+    return render_template('encuesta_practicante.html', datosEncu = datosEncu, username=session['name'], email=session['correoSup'])
+
+
+
+# ~~~~~~~~~~~~~~~~~~~ Ver Resultados de Practicantes ~~~~~~~~~~~~~~~~~~~#
+# @PCapp.route('/VerResultadosEncuesta/<string:idEncu>', methods=['GET', 'POST'])
+# @login_required
+# @verified_required
+# @supervisor_required
+# def verResultadosEncuesta(idEncu):
+#     # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
+#     selecEncuesta    =   mysql.connection.cursor()
+#     selecEncuesta.execute("SELECT * FROM encuesta WHERE idEncu=%s",(idEncu,))
+#     encu              =   selecEncuesta.fetchone()
+
+#     print(encu)
+
+#     return render_template('resultados_encuestas.html', resu = encu, username=session['name'], email=session['correoSup'])
 
 
 # ~~~~~~~~~~~~~~~~~~~ Ver Resultados de Practicantes ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/VerResultadosEncuesta/<string:idEncu>', methods=['GET', 'POST'])
+@login_required
+@verified_required
+@supervisor_required
 def verResultadosEncuesta(idEncu):
-    if not 'login' in session:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
+    # Obtener el ID del supervisor desde la sesión
+    idSup = session['idSup']
     
-    if not session['verificado'] == 2:
-        flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-        return redirect(url_for('verify'))
+    # SELECCIONAR EL RESULTADO DE LA ENCUESTA Y VERIFICAR QUE PERTENEZCA AL SUPERVISOR
+    selecEncuesta = mysql.connection.cursor()
+    selecEncuesta.execute("""
+        SELECT * 
+        FROM encuesta 
+        WHERE idEncu=%s AND idSup=%s
+    """, (idEncu, idSup))
     
-    if not 'loginSup' in session:
-        flash("No tienes permiso para acceder a esta página", 'danger')
+    encu = selecEncuesta.fetchone()
+    
+    if not encu:
+        flash("No tienes permiso para ver estos resultados.")
         return redirect(url_for('home'))
 
-    # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
-    selecEncuesta    =   mysql.connection.cursor()
-    selecEncuesta.execute("SELECT * FROM encuesta WHERE idEncu=%s",(idEncu,))
-    encu              =   selecEncuesta.fetchone()
-
     print(encu)
+    return render_template('resultados_encuestas.html', resu=encu, username=session['name'], email=session['correoSup'])
 
-    return render_template('resultados_encuestas.html', resu = encu, username=session['name'], email=session['correoSup'])
 
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Cita Paciente ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCitaPaciente', methods=["GET", "POST"])
+@require_post
 def eliminarCitaPaciente():
 
         # USO SESION PARA OBTENER LOS DATOS DEL PACIENTE
@@ -1052,122 +1116,116 @@ def eliminarCitaPaciente():
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Cita Supervisor ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCitaSupervisor', methods=["GET", "POST"])
+@require_post
 def eliminarCitaSupervisor():
-
-        # USO SESION PARA OBTENER LOS DATOS DEL PACIENTE
+    # USO SESION PARA OBTENER LOS DATOS DEL PACIENTE
         
-        # RECUPERAR DATOS
-        idCita          = request.form['idCita']
-        eventoIdCita    = request.form['eventoCita']
-        cancelacion     = request.form['cancelacion']
+    # RECUPERAR DATOS
+    idCita          = request.form['idCita']
+    eventoIdCita    = request.form['eventoCita']
+    cancelacion     = request.form['cancelacion']
 
-        # Verificar si todavía hay más de 24 horas de diferencia antes de la cita
-        if cancelacion == 'Si':
-            print("Como no pa, ahi te va tu cancelacion.")
+    # Verificar si todavía hay más de 24 horas de diferencia antes de la cita
+    if cancelacion == 'Si':
+        print("Como no pa, ahi te va tu cancelacion.")
 
-            """Shows basic usage of the Google Calendar API.
-            Prints the start and name of the next 10 events on the user's calendar.
-            """
-            creds = None
-            # The file token.json stores the user's access and refresh tokens, and is
-            # created automatically when the authorization flow completes for the first
-            # time.
-            if os.path.exists('token.json'):
-                creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-            # If there are no (valid) credentials available, let the user log in.
-            if not creds or not creds.valid:
-                if creds and creds.expired and creds.refresh_token:
-                    creds.refresh(Request())
-                else:
-                    flow = InstalledAppFlow.from_client_secrets_file(
-                        'credentials.json', SCOPES)
-                    creds = flow.run_local_server(port=0)
-                # Save the credentials for the next run
-                with open('token.json', 'w') as token:
-                    token.write(creds.to_json())
+        """Shows basic usage of the Google Calendar API.
+        Prints the start and name of the next 10 events on the user's calendar.
+        """
+        creds = None
+        # The file token.json stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first
+        # time.
+        if os.path.exists('token.json'):
+            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    'credentials.json', SCOPES)
+                creds = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with open('token.json', 'w') as token:
+                token.write(creds.to_json())
 
-            try:
-                service = build('calendar', 'v3', credentials=creds)
+        try:
+            service = build('calendar', 'v3', credentials=creds)
 
-                service.events().delete(calendarId='primary', eventId=eventoIdCita, sendNotifications=True).execute()
+            service.events().delete(calendarId='primary', eventId=eventoIdCita, sendNotifications=True).execute()
 
-                estatusCita = 2
-                editarCita      = mysql.connection.cursor()
-                editarCita.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s",
-                            (estatusCita, idCita,))
-                mysql.connection.commit()
-
-                flash('Cita eliminada con exito.')
-                return redirect(url_for('verPracticantesSupervisor'))
-
-
-            except HttpError as error:
-                print('An error occurred: %s' % error)
-        
-        else:
-            estatusCita = 1
+            estatusCita = 2
             editarCita      = mysql.connection.cursor()
             editarCita.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s",
                         (estatusCita, idCita,))
             mysql.connection.commit()
-            print("Nel padrino, ahuevo ahora la bebes o la derramas")
-            flash("No se puede cancelar la cita, faltan menos de 24 horas")
-            return redirect(url_for('verPracticantesSupervisor'))
+
+            flash('Cita eliminada con exito.')
+            return redirect(url_for('indexSupervisor'))
+
+
+        except HttpError as error:
+            print('An error occurred: %s' % error)
+    
+    else:
+        estatusCita = 1
+        editarCita      = mysql.connection.cursor()
+        editarCita.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s",
+                    (estatusCita, idCita,))
+        mysql.connection.commit()
+        print("Nel padrino, ahuevo ahora la bebes o la derramas")
+        flash("No se puede cancelar la cita, faltan menos de 24 horas")
+        return redirect(url_for('indexSupervisor'))
+    
 
 
 # ~~~~~~~~~~~~~~~~~~~ Crear Cita ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/AgendarCita', methods=['GET', 'POST'])
+@login_required
+@verified_required
+@paciente_required
 def agendarCita():
-    if 'login' in session:
-        if session['verificado'] == 2:
-            if 'loginPaci' in session:
-                # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
-                encriptar = encriptado()
+    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
+    encriptar = encriptado()
 
-                # USAR EL SESSION PARA OBTENER EL ID DEL PACIENTE
-                idPaci = session['idPaci']
+    # USAR EL SESSION PARA OBTENER EL ID DEL PACIENTE
+    idPaci = session['idPaci']
 
-                # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
-                selecPrac        =   mysql.connection.cursor()
-                selecPrac.execute("SELECT * FROM practicante WHERE activoPrac IS NOT NULL ORDER BY RAND() LIMIT 10")
-                pra              =   selecPrac.fetchall()
+    # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
+    selecPrac        =   mysql.connection.cursor()
+    selecPrac.execute("SELECT * FROM practicante WHERE activoPrac IS NOT NULL ORDER BY RAND() LIMIT 10")
+    pra              =   selecPrac.fetchall()
 
-                # SE CREA UNA LISTA
-                datosPrac = []
+    # SE CREA UNA LISTA
+    datosPrac = []
 
-                # SE CREA UNA LISTA CON LOS NOMBRES DE LOS CAMPOS
-                list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
-                
-                # CON ESTE FOR, SE VAN OBTENIENDO LOS DATOS PARA POSTERIORMENTE DECODIFICARLOS 
-                for pract in pra:
+    # SE CREA UNA LISTA CON LOS NOMBRES DE LOS CAMPOS
+    list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
+    
+    # CON ESTE FOR, SE VAN OBTENIENDO LOS DATOS PARA POSTERIORMENTE DECODIFICARLOS 
+    for pract in pra:
 
-                    # SE AGREGA A UN DICCIONARIO
-                    noPrac = select_and_decode_atribute(pract, list_campo, encriptar)
+        # SE AGREGA A UN DICCIONARIO
+        noPrac = select_and_decode_atribute(pract, list_campo, encriptar)
 
-                    # SE ACTUALIZA EL DICCIONARIO QUE MANDA LA BD
-                    pract.update(noPrac)
+        # SE ACTUALIZA EL DICCIONARIO QUE MANDA LA BD
+        pract.update(noPrac)
 
-                    # SE AGREGA A UNA LISTA ANTERIORMENTE CREADA
-                    datosPrac.append(pract)
-                
-                # LA LISTA LA CONVERTIMOS A TUPLE PARA PODER USARLA CON MAYOR COMODIDAD EN EL FRONT
-                datosPrac = tuple(datosPrac)
-                print(datosPrac)
+        # SE AGREGA A UNA LISTA ANTERIORMENTE CREADA
+        datosPrac.append(pract)
+    
+    # LA LISTA LA CONVERTIMOS A TUPLE PARA PODER USARLA CON MAYOR COMODIDAD EN EL FRONT
+    datosPrac = tuple(datosPrac)
+    print(datosPrac)
 
-                return render_template('agenda_cita.html', datosPrac = datosPrac, username=session['name'], email=session['correoPaci'])
-            else:
-                flash("No tienes permiso para acceder a esta página", 'danger')
-                return redirect(url_for('home'))
-        else:
-            flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-            return redirect(url_for('verify'))
-    else:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
+    return render_template('paci/agenda_cita.html', datosPrac = datosPrac, username=session['name'], email=session['correoPaci'])
+
 
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Cita Pracicante ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCitaPracticante', methods=["GET", "POST"])
+@require_post
 def eliminarCitaPracticante():
         
     idCita      = request.form['idCita']
@@ -1210,113 +1268,100 @@ def eliminarCitaPracticante():
 
 
 # VER PRACTICANTES SUPERVISOR
-@PCapp.route('/VerPracticantesSupervisor', methods=['GET', 'POST'])
-def verPracticantesSupervisor():
-    if 'login' in session:
-        if session['verificado'] == 2:
-            if 'loginSup' in session:
-                # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
-                encriptar = encriptado()
-                
-                # USAR SESSION PARA OBTENER EL ID DE SUPERVISOR
-                idSup = session['idSup']
+@PCapp.route('/IndexSupervisor', methods=['GET', 'POST'])
+@login_required
+@verified_required
+@supervisor_required
+def indexSupervisor():
+    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
+    encriptar = encriptado()
+    
+    # USAR SESSION PARA OBTENER EL ID DE SUPERVISOR
+    idSup = session['idSup']
 
-                # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
-                selecPrac        =   mysql.connection.cursor()
-                selecPrac.execute("SELECT * FROM supervisor S INNER JOIN practicante P ON P.idSupPrac = S.idSup WHERE S.idSup=%s AND activoSup IS NOT NULL AND P.activoPrac IS NOT NULL",(idSup,))
-                pra              =   selecPrac.fetchall()
+    # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
+    selecPrac        =   mysql.connection.cursor()
+    selecPrac.execute("SELECT * FROM supervisor S INNER JOIN practicante P ON P.idSupPrac = S.idSup WHERE S.idSup=%s AND activoSup IS NOT NULL AND P.activoPrac IS NOT NULL",(idSup,))
+    pra              =   selecPrac.fetchall()
 
-                # SE CREA UNA LISTA
-                datosPrac = []
+    # SE CREA UNA LISTA
+    datosPrac = []
 
-                # SE CREA UNA LISTA CON LOS NOMBRES DE LOS CAMPOS
-                list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombreSup', 'apellidoPSup', 'apellidoMSup']
-                
-                # CON ESTE FOR, SE VAN OBTENIENDO LOS DATOS PARA POSTERIORMENTE DECODIFICARLOS 
-                for sup in pra:
-                    
-                    # SE AGREGA A UN DICCIONARIO
-                    noPrac = select_and_decode_atribute(sup, list_campo, encriptar)
-                    
-                    # SE ACTUALIZA EL DICCIONARIO QUE MANDA LA BD
-                    sup.update(noPrac)
+    # SE CREA UNA LISTA CON LOS NOMBRES DE LOS CAMPOS
+    list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombreSup', 'apellidoPSup', 'apellidoMSup']
+    
+    # CON ESTE FOR, SE VAN OBTENIENDO LOS DATOS PARA POSTERIORMENTE DECODIFICARLOS 
+    for sup in pra:
+        
+        # SE AGREGA A UN DICCIONARIO
+        noPrac = select_and_decode_atribute(sup, list_campo, encriptar)
+        
+        # SE ACTUALIZA EL DICCIONARIO QUE MANDA LA BD
+        sup.update(noPrac)
 
-                    # SE AGREGA A UNA LISTA ANTERIORMENTE CREADA
-                    datosPrac.append(sup)
-                
-                # LA LISTA LA CONVERTIMOS A TUPLE PARA PODER USARLA CON MAYOR COMODIDAD EN EL FRONT
-                datosPrac = tuple(datosPrac)
+        # SE AGREGA A UNA LISTA ANTERIORMENTE CREADA
+        datosPrac.append(sup)
+    
+    # LA LISTA LA CONVERTIMOS A TUPLE PARA PODER USARLA CON MAYOR COMODIDAD EN EL FRONT
+    datosPrac = tuple(datosPrac)
 
-                # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
-                selecCitas        =   mysql.connection.cursor()
-                selecCitas.execute("SELECT * FROM supervisor S INNER JOIN practicante P ON P.idSupPrac = S.idSup INNER JOIN citas C ON C.idCitaPrac = P.idPrac WHERE P.idSupPrac=%s AND activoSup IS NOT NULL AND C.estatusCita = %s AND P.activoPrac IS NOT NULL",(idSup, 3))
-                cita              =   selecCitas.fetchall()
+    # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
+    selecCitas        =   mysql.connection.cursor()
+    selecCitas.execute("SELECT * FROM supervisor S INNER JOIN practicante P ON P.idSupPrac = S.idSup INNER JOIN citas C ON C.idCitaPrac = P.idPrac WHERE P.idSupPrac=%s AND activoSup IS NOT NULL AND C.estatusCita = %s AND P.activoPrac IS NOT NULL",(idSup, 3))
+    cita              =   selecCitas.fetchall()
 
-                # SE CREA UNA LISTA
-                datosCitas = []
+    # SE CREA UNA LISTA
+    datosCitas = []
 
-                # SE CREA UNA LISTA CON LOS NOMBRES DE LOS CAMPOS
-                list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombreSup', 'apellidoPSup', 'apellidoMSup']
-                
-                # CON ESTE FOR, SE VAN OBTENIENDO LOS DATOS PARA POSTERIORMENTE DECODIFICARLOS 
-                for cit in cita:                    
+    # SE CREA UNA LISTA CON LOS NOMBRES DE LOS CAMPOS
+    list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombreSup', 'apellidoPSup', 'apellidoMSup']
+    
+    # CON ESTE FOR, SE VAN OBTENIENDO LOS DATOS PARA POSTERIORMENTE DECODIFICARLOS 
+    for cit in cita:                    
 
-                    # SE AGREGA A UN DICCIONARIO
-                    noCita = select_and_decode_atribute(cit, list_campo, encriptar)
+        # SE AGREGA A UN DICCIONARIO
+        noCita = select_and_decode_atribute(cit, list_campo, encriptar)
 
-                    # SE ACTUALIZA EL DICCIONARIO QUE MANDA LA BD
-                    cit.update(noCita)
+        # SE ACTUALIZA EL DICCIONARIO QUE MANDA LA BD
+        cit.update(noCita)
 
-                    # SE AGREGA A UNA LISTA ANTERIORMENTE CREADA
-                    datosCitas.append(cit)
-                
-                # LA LISTA LA CONVERTIMOS A TUPLE PARA PODER USARLA CON MAYOR COMODIDAD EN EL FRONT
-                datosCitas = tuple(datosCitas)
+        # SE AGREGA A UNA LISTA ANTERIORMENTE CREADA
+        datosCitas.append(cit)
+    
+    # LA LISTA LA CONVERTIMOS A TUPLE PARA PODER USARLA CON MAYOR COMODIDAD EN EL FRONT
+    datosCitas = tuple(datosCitas)
 
 
-                return render_template('index_supervisor.html', pract = pra, datosPrac = datosPrac, datosCitas = datosCitas, username=session['name'], email=session['correoSup'])
-            else:
-                flash("No tienes permiso para acceder a esta página", 'danger')
-                return redirect(url_for('home'))
-        else:
-            flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-            return redirect(url_for('verify'))
-    else:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
+    return render_template('sup/index_supervisor.html', pract = pra, datosPrac = datosPrac, datosCitas = datosCitas, username=session['name'], email=session['correoSup'])
+
 
 
 #~~~~~~~~~~~~~~~~~~~ Ver Practicantes ADMINISTRADOR ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/VerPracticantesAdm', methods=['GET', 'POST'])
+@login_required
+@verified_required
+@admin_required
 def verPracticantesAdm():
-    if 'login' in session:
-        if session['verificado'] == 2:
-            if 'loginAdmin' in session:
-                # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
-                encriptar = encriptado()
+    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
+    encriptar = encriptado()
 
-                # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-                list_consult = ['practicante', ' activoPrac']
-                list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
+    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
+    list_consult = ['practicante', ' activoPrac']
+    list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
 
-                # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
-                pra, datosPrac = obtener_datos(list_campo, list_consult, mysql, encriptar, 1)
+    # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
+    pra, datosPrac = obtener_datos(list_campo, list_consult, mysql, encriptar, 1)
 
-                return render_template('adm_pract.html', pract = pra, datosPrac = datosPrac, username=session['name'], email=session['correoAd'])
-            
-            else:
-                flash("No tienes permiso para acceder a esta página", 'danger')
-                return redirect(url_for('home'))
-        else:
-            flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-            return redirect(url_for('verify'))
-    else:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
+    return render_template('adm/adm_pract.html', pract = pra, datosPrac = datosPrac, username=session['name'], email=session['correoAd'])
+
     
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Practicantes ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCuentaPracticantesAdm', methods=["GET", "POST"])
+@login_required
+@verified_required
+@admin_required
+@require_post
 def eliminarCuentaPracticantesAdm():
 
     list_consult = ['idPrac', 'practicante', 'activoPrac']
@@ -1327,16 +1372,18 @@ def eliminarCuentaPracticantesAdm():
 
     #~~~~~~~~~~~~~~~~~~~ Eliminar Practicantes ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCuentaPracticantesSup', methods=["GET", "POST"])
+@require_post
 def eliminarCuentaPracticantesSup():
 
     list_consult = ['idPrac', 'practicante', 'activoPrac']
     eliminarCuenta(request, mysql, list_consult)
     
     flash('Cuenta editada con exito.')
-    return redirect(url_for('verPracticantesSupervisor'))
+    return redirect(url_for('indexSupervisor'))
 
 #~~~~~~~~~~~~~~~~~~~ Editar Practicantes ADMIN ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EditarCuentaPracticantesAdm', methods=["GET", "POST"])
+@require_post
 def editarCuentaPracticantesAdm():
     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
     encriptar = encriptado()
@@ -1367,6 +1414,7 @@ def editarCuentaPracticantesAdm():
 
 #~~~~~~~~~~~~~~~~~~~ Editar Practicantes Supervisores ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EditarCuentaPracticantesSup', methods=["GET", "POST"])
+@require_post
 def editarCuentaPracticantesSup():
     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
     encriptar = encriptado()
@@ -1392,11 +1440,12 @@ def editarCuentaPracticantesSup():
         mysql.connection.commit()
 
     flash('Cuenta editada con exito.')
-    return redirect(url_for('verPracticantesSupervisor'))
+    return redirect(url_for('indexSupervisor'))
 
 
 #~~~~~~~~~~~~~~~~~~~ Crear Practicantes ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/CrearCuentaPracticantes', methods=["GET", "POST"])
+@require_post
 def crearCuentaPracticantes():
     if request.method == 'POST':
         #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
@@ -1438,7 +1487,7 @@ def crearCuentaPracticantes():
             # Si el correo ya está registrado, mostrar un mensaje de error
             flash("El correo ya está registrado", 'danger')
             cur.close()
-            return redirect(url_for('verPracticantesSupervisor'))        
+            return redirect(url_for('indexSupervisor'))        
         
         regPracticante = mysql.connection.cursor()
         regPracticante.execute("INSERT INTO practicante (nombrePrac, apellidoPPrac, apellidoMPrac, contraPrac, sexoPrac, codVeriPrac, correoPrac, fechaNacPrac, activoPrac, veriPrac, edadPrac, celPrac, codigoUPrac, idSupPrac) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
@@ -1476,14 +1525,15 @@ def crearCuentaPracticantes():
         flash('Cuenta creada con exito.')
 
         #MANDAR A UNA VENTANA PARA QUE META EL CODIGO DE VERFICIACION
-        return redirect(url_for('verPracticantesSupervisor'))
+        return redirect(url_for('indexSupervisor'))
     else:
         flash('No se pudo crear la cuenta.')
-        return redirect(url_for('verPracticantesSupervisor'))
+        return redirect(url_for('indexSupervisor'))
 
 
 # ~~~~~~~~~~~~~~~~~~~ Editar Pacientes Admin ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EditarCuentaPacienteAdm', methods=["GET", "POST"])
+@require_post
 def editarCuentaPacienteAdm():
     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
     encriptar = encriptado()
@@ -1503,6 +1553,7 @@ def editarCuentaPacienteAdm():
 
 # ~~~~~~~~~~~~~~~~~~~ Editar Pacientes Supervisor ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EditarCuentaPacienteSup', methods=["GET", "POST"])
+@require_post
 def editarCuentaPacienteSup():
     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
     encriptar = encriptado()
@@ -1521,6 +1572,7 @@ def editarCuentaPacienteSup():
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Pacientes ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCuentaPacienteAdm', methods=["GET", "POST"])
+@require_post
 def eliminarCuentaPacienteAdm():
     # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
     list_consult = ['idPaci', 'paciente', 'activoPaci']
@@ -1531,6 +1583,7 @@ def eliminarCuentaPacienteAdm():
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Pacientes ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCuentaPacienteSup', methods=["GET", "POST"])
+@require_post
 def eliminarCuentaPacienteSup():
     # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
     list_consult = ['idPaci', 'paciente', 'activoPaci']
@@ -1546,6 +1599,7 @@ def eliminarCuentaPacienteSup():
 
 #~~~~~~~~~~~~~~~~~~~ Crear Supervisores ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/CrearCuentaSupervisor', methods=["GET", "POST"])
+@require_post
 def crearCuentaSupervisor():
     if request.method == 'POST':
         # -------------------------------------------------------------------------
@@ -1614,34 +1668,26 @@ def crearCuentaSupervisor():
 
 #~~~~~~~~~~~~~~~~~~~ Ver Supervisores ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/VerSupervisor', methods=['GET', 'POST'])
+@login_required
+@verified_required
+@admin_required
 def verSupervisor():
-    if 'login' in session:
-        if session['verificado'] == 2:
-            if 'loginAdmin' in session:
-                # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
-                encriptar = encriptado()
+    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
+    encriptar = encriptado()
 
-                # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-                list_consult = ['supervisor', 'activoSup']
-                list_campo = ['nombreSup', 'apellidoPSup', 'apellidoMSup']
-                
-                # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
-                sup, datosSup = obtener_datos(list_campo, list_consult, mysql, encriptar, 1)
+    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
+    list_consult = ['supervisor', 'activoSup']
+    list_campo = ['nombreSup', 'apellidoPSup', 'apellidoMSup']
+    
+    # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
+    sup, datosSup = obtener_datos(list_campo, list_consult, mysql, encriptar, 1)
 
-                return render_template('adm_super.html', super = sup, datosSup = datosSup, username=session['name'], email=session['correoAd'])
-            else:
-                flash("No tienes permiso para acceder a esta página", 'danger')
-                return redirect(url_for('home'))
-        else:
-            flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-            return redirect(url_for('verify'))
-    else:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
+    return render_template('adm/adm_super.html', super = sup, datosSup = datosSup, username=session['name'], email=session['correoAd'])
 
     
 #~~~~~~~~~~~~~~~~~~~ Editar Supervisores ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EditarCuentaSupervisor', methods=["GET", "POST"])
+@require_post
 def editarCuentaSupervisor():
     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
     encriptar = encriptado()
@@ -1661,6 +1707,7 @@ def editarCuentaSupervisor():
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Supervisores ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCuentaSupervisor', methods=["GET", "POST"])
+@require_post
 def eliminarCuentaSupervisor():
     # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
     list_consult = ['idSup', 'supervisor', 'activoSup']
@@ -1671,53 +1718,36 @@ def eliminarCuentaSupervisor():
 
 
 @PCapp.route('/IndexAdministrador', methods=['GET', 'POST'])
+@login_required
+@verified_required
+@admin_required
 def indexAdministrador():
-    if not 'login' in session:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
-
-    if not session['verificado'] == 2:
-        flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-        return redirect(url_for('verify'))
-    
-    if not 'loginAdmin' in session:
-        flash("No tienes permiso para acceder a esta página", 'danger')
-        return redirect(url_for('home'))
-    
-    return render_template('index_admin.html', username=session['name'], email=session['correoAd'])
+    return render_template('adm/index_admin.html', username=session['name'], email=session['correoAd'])
     
 
 #~~~~~~~~~~~~~~~~~~~ Index Practicantes ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/IndexPracticantes', methods=["GET", "POST"])
+@login_required
+@verified_required
+@practicante_required
 def indexPracticantes():
-    if 'login' in session:
-        if session['verificado'] == 2:
-            if 'loginPrac' in session:
-                #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
-                encriptar = encriptado()
+    #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
+    encriptar = encriptado()
 
-                idPrac = session['idPrac']
-                
-                # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-                list_campo  = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
-                list_consult = [idPrac, 1]
-                
-                pra, datosPrac = obtener_datos(list_campo, list_consult, mysql, encriptar, 3)
+    idPrac = session['idPrac']
+    
+    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
+    list_campo  = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
+    list_consult = [idPrac, 1]
+    
+    pra, datosPrac = obtener_datos(list_campo, list_consult, mysql, encriptar, 3)
 
-                # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-                list_cosult = [idPrac, 4]
-                praH, datosPracH = obtener_datos(list_campo, list_consult, mysql, encriptar, 3)
+    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
+    list_cosult = [idPrac, 4]
+    praH, datosPracH = obtener_datos(list_campo, list_consult, mysql, encriptar, 3)
 
-                return render_template('index_practicante.html', pract = pra, datosPrac = datosPrac, datosPracH=datosPracH, username=session['name'], email=session['correoPrac'])
-            else:
-                flash("No tienes permiso para acceder a esta página", 'danger')
-                return redirect(url_for('home'))
-        else:
-            flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-            return redirect(url_for('verify'))
-    else:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
+    return render_template('prac/index_practicante.html', pract = pra, datosPrac = datosPrac, datosPracH=datosPracH, username=session['name'], email=session['correoPrac'])
+
     
 
 
@@ -1739,22 +1769,12 @@ def home():
 @PCapp.route('/AgregarPracticante')
 @login_required
 @verified_required
+@supervisor_required
 def agregarPracticante():
-    if not 'login' in session:
-        flash("Por favor, inicia sesión para continuar", 'warning')
-        return redirect(url_for('auth'))
-         
-    if not session['verificado'] == 2: 
-        flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
-        return redirect(url_for('verify')) 
-       
-    if not 'loginSup' in session:
-        flash("No tienes permiso para acceder a esta página", 'danger')
-        return redirect(url_for('home'))
-    
-    return render_template('agregar_practicante.html', username=session['name'], email=session['correoSup'])
+    return render_template('sup/agregar_practicante.html', username=session['name'], email=session['correoSup'])
 
 @PCapp.route('/logout')
+@login_required
 def logout():
     session.clear()
     return redirect(url_for('auth'))
@@ -1770,14 +1790,41 @@ def status_401(error):
 def status_404(error):
     return render_template('404.html'), 404
 
+@PCapp.cli.command()
+def list_routes():
+    import urllib
+    output = []
+    for rule in app.url_map.iter_rules():
+        options = {}
+        for arg in rule.arguments:
+            options[arg] = "[{0}]".format(arg)
+
+        methods = ','.join(rule.methods)
+        url = url_for(rule.endpoint, **options)
+        line = urllib.parse.unquote("{:50s} {:20s} {}".format(rule.endpoint, methods, url))
+        output.append(line)
+
+    for line in sorted(output):
+        print(line)
+
+
+
+
 if __name__ == '__main__':
     PCapp.secret_key = '123'
+    PCapp.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=6) 
     csrf.init_app(PCapp)
     PCapp.register_error_handler(401,status_401)
     PCapp.register_error_handler(404,status_404)
     PCapp.run(port=3000,debug=True)
     
-    
+
+
+#Cuenta un chiste
+# ¿Cuál es el animal más antiguo?
+# La cebra, porque está en blanco y negro
+
+
 #E we, cuanto es 2 + 2?  = △⃒⃘
 
 # FALTA PROBAR CITAS EN PACIENTES

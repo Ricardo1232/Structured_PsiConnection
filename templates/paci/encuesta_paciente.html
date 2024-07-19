@@ -1,0 +1,133 @@
+{% extends "layaouts/layaout.html" %}
+{% block title %}PsiConnection - Encuesta{% endblock %}
+{% block content %}
+
+    <section class="sect">
+
+        <!--***Este section es lo que debe de cambiar en todos los html *****-->
+
+        <h2 class="text-center">Encuesta de Satisfacción</h2>
+        <h3 class="text-center">Practicante: {{nombrePrac}} {{apellidoPPrac}} {{apellidoMPrac}}</h3>
+
+        <form id="EncuestaPaci" action="/ContestarEncuesta" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
+            <input type="hidden" name="idCita" value="{{idCita}}">
+            <input type="hidden" name="idPrac" value="{{idPrac}}">
+            <p class="form-control preg">
+                <label for="pregunta-1" class="labeEncuestaPaci">1. ¿Cómo calificaría su nivel de satisfacción
+                    general con el servicio
+                    proporcionado por
+                    el psicólogo?</label><br>
+                <select name="calificacion-1" id="calificacion-1">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="No Aplica">No Aplica</option>
+                </select>
+            </p>
+
+            <p class="form-control preg">
+                <label for="pregunta-2" class="labeEncuestaPaci">2. ¿El psicólogo escuchó atentamente sus
+                    preocupaciones y dudas durante las
+                    sesiones?</label><br>
+                <select name="calificacion-2" id="calificacion-2">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="No Aplica">No Aplica</option>
+                </select>
+            </p>
+
+            <p class="form-control preg">
+                <label for="pregunta-3" class="labeEncuestaPaci">3. ¿Se sintió cómodo compartiendo sus pensamientos
+                    y sentimientos con el
+                    psicólogo?</label><br>
+                <select name="calificacion-3" id="calificacion-3">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="No Aplica">No Aplica</option>
+                </select>
+            </p>
+
+
+            <p class="form-control preg">
+                <label for="pregunta-4" class="labeEncuestaPaci">4. ¿El psicólogo mostró empatía y comprensión hacia
+                    sus problemas?</label><br>
+                <select name="calificacion-4" id="calificacion-4">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="No Aplica">No Aplica</option>
+
+                </select>
+            </p>
+
+            <p class="form-control preg">
+                <label for="pregunta-5" class="labeEncuestaPaci">5. ¿Sintió que el tratamiento fue efectivo para
+                    abordar sus problemas o
+                    preocupaciones?</label><br>
+                <select name="calificacion-5" id="calificacion-5">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="No Aplica">No Aplica</option>
+                </select>
+            </p>
+
+            <p class="form-control preg">
+                <label for="pregunta-6" class="labeEncuestaPaci">6. ¿Cómo calificaría la calidad y la organización
+                    del psicólogo en cuanto a
+                    las citas y la
+                    comunicación?</label><br>
+                <select name="calificacion-6" id="calificacion-6">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="No Aplica">No Aplica</option>
+                </select>
+            </p>
+
+            <p class="form-control preg">
+                <label for="pregunta-7" class="labeEncuestaPaci">7. ¿Recomendaría a este psicólogo a amigos o
+                    familiares que necesiten
+                    servicios de salud
+                    mental?</label><br>
+                <input type="radio" id="si-7" name="calificacion-7" value="Si">
+                <label for="si-7">Sí</label><br>
+                <input type="radio" id="no-7" name="calificacion-7" value="No">
+                <label for="no-7">No</label><br>
+                <input type="radio" id="no-7" name="calificacion-7" value="No Aplica">
+                <label for="no-Aplica-7">No Aplica</label>
+            </p>
+            <p class="form-control preg">
+                <label for="pregunta-8" class="labeEncuestaPaci">8. ¿Tiene algún comentario adicional o sugerencias
+                    para mejorar la
+                    experiencia con el
+                    psicólogo?</label><br>
+                <textarea id="comentario" name="calificacion-8" rows="4" cols="50"></textarea>
+            </p>
+            <div class="text-center">
+
+                <input class="btn btn-info botonEncuestaPaci" type="submit" value="Enviar"
+                    style="background-color:rgb(0, 139, 93); color: #ffffff;">
+            </div>
+        </form>
+
+        <!--**** Este section es lo que debe de cambiar en todos los html ******-->
+
+    </section>
+
+{% endblock %}

@@ -1,5 +1,3 @@
-Generalizacion de formato de comentarios en pc2, faltan generalizar los tipos de sentencias sql, se termino los editar, se corrigieron errores de retorno
-
 ####################################################################################################################################        
 Error al editar nombre
     max caracteres es de 15 
@@ -10,12 +8,19 @@ Error al editar nombre
     En nombre maximo 20
     apellidos maximo 15
 
-    adm_adm   --
-    adm_pac   --
-    adm_super --
-    amd_pract --
-    indx_sup  --
-
-Login cambiar el minimo de caracteres
-
+    adm_adm   -- ya
+    adm_pac   -- ya
+    adm_super -- ya
+    amd_pract -- ya
+    indx_sup  -- ya
+-----------------------------------------------------------
+Login cambiar el minimo de caracteres para evitar problema en BD
+-----------------------------------------------------------
 Agregar los close despues de los commit
+-----------------------------------------------------------
+Arreglar las citas
+    Permitir borrar cita al paciente, cuando haya pasado la fecha
+    Arreglar errores de formato de fecha
+    etc
+-----------------------------------------------------------
+-----------------------------------------------------------

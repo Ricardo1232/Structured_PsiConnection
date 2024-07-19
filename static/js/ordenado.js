@@ -264,7 +264,7 @@ if (currentUrl == "/VerSupervisor") {
 
 // Espera a que se haga clic en el botón "Modificar datos"
 
-if ((currentUrl == "/VerPracticantesAdm") || (currentUrl == "/VerPracticantesSupervisor")) {
+if ((currentUrl == "/VerPracticantesAdm") || (currentUrl == "/IndexSupervisor")) {
     console.log('Prac');
     // ------------------------------------ Modificar datos practicante ------------------------------------ //
     $('a.btn-edit').click(function () {
@@ -479,7 +479,7 @@ function togglePasswordVisibility(inputId, buttonId) {
 // ----------------------------------------- End Ocultar ----------------------------------------- //
 
 // ------------------------------------ Modal eliminar cita paciente ------------------------------------ //
-if (currentUrl == "/indexPacientes") {
+if (currentUrl == "/IndexPacientes") {
     $('a.delete').click(function () {
         console.log("Hola");
         const form = document.querySelector('#borrarCita');

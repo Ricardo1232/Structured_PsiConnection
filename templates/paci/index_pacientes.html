@@ -1,0 +1,150 @@
+{% extends "layaouts/layaout.html" %}
+{% block title %}PsiConnection - Pacientes{% endblock %}
+{% block content %}
+
+        <!-- Este section es lo que debe de cambiar en todos los html -->
+        <section class="sect">
+
+            <!-- Provisional -->
+            <div class="text-center">
+                {% if cit == None %}
+                <div>
+                    <p>Haga click en el boton de abajo para agendar una cita con nuestros psicologos.</p>
+                    <a href="/AgendarCita" class="btn btn-success" style="transform: scaleX(1.2) scaleY(1.3);">Agendar
+                        cita</a>
+                </div>
+                {% else %}
+                {% if citaRealizada == 1 %}
+                <div>
+                    <p>Responda la encuesta para poder agendar un nueva cita.</p>
+                    <a href="/EncuestaPaciente" class="btn btn-success"
+                        style="transform: scaleX(1.2) scaleY(1.3);">Encuesta</a>
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="container">
+                <div class="table-wrapper">
+                    <div class="table-title">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <h2 class="textoPresentacion mb-3">Cita pendiente</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Modalidad</th>
+                                <th>Ubicación</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cita in datosCitas %}
+                            {% if cita.estatusCita == 1 %}
+                            <tr data-id="{{cita.idCita}}" data-evento-id="{{cita.eventoId}}"
+                                data-fecha-cita="{{cita.fechaCita}}" data-hora-cita="{{cita.horaCita}}">
+                                <td>{{cita.nombrePrac }}</td>
+                                <td>{{cita.fechaCita }}</td>
+                                <td>{{cita.horaCita }}</td>
+                                <td>{{cita.tipo}}</td>
+                                <td>{{cita.direCita}}</td>
+                                <td>
+                                    <a href="#deleteEmployeeModal" class="delete linkIcono" data-bs-toggle="modal">
+                                        <img class="Icono" src="/static/img/trash.svg" alt="Eliminar">
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div id="deleteEmployeeModal" class="modal fade" class="modal fade" tabindex="-1" data-bs-backdrop="static"
+                data-bs-keyboard="false" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="staticBackdropLabel">Eliminar cita</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <form id="borrarCita" action="/EliminarCitaPaciente" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
+                                <input type="hidden" name="idCita" value="">
+                                <input type="hidden" name="eventoCita" value="">
+                                <input type="hidden" name="fechaCita" value="">
+                                <input type="hidden" name="horaCita" value="">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <img src="/static/img/PELIGRO 2@2x.png" alt="Ver Expediente" width="80px"
+                                                style=" float: left; margin-right: 30px; margin-left: 20px;">
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <p>¿Esta seguro de eliminar esta cita?</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p id="nombreModal"></p>
+                                <p class="text-warning"><small>Esta accion no se puede deshacer.</small></p>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="button" class="btn btn-default" data-bs-dismiss="modal" value="Cancelar">
+                            <input type="submit" class="btn btn-danger" value="Borrar">
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
+                <div class="table-wrapper">
+                    <div class="table-title">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <h2 class="textoPresentacion mb-3">Historial De Citas</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Modalidad</th>
+                                <th>Ubicación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hist in datosCitas %}
+                            {% if hist.estatusCita == 4 %}
+                            <tr>
+                                <td>{{hist.nombrePrac }}</td>
+                                <td>{{hist.fechaCita }}</td>
+                                <td>{{hist.horaCita }}</td>
+                                <td>{{hist.tipo}}</td>
+                                <td>{{hist.direCita}}</td>
+
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+{% endblock %}

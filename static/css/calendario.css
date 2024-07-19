@@ -1,0 +1,7 @@
+.table-fixed { table-layout: fixed; width: 100%; }
+.not-available { background-color: #ff0015; color: #721c24; } /* Rojo claro */
+.available { background-color: #d4edda; color: #155724; } /* Verde claro */
+.hour-cell { height: 60px; }
+.day-header { text-align: center; font-weight: bold; }
+.selected { border: 2px solid #007bff; }
+.date-info { font-size: 10px; color: #6c757d; }
