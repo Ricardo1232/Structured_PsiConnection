@@ -368,7 +368,7 @@ def diagnose(reported_symptoms: List[str]) -> Dict[str, float]:
 @paciente_required
 @done_survey_required
 def survey_v2():
-    return render_template('paci/SurveyV2modcopy.html')
+    return render_template('/paci/SurveyV2modcopy.html')
 
 
 @PCapp.route('/results', methods=['POST'])
@@ -552,7 +552,7 @@ def verAdministrador():
     # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
     ad, datosAd = obtener_datos(list_campo, list_consult, mysql, encriptar, 1)
 
-    return render_template('adm/adm_adm.html', admin = ad, datosAd = datosAd, username=session['name'], email=session['correoAd'])    
+    return render_template('/adm/adm_adm.html', admin = ad, datosAd = datosAd, username=session['name'], email=session['correoAd'])    
 
 
 
@@ -658,7 +658,7 @@ def indexPacientes():
     # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
     hc, datosCitas = obtener_datos(list_campo, list_consult, mysql, encriptar, 2)
 
-    return render_template('paci/index_pacientes.html', hc = hc, datosCitas = datosCitas, cit = cit, citaRealizada = citaRealizada, username=session['name'], email=session['correoPaci'])
+    return render_template('/paci/index_pacientes.html', hc = hc, datosCitas = datosCitas, cit = cit, citaRealizada = citaRealizada, username=session['name'], email=session['correoPaci'])
 
 
 
@@ -699,21 +699,13 @@ def verPacientesAdm():
     # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
     pac, datosPaci = obtener_datos(list_campo, list_consult, mysql, encriptar, 1)
 
-    return render_template('adm/adm_pacie.html', paci = pac, datosPaci = datosPaci, username=session['name'], email=session['correoAd'])
+    return render_template('/adm/adm_pacie.html', paci = pac, datosPaci = datosPaci, username=session['name'], email=session['correoAd'])
 
 
 @PCapp.route('/CrearCita', methods=["GET", "POST"])
 @require_post
 def crearCita():
-
-        let = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        num = "0123456789"
-
-        gen = f"{let}{num}"
-        lon = 8
-        ran = random.sample(gen, lon)
-        cod = "".join(ran)
-        requestCOD = cod
+        requestCOD = security_code()
 
         # USO SESION PARA OBTENER LOS DATOS DEL PACIENTE
         idPaci      = session['idPaci']
@@ -723,11 +715,15 @@ def crearCita():
         idPrac      = request.form['idPrac']
         correoPrac  = request.form['correoPrac']
         tipoCita    = request.form['tipoCita']
-        fechaCita   = request.form['fechaCita']
-        horaCita    = request.form['horaCita']
+        # fechaCita   = request.form['fechaCita']
+        # horaCita    = request.form['horaCita']
+        fechaHoraCita = request.form['fechaHoraCita']
 
         # HACER FORMATO ESPECIFICO FECHAS
-        fecha_hora = datetime.datetime.strptime(f'{fechaCita} {horaCita}', '%Y-%m-%d %H:%M')
+        # fecha_hora = datetime.datetime.strptime(f'{fechaCita} {horaCita}', '%Y-%m-%d %H:%M')
+        fecha_hora = datetime.datetime.strptime(fechaHoraCita, '%Y-%m-%dT%H:%M')
+        fecha = fecha_hora.date()
+        hora = fecha_hora.time()
 
         if tipoCita == "Presencial":
             direCita = "Modulo X"
@@ -856,6 +852,12 @@ def crearCita():
                 mysql.connection.commit()
                 
 
+                
+                horario = mysql.connection.cursor()
+                horario.execute("INSERT INTO horario (fecha,hora,permitido,practicanye_id) VALUES(%s,%s,%s,%s)",
+                           (fecha, hora, False, idPrac))
+                mysql.connection.commit()
+
 
                 flash('Cita agendada con exito.')
                 return redirect(url_for('indexPacientes'))
@@ -904,7 +906,7 @@ def encuestaPaciente():
     datosCitas = tuple(datosCitas)
     print(datosCitas)
 
-    return render_template('paci/encuesta_paciente.html', nombrePrac = nombrPR, apellidoPPrac = apelpPR, apellidoMPrac = apelmPR, idCita = idCita, idPrac = idPrac, username=session['name'], email=session['correoPaci'])
+    return render_template('/paci/encuesta_paciente.html', nombrePrac = nombrPR, apellidoPPrac = apelpPR, apellidoMPrac = apelmPR, idCita = idCita, idPrac = idPrac, username=session['name'], email=session['correoPaci'])
 
 
 #~~~~~~~~~~~~~~~~~~~ Respuestas Encuesta ~~~~~~~~~~~~~~~~~~~#
@@ -946,9 +948,24 @@ def contestarEncuesta():
     return redirect(url_for('indexPacientes'))
 
 
-@PCapp.route('/Calendario', methods=['GET', 'POST'])
-def calendario():
-    return render_template('calendario.html')
+@PCapp.route('/Calendario/<string:idPrac>', methods=['GET'])
+def calendario(idPrac):
+    return render_template('calendario.html', idPrac=idPrac)
+
+@PCapp.route('/Horario/<string:idPrac>', methods=['GET'])
+def obtener_horarios(idPrac):
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute("SELECT fecha, hora, permitido FROM horario WHERE practicante_id = %s", (idPrac,))
+        horarios = cursor.fetchall()
+        horarios_dict = [{'fecha': row['fecha'].strftime('%Y-%m-%d'), 'hora': row['hora'], 'permitido': row['permitido']} for row in horarios]
+        return jsonify(horarios_dict)
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        mysql.connection.close()  # Cierra la conexión correctamente
 
 
 # ~~~~~~~~~~~~~~~~~~~ Ver Encuestas de Practicantes ~~~~~~~~~~~~~~~~~~~#
@@ -1219,7 +1236,7 @@ def agendarCita():
     datosPrac = tuple(datosPrac)
     print(datosPrac)
 
-    return render_template('paci/agenda_cita.html', datosPrac = datosPrac, username=session['name'], email=session['correoPaci'])
+    return render_template('/paci/agenda_cita copy.html', datosPrac = datosPrac, username=session['name'], email=session['correoPaci'])
 
 
 
@@ -1332,7 +1349,7 @@ def indexSupervisor():
     datosCitas = tuple(datosCitas)
 
 
-    return render_template('sup/index_supervisor.html', pract = pra, datosPrac = datosPrac, datosCitas = datosCitas, username=session['name'], email=session['correoSup'])
+    return render_template('/sup/index_supervisor.html', pract = pra, datosPrac = datosPrac, datosCitas = datosCitas, username=session['name'], email=session['correoSup'])
 
 
 
@@ -1352,7 +1369,7 @@ def verPracticantesAdm():
     # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
     pra, datosPrac = obtener_datos(list_campo, list_consult, mysql, encriptar, 1)
 
-    return render_template('adm/adm_pract.html', pract = pra, datosPrac = datosPrac, username=session['name'], email=session['correoAd'])
+    return render_template('/adm/adm_pract.html', pract = pra, datosPrac = datosPrac, username=session['name'], email=session['correoAd'])
 
     
 
@@ -1682,7 +1699,7 @@ def verSupervisor():
     # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
     sup, datosSup = obtener_datos(list_campo, list_consult, mysql, encriptar, 1)
 
-    return render_template('adm/adm_super.html', super = sup, datosSup = datosSup, username=session['name'], email=session['correoAd'])
+    return render_template('/adm/adm_super.html', super = sup, datosSup = datosSup, username=session['name'], email=session['correoAd'])
 
     
 #~~~~~~~~~~~~~~~~~~~ Editar Supervisores ~~~~~~~~~~~~~~~~~~~#
@@ -1722,7 +1739,7 @@ def eliminarCuentaSupervisor():
 @verified_required
 @admin_required
 def indexAdministrador():
-    return render_template('adm/index_admin.html', username=session['name'], email=session['correoAd'])
+    return render_template('/adm/index_admin.html', username=session['name'], email=session['correoAd'])
     
 
 #~~~~~~~~~~~~~~~~~~~ Index Practicantes ~~~~~~~~~~~~~~~~~~~#
@@ -1746,7 +1763,7 @@ def indexPracticantes():
     list_cosult = [idPrac, 4]
     praH, datosPracH = obtener_datos(list_campo, list_consult, mysql, encriptar, 3)
 
-    return render_template('prac/index_practicante.html', pract = pra, datosPrac = datosPrac, datosPracH=datosPracH, username=session['name'], email=session['correoPrac'])
+    return render_template('/prac/index_practicante.html', pract = pra, datosPrac = datosPrac, datosPracH=datosPracH, username=session['name'], email=session['correoPrac'])
 
     
 
@@ -1771,7 +1788,7 @@ def home():
 @verified_required
 @supervisor_required
 def agregarPracticante():
-    return render_template('sup/agregar_practicante.html', username=session['name'], email=session['correoSup'])
+    return render_template('/sup/agregar_practicante.html', username=session['name'], email=session['correoSup'])
 
 @PCapp.route('/logout')
 @login_required

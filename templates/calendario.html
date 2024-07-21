@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendario Dinámico</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+{% extends "layaouts/layaout.html" %}
+{% block title %}Agendar cita{% endblock %}
+{% block content %}
     <style>
         .calendar-cell {
             height: 60px;
@@ -66,27 +62,10 @@
         <div id="calendar"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Datos de ejemplo (esto se podría cargar desde un archivo JSON)
-        const personas = [
-            {
-                nombre: "Juan Pérez",
-                horarios: [
-                    { fecha: "2024-07-22", horasPermitidas: ["10:00", "11:00", "12:00"], horasNoPermitidas: ["14:00", "15:00"] },
-                    { fecha: "2024-07-24", horasPermitidas: ["14:00", "15:00", "16:00"], horasNoPermitidas: ["09:00", "10:00"] }
-                ]
-            }
-            //{
-            //    nombre: "María García",
-            //    horarios: [
-            //        { fecha: "2024-07-23", horasPermitidas: ["09:00", "10:00", "11:00"], horasNoPermitidas: ["14:00", "15:00"] },
-            //      { fecha: "2024-07-25", horasPermitidas: ["15:00", "16:00", "17:00"], horasNoPermitidas: ["10:00", "11:00"] }
-            //    ]
-            //}
-        ];
-
         let currentDate = new Date();
+        const maxWeeksInFuture = 3;
+        const practicanteId = {{ idPrac }}  // ID del practicante que has seleccionado, podrías pasar esto dinámicamente
 
         function getWeekDates(date) {
             const week = [];
@@ -107,7 +86,19 @@
             return `${hour.toString().padStart(2, '0')}:00`;
         }
 
-        function updateCalendar() {
+        async function fetchHorarios(practicanteId) {
+            try {
+                const response = await fetch(`/Horario/${practicanteId}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            } catch (error) {
+                console.error('There has been a problem with your fetch operation:', error);
+            }
+        }
+
+        async function updateCalendar() {
             const calendarEl = document.getElementById('calendar');
             const weekDates = getWeekDates(currentDate);
             const weekStart = weekDates[0];
@@ -122,12 +113,14 @@
             });
             calendarHTML += '</tr></thead><tbody>';
 
+            const horarios = await fetchHorarios(practicanteId);
+
             for (let hour = 8; hour <= 20; hour++) {
                 calendarHTML += '<tr>';
                 calendarHTML += `<td>${formatHour(hour)}</td>`;
                 weekDates.forEach(date => {
                     calendarHTML += '<td class="calendar-cell">';
-                    personas.forEach(persona => {
+                    horarios.forEach(persona => {
                         const horario = persona.horarios.find(h => h.fecha === formatDate(date));
                         if (horario) {
                             const formattedHour = formatHour(hour);
@@ -146,15 +139,13 @@
             calendarHTML += '</tbody></table>';
             calendarEl.innerHTML = calendarHTML;
 
-            // Deshabilitar el botón de semana anterior si estamos en la semana actual
             const today = new Date();
             const currentWeekStart = new Date(today.setDate(today.getDate() - today.getDay() + 1));
             document.getElementById('prevWeek').disabled = weekStart <= currentWeekStart;
 
-            // Deshabilitar el botón de semana siguiente si estamos a más de 2 meses en el futuro
-            const twoMonthsLater = new Date();
-            twoMonthsLater.setMonth(twoMonthsLater.getMonth() + 2);
-            document.getElementById('nextWeek').disabled = weekEnd >= twoMonthsLater;
+            const maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + (maxWeeksInFuture * 7));
+            document.getElementById('nextWeek').disabled = weekEnd >= maxDate;
         }
 
         document.getElementById('prevWeek').addEventListener('click', () => {
@@ -169,5 +160,5 @@
 
         updateCalendar();
     </script>
-</body>
-</html>
+
+    {% endblock %}
