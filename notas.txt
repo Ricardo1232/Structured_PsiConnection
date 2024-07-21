@@ -24,3 +24,12 @@ Arreglar las citas
     etc
 -----------------------------------------------------------
 -----------------------------------------------------------
+
+calendario
+    faltan las sesiones del pacientes y los datos de practicante
+    formato de la semanas en inlineblock
+    selecionar horario y mostar formulario de selecion
+
+crear cita 
+    comprobar funcionalidad
+    validacion de hora selecionada si es disponible

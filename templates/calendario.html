@@ -65,8 +65,8 @@
     <script>
         let currentDate = new Date();
         const maxWeeksInFuture = 3;
-        const practicanteId = {{ idPrac }}  // ID del practicante que has seleccionado, podrías pasar esto dinámicamente
-
+        const practicanteId = {{ idPrac }};  // ID del practicante que has seleccionado
+        
         function getWeekDates(date) {
             const week = [];
             const current = new Date(date);
@@ -77,15 +77,15 @@
             }
             return week;
         }
-
+        
         function formatDate(date) {
             return date.toISOString().split('T')[0];
         }
-
+        
         function formatHour(hour) {
             return `${hour.toString().padStart(2, '0')}:00`;
         }
-
+        
         async function fetchHorarios(practicanteId) {
             try {
                 const response = await fetch(`/Horario/${practicanteId}`);
@@ -95,70 +95,69 @@
                 return response.json();
             } catch (error) {
                 console.error('There has been a problem with your fetch operation:', error);
+                return [];  // Retorna un arreglo vacío en caso de error
             }
         }
-
+        
         async function updateCalendar() {
             const calendarEl = document.getElementById('calendar');
             const weekDates = getWeekDates(currentDate);
             const weekStart = weekDates[0];
             const weekEnd = weekDates[4];
-
+        
             document.getElementById('currentWeek').textContent = `${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`;
-
+        
             let calendarHTML = '<table class="table table-bordered">';
             calendarHTML += '<thead><tr><th>Hora</th>';
             weekDates.forEach(date => {
                 calendarHTML += `<th class="day-header">${date.toLocaleDateString('es-ES', { weekday: 'short' })}<br>${date.getDate()}</th>`;
             });
             calendarHTML += '</tr></thead><tbody>';
-
+        
             const horarios = await fetchHorarios(practicanteId);
-
+        
             for (let hour = 8; hour <= 20; hour++) {
                 calendarHTML += '<tr>';
                 calendarHTML += `<td>${formatHour(hour)}</td>`;
                 weekDates.forEach(date => {
                     calendarHTML += '<td class="calendar-cell">';
-                    horarios.forEach(persona => {
-                        const horario = persona.horarios.find(h => h.fecha === formatDate(date));
-                        if (horario) {
-                            const formattedHour = formatHour(hour);
-                            if (horario.horasPermitidas.includes(formattedHour)) {
-                                calendarHTML += `<div class="event allowed">${persona.nombre}: Disponible</div>`;
-                            } else if (horario.horasNoPermitidas.includes(formattedHour)) {
-                                calendarHTML += `<div class="event not-allowed">${persona.nombre}: No disponible</div>`;
-                            }
+                    const formattedHour = formatHour(hour);
+                    horarios.forEach(horario => {
+                        if (horario.fecha === formatDate(date) && horario.hora === formattedHour) {
+                            const eventClass = horario.permitido ? 'allowed' : 'not-allowed';
+                            const eventText = horario.permitido ? 'Disponible' : 'No disponible';
+                            calendarHTML += `<div class="event ${eventClass}">${eventText}</div>`;
                         }
                     });
                     calendarHTML += '</td>';
                 });
                 calendarHTML += '</tr>';
             }
-
+        
             calendarHTML += '</tbody></table>';
             calendarEl.innerHTML = calendarHTML;
-
+        
             const today = new Date();
             const currentWeekStart = new Date(today.setDate(today.getDate() - today.getDay() + 1));
             document.getElementById('prevWeek').disabled = weekStart <= currentWeekStart;
-
+        
             const maxDate = new Date();
             maxDate.setDate(maxDate.getDate() + (maxWeeksInFuture * 7));
             document.getElementById('nextWeek').disabled = weekEnd >= maxDate;
         }
-
+        
         document.getElementById('prevWeek').addEventListener('click', () => {
             currentDate.setDate(currentDate.getDate() - 7);
             updateCalendar();
         });
-
+        
         document.getElementById('nextWeek').addEventListener('click', () => {
             currentDate.setDate(currentDate.getDate() + 7);
             updateCalendar();
         });
-
+        
         updateCalendar();
+        
     </script>
 
     {% endblock %}

@@ -3,7 +3,7 @@ from __future__ import print_function
 from ast                    import If
 from threading              import activeCount
 from time                   import time
-from flask                  import Flask, render_template, request, redirect, url_for, session, flash, make_response
+from flask                  import Flask, render_template, request, redirect, url_for, session, flash, make_response, jsonify
 from flask_mysqldb          import MySQL, MySQLdb
 from flask_mail             import Mail, Message
 from flask_bcrypt           import bcrypt,Bcrypt
@@ -852,11 +852,11 @@ def crearCita():
                 mysql.connection.commit()
                 
 
-                
-                horario = mysql.connection.cursor()
-                horario.execute("INSERT INTO horario (fecha,hora,permitido,practicanye_id) VALUES(%s,%s,%s,%s)",
-                           (fecha, hora, False, idPrac))
-                mysql.connection.commit()
+                # 
+                # horario = mysql.connection.cursor()
+                # horario.execute("INSERT INTO horario (fecha,hora,permitido,practicanye_id) VALUES(%s,%s,%s,%s)",
+                #            (fecha, hora, False, idPrac))
+                # mysql.connection.commit()
 
 
                 flash('Cita agendada con exito.')
@@ -965,7 +965,6 @@ def obtener_horarios(idPrac):
         return jsonify({"error": "Internal Server Error"}), 500
     finally:
         cursor.close()
-        mysql.connection.close()  # Cierra la conexión correctamente
 
 
 # ~~~~~~~~~~~~~~~~~~~ Ver Encuestas de Practicantes ~~~~~~~~~~~~~~~~~~~#
