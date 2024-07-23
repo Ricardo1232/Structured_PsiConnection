@@ -13,23 +13,37 @@ Error al editar nombre
     adm_super -- ya
     amd_pract -- ya
     indx_sup  -- ya
+
+    verificar, por favor.
 -----------------------------------------------------------
 Login cambiar el minimo de caracteres para evitar problema en BD
------------------------------------------------------------
-Agregar los close despues de los commit
+probar
 -----------------------------------------------------------
 Arreglar las citas
     Permitir borrar cita al paciente, cuando haya pasado la fecha
-    Arreglar errores de formato de fecha
     etc
------------------------------------------------------------
 -----------------------------------------------------------
 
 calendario
-    faltan las sesiones del pacientes y los datos de practicante
     formato de la semanas en inlineblock
-    selecionar horario y mostar formulario de selecion
+    cambiar horas para ser eliminadas automaticamente cuando pase la fecha actual
 
+    estilos
+
+-----------------------------------------------------------
 crear cita 
     comprobar funcionalidad
-    validacion de hora selecionada si es disponible
+-----------------------------------------------------------
+Agregar a todos los intpus el atributo  maxlength="XX" para que el usuario no escriba mas de lo necesario.
+comprobar si faltan
+
+
+----------------------------------------------------------------------------------------
+En las vistas asociadas a las contraseñas, mejorar la visualizacion (visible o no visible) y comparacion de las contraseñas.
+
+
+
+-------------------------- Aparte ----------------------------
+Modifique varias funciones en el apartado de conexion con la base de datos, usando el with esta mejor optimizado, usando try y except junto con los with para liberar los recursos.
+
+

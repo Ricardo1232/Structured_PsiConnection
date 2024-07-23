@@ -1,13 +1,14 @@
 {% extends "layaouts/layaout.html" %}
 {% block title %}Agendar cita{% endblock %}
 {% block content %}
+
     <style>
         .calendar-cell {
             height: 60px;
             border: 1px solid #dee2e6;
             vertical-align: top;
             position: relative;
-            overflow: hidden; /* Asegura que el contenido no se desborde */
+            overflow: hidden;
         }
         
         .event {
@@ -22,7 +23,7 @@
             bottom: 0;
             box-sizing: border-box;
             text-align: center;
-            overflow: hidden; /* Asegura que el texto no se desborde */
+            overflow: hidden;
         }
         
         .allowed {
@@ -40,12 +41,46 @@
             vertical-align: middle;
             padding: 10px;
         }
+
+        .calendar-cell:hover {
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        
+        .selected {
+            border: 2px solid #007bff;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            text-align: center;
+        }
+        
+        .modal-button {
+            margin: 10px;
+            padding: 10px 20px;
+        }
+        
         th {
             text-align: center;
         }
     </style>
-</head>
-<body>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="container mt-5">
         <h1 class="text-center mb-4">Calendario Dinámico</h1>
         <div class="row mb-3">
@@ -62,11 +97,18 @@
         <div id="calendar"></div>
     </div>
 
+    <div id="appointmentModal" class="modal">
+        <div class="modal-content">
+            <h3>Seleccione el tipo de cita</h3>
+            <button id="virtualAppointment" class="modal-button">Virtual</button>
+            <button id="onsiteAppointment" class="modal-button">Presencial</button>
+        </div>
+    </div>
     <script>
         let currentDate = new Date();
         const maxWeeksInFuture = 3;
-        const practicanteId = {{ idPrac }};  // ID del practicante que has seleccionado
-        
+        const practicanteId = {{ idPrac }}; // ID del practicante que has seleccionado
+
         function getWeekDates(date) {
             const week = [];
             const current = new Date(date);
@@ -77,15 +119,18 @@
             }
             return week;
         }
-        
+
         function formatDate(date) {
-            return date.toISOString().split('T')[0];
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
-        
+
         function formatHour(hour) {
             return `${hour.toString().padStart(2, '0')}:00`;
         }
-        
+
         async function fetchHorarios(practicanteId) {
             try {
                 const response = await fetch(`/Horario/${practicanteId}`);
@@ -94,70 +139,172 @@
                 }
                 return response.json();
             } catch (error) {
-                console.error('There has been a problem with your fetch operation:', error);
-                return [];  // Retorna un arreglo vacío en caso de error
+                console.error('Error fetching horarios:', error);
+                return [];
             }
         }
-        
+
         async function updateCalendar() {
             const calendarEl = document.getElementById('calendar');
             const weekDates = getWeekDates(currentDate);
             const weekStart = weekDates[0];
             const weekEnd = weekDates[4];
-        
-            document.getElementById('currentWeek').textContent = `${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`;
-        
+
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+            document.getElementById('currentWeek').textContent = `${weekStart.toLocaleDateString('es-MX', options)} - ${weekEnd.toLocaleDateString('es-MX', options)}`;
+
             let calendarHTML = '<table class="table table-bordered">';
             calendarHTML += '<thead><tr><th>Hora</th>';
             weekDates.forEach(date => {
-                calendarHTML += `<th class="day-header">${date.toLocaleDateString('es-ES', { weekday: 'short' })}<br>${date.getDate()}</th>`;
+                calendarHTML += `<th class="day-header">${date.toLocaleDateString('es-MX', { weekday: 'short' })}<br>${date.getDate()}</th>`;
             });
             calendarHTML += '</tr></thead><tbody>';
-        
+
             const horarios = await fetchHorarios(practicanteId);
-        
+            console.log('Horarios:', horarios);
+            const horariosMap = new Map();
+            horarios.forEach(horario => {
+                const key = `${horario.fecha}_${horario.hora}`;
+                horariosMap.set(key, horario.permitido);
+            });
+
             for (let hour = 8; hour <= 20; hour++) {
                 calendarHTML += '<tr>';
                 calendarHTML += `<td>${formatHour(hour)}</td>`;
                 weekDates.forEach(date => {
-                    calendarHTML += '<td class="calendar-cell">';
                     const formattedHour = formatHour(hour);
-                    horarios.forEach(horario => {
-                        if (horario.fecha === formatDate(date) && horario.hora === formattedHour) {
-                            const eventClass = horario.permitido ? 'allowed' : 'not-allowed';
-                            const eventText = horario.permitido ? 'Disponible' : 'No disponible';
-                            calendarHTML += `<div class="event ${eventClass}">${eventText}</div>`;
-                        }
-                    });
-                    calendarHTML += '</td>';
+                    const key = `${formatDate(date)}_${formattedHour}`;
+                    const permitido = horariosMap.get(key);
+                    let cellHTML = `<td class="calendar-cell" data-id="${key}">`;
+                    if (permitido !== undefined) {
+                        const eventClass = permitido ? 'allowed' : 'not-allowed';
+                        const eventText = permitido ? 'Disponible' : 'No disponible';
+                        cellHTML += `<div class="event ${eventClass}">${eventText}</div>`;
+                    } else {
+                        console.log(`No data for key: ${key}`);
+                    }
+                    cellHTML += '</td>';
+                    calendarHTML += cellHTML;
                 });
                 calendarHTML += '</tr>';
             }
-        
+
             calendarHTML += '</tbody></table>';
             calendarEl.innerHTML = calendarHTML;
-        
+
             const today = new Date();
-            const currentWeekStart = new Date(today.setDate(today.getDate() - today.getDay() + 1));
+            const currentWeekStart = new Date(today);
+            currentWeekStart.setDate(today.getDate() - today.getDay() + 1);
             document.getElementById('prevWeek').disabled = weekStart <= currentWeekStart;
-        
+
             const maxDate = new Date();
             maxDate.setDate(maxDate.getDate() + (maxWeeksInFuture * 7));
+            maxDate.setDate(maxDate.getDate() - maxDate.getDay() + 5);
             document.getElementById('nextWeek').disabled = weekEnd >= maxDate;
         }
-        
+
         document.getElementById('prevWeek').addEventListener('click', () => {
             currentDate.setDate(currentDate.getDate() - 7);
             updateCalendar();
         });
-        
+
         document.getElementById('nextWeek').addEventListener('click', () => {
             currentDate.setDate(currentDate.getDate() + 7);
             updateCalendar();
         });
-        
+
         updateCalendar();
+
+        let selectedCell = null;
+
+        function showModal() {
+            document.getElementById('appointmentModal').style.display = 'block';
+        }
+
+        function hideModal() {
+            document.getElementById('appointmentModal').style.display = 'none';
+        }
+
+        function selectCell(cell) {
+            if (selectedCell) {
+                selectedCell.classList.remove('selected');
+            }
+            selectedCell = cell;
+            selectedCell.classList.add('selected');
+            showModal();
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.calendar-cell')) {
+                const cell = e.target.closest('.calendar-cell');
+                if (cell.querySelector('.allowed')) {
+                    selectCell(cell);
+                }
+            }
+        });
+
+        document.getElementById('virtualAppointment').addEventListener('click', function() {
+            if (selectedCell) {
+                const cellId = selectedCell.getAttribute('data-id');
+                const [fecha, hora] = cellId.split('_');
+                crearCita('Virtual', fecha, hora);
+            }
+        });
         
+        document.getElementById('onsiteAppointment').addEventListener('click', function() {
+            if (selectedCell) {
+                const cellId = selectedCell.getAttribute('data-id');
+                const [fecha, hora] = cellId.split('_');
+                crearCita('Presencial', fecha, hora);
+            }
+        });
+        
+        function crearCita(tipoCita, fecha, hora) {
+            const formData = new FormData();
+            formData.append('idPrac', '{{ idPrac }}');
+            formData.append('correoPrac', '{{ correoPrac }}');
+            formData.append('tipoCita', tipoCita);
+            formData.append('fechaHoraCita', `${fecha}T${hora}`);
+            formData.append('csrf_token', '{{ csrf_token() }}');
+        
+            fetch('/CrearCita', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('Cita agendada con éxito');
+                    window.location.href = '/IndexPacientes';
+                } else {
+                    alert('Error al agendar la cita: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ocurrió un error al crear la cita. Inténtalo de nuevo.');
+            });
+        
+            hideModal();
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('appointmentModal');
+            if (event.target === modal) {
+                hideModal();
+            }
+        };
     </script>
 
     {% endblock %}

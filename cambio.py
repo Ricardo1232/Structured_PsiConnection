@@ -1,3 +1,5 @@
+from datetime import date, datetime, timedelta
+
 # AUTENTIFICA CADA TIPO DE USUARIO 
 def auth_user(bcrypt, password, encriptar, session, cur, user, email, flash):
     for clave, u in user.items():              
@@ -37,17 +39,21 @@ def verify_register(campo, mensaje, flash):
         
     
 # VERIFICA EL CODIGO DE VERIFICACION
-def verify_code(mysql, cur, session, user, user_code, flash):
-    for clave, u in user.items(): 
-        result = cur.execute(f"SELECT * FROM {u[0]} WHERE {u[1]}=%s", [user_code])
-        if result > 0:  
-            # Si el código es correcto, actualizar el campo "verificado" a 1
-            cur.execute(f"UPDATE {u[0]} SET {u[2]} = %s, {u[3]} = %s WHERE {u[1]} = %s", (2, 1, user_code))   
-            mysql.connection.commit()
-            flash("Registro completado con éxito", 'success')
-            cur.close()
-            session.clear()
-            return True
+def verify_code(mysql, session, dicc_verify, user_code):
+    try:
+        with mysql.connection.cursor() as cur:
+            for clave, u in dicc_verify.items():
+                cur.execute(f"SELECT * FROM {u[0]} WHERE {u[1]}=%s", [user_code])
+                if cur.rowcount > 0:
+                    # Si el código es correcto, actualizar el campo "verificado" a 1
+                    cur.execute(f"UPDATE {u[0]} SET {u[2]} = %s, {u[3]} = %s WHERE {u[1]} = %s", (2, 1, user_code))
+                    mysql.connection.commit()
+                    flash("Registro completado con éxito", 'success')
+                    session.clear()
+                    return True
+    except Exception as e:
+        pass
+    return False
 
 # FUNCION QUE CREA EL CODIGO DE SGURIDAD
 def security_code():
@@ -74,19 +80,20 @@ def get_information_3_attributes(encriptar, request, list_campos):
 # EDITAR GENERAL
 def consult_edit(request, mysql, user, nombreCC, apellidoPCC, apellidoMCC):
     id         = request.form[user[0]]
-    editar     = mysql.connection.cursor()
-    editar.execute(f"UPDATE {user[1]} set {user[2]}=%s, {user[3]}=%s, {user[4]}=%s WHERE {user[0]}=%s",
-                        (nombreCC, apellidoPCC, apellidoMCC, id,))
-    mysql.connection.commit()
+    with mysql.connection.cursor() as editar:
+        editar.execute(f"UPDATE {user[1]} set {user[2]}=%s, {user[3]}=%s, {user[4]}=%s WHERE {user[0]}=%s",
+                            (nombreCC, apellidoPCC, apellidoMCC, id,))
+        mysql.connection.commit()
     
 # ELIMINAR GENERAR PARA CUALQUIER TIPO USUARIO 
 def eliminarCuenta(request, mysql, user):
     id              = request.form[user[0]]
     activo          = None
-    Eliminar  = mysql.connection.cursor()
-    Eliminar.execute(f"UPDATE {user[1]} set {user[2]}=%s WHERE {user[0]}=%s",
-                        (activo, id,))
-    mysql.connection.commit()
+    with mysql.connection.cursor() as Eliminar:
+        Eliminar.execute(f"UPDATE {user[1]} set {user[2]}=%s WHERE {user[0]}=%s",
+                            (activo, id,))
+        mysql.connection.commit()
+    
  
 # FUNCION QUE DECODIFICA LOS CAMPOS PARA ACTIALIZAR EL DICCIONARIO
 def select_and_decode_atribute(datos, list_campo, encriptar):
@@ -106,17 +113,17 @@ def select_and_decode_atribute(datos, list_campo, encriptar):
     
 def obtener_datos(user, consult, mysql, encriptar, tipo):
     # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
-    selector     =  mysql.connection.cursor()
-    if tipo == 1:
-        selector.execute(f"SELECT * FROM {consult[0]} WHERE {consult[1]}  IS NOT NULL")
-    elif tipo == 2:
-        selector.execute(f"SELECT * FROM {consult[0]} {consult[1]} INNER JOIN practicante PR ON {consult[2]} = PR.idPrac INNER JOIN paciente PA ON {consult[3]} = PA.idPaci WHERE {consult[4]}= %s",(consult[5],))
-        #seletda.execute(f"SELECT * FROM citas    C  INNER JOIN practicante PR ON C.idCitaPrac = PR.idPrac  INNER JOIN paciente PA ON C.idCitaPaci = PA.idPaci WHERE idCitaPaci=  %s",(idPaci,))
-        #legcEnc.execute(f"SELECT * FROM encuesta E  INNER JOIN practicante PR ON E.idEncuPrac = PR.idPrac  INNER JOIN paciente PA ON E.idEncuPaci = PA.idPaci WHERE idEncuPrac=  %s",(idPrac,))
-    elif tipo == 3:
-        selector.execute(f"SELECT * FROM citas C INNER JOIN practicante P ON P.idPrac = C.idCitaPrac INNER JOIN paciente PA ON PA.idPaci = C.idCitaPaci WHERE P.idPrac=%s AND activoPrac IS NOT NULL AND estatusCita=%s",(consult[0], consult[1]))
-    
-    user_records =  selector.fetchall()
+    with mysql.connection.cursor() as selector:
+        if tipo == 1:
+            selector.execute(f"SELECT * FROM {consult[0]} WHERE {consult[1]}  IS NOT NULL")
+        elif tipo == 2:
+            selector.execute(f"SELECT * FROM {consult[0]} {consult[1]} INNER JOIN practicante PR ON {consult[2]} = PR.idPrac INNER JOIN paciente PA ON {consult[3]} = PA.idPaci WHERE {consult[4]}= %s",(consult[5],))
+            #seletda.execute(f"SELECT * FROM citas    C  INNER JOIN practicante PR ON C.idCitaPrac = PR.idPrac  INNER JOIN paciente PA ON C.idCitaPaci = PA.idPaci WHERE idCitaPaci=  %s",(idPaci,))
+            #legcEnc.execute(f"SELECT * FROM encuesta E  INNER JOIN practicante PR ON E.idEncuPrac = PR.idPrac  INNER JOIN paciente PA ON E.idEncuPaci = PA.idPaci WHERE idEncuPrac=  %s",(idPrac,))
+        elif tipo == 3:
+            selector.execute(f"SELECT * FROM citas C INNER JOIN practicante P ON P.idPrac = C.idCitaPrac INNER JOIN paciente PA ON PA.idPaci = C.idCitaPaci WHERE P.idPrac=%s AND activoPrac IS NOT NULL AND estatusCita=%s",(consult[0], consult[1]))
+        
+        user_records =  selector.fetchall()
 
     # SE CREA UNA LISTA
     data_list = []
@@ -135,16 +142,32 @@ def obtener_datos(user, consult, mysql, encriptar, tipo):
 
     # LA LISTA LA CONVERTIMOS A TUPLE PARA PODER USARLA CON MAYOR COMODIDAD EN EL FRONT
     data_list = tuple(data_list)
+        
     return user_records, data_list
 
 
+def crear_evento(dire_cita, tipo_cita, fecha_hora, correo_prac, correo_paci):
+    """
+    Crea un diccionario con los detalles del evento para Google Calendar.
 
+    Args:
+        dire_cita (str): Dirección o lugar de la cita.
+        tipo_cita (str): Tipo de cita (Presencial o Virtual).
+        fecha_hora (datetime): Fecha y hora de inicio de la cita.
+        correo_prac (str): Correo electrónico del practicante.
+        correo_paci (str): Correo electrónico del paciente.
 
-def crear_evento(direCita, tipoCita, fecha_hora, datetime, correoPrac, correoPaci):
-    return {
+    Returns:
+        dict: Diccionario con la estructura del evento para Google Calendar.
+    """
+    # Definir la duración del evento (por defecto, 1 hora)
+    duracion_evento = timedelta(hours=1)
+    
+    # Crear el evento
+    evento = {
         'summary': 'Cita - Psiconnection',
-        'location': direCita+' - Tipo: '+tipoCita,
-        'description': 'Cita con un psicologo de Psiconnection',
+        'location': f'{dire_cita} - Tipo: {tipo_cita}',
+        'description': 'Cita con un psicólogo de Psiconnection',
         'status': 'confirmed',
         'sendUpdates': 'all',
         'start': {
@@ -152,36 +175,36 @@ def crear_evento(direCita, tipoCita, fecha_hora, datetime, correoPrac, correoPac
             'timeZone': 'America/Mexico_City',
         },
         'end': {
-            'dateTime': (fecha_hora + datetime.timedelta(hours=1)).isoformat(),
+            'dateTime': (fecha_hora + duracion_evento).isoformat(),
             'timeZone': 'America/Mexico_City',
         },
         'recurrence': [
             'RRULE:FREQ=DAILY;COUNT=1'
         ],
         'attendees': [
-            {'email': correoPrac},
-            {'email': correoPaci}
+            {'email': correo_prac},
+            {'email': correo_paci}
         ],
         'reminders': {
             'useDefault': False,
             'overrides': [
-                {'method': 'email', 'minutes': 24 * 60},
-                {'method': 'popup', 'minutes': 10},
+                {'method': 'email', 'minutes': 24 * 60},  # 1 día antes
+                {'method': 'popup', 'minutes': 10},       # 10 minutos antes
             ],
         },
-    }
+    } 
+    return evento
     
        
-def date_to_age(fecha):
-    from datetime import date, datetime
-    from math import floor
-    
-    fechaActual     = date.today()
-    fechaNacimiento = datetime.strptime(fecha, '%Y-%m-%d')
-    fechaNac = fechaNacimiento.date()
-    edad = fechaActual - fechaNac
-    edad = edad.days
-    edad = edad/365
-    return floor(edad)
+def date_to_age(fecha_nacimiento):
+    fecha_actual = date.today()
+    fecha_nacimiento = datetime.strptime(fecha_nacimiento, '%Y-%m-%d').date()
+    edad = fecha_actual.year - fecha_nacimiento.year
+
+    # Ajustar si el cumpleaños de este año aún no ha ocurrido
+    if (fecha_actual.month, fecha_actual.day) < (fecha_nacimiento.month, fecha_nacimiento.day):
+        edad -= 1
+
+    return edad
 
     

@@ -82,7 +82,7 @@ def verified_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Asumiendo que el estado de verificación se guarda en la sesión del usuario
-        if 'verificado' not in session or not session['verificado']:
+        if 'verificado' not in session or not session['verificado'] or session['verificado'] != 2:
             flash("Por favor, verifica tu cuenta antes de continuar", 'warning')
             return redirect(url_for('verify'))
         return f(*args, **kwargs)
@@ -295,7 +295,10 @@ def auth():
             nombre = ad.get('nombrePaci')
             name = nombre.encode()
             name = encriptar.decrypt(name)
-            name = name.decode()            
+            name = name.decode() 
+            
+            cur.close()
+            selPaci.close()           
             
             # Enviar el código de verificación por correo electrónico
             msg = Message('Código de verificación', sender=PCapp.config['MAIL_USERNAME'], recipients=[email])
@@ -414,39 +417,37 @@ def results():
 
 @PCapp.route('/verify', methods=['GET', 'POST'])
 def verify():
-    if 'login' in session:
-        if session['verificado'] == 2:
-            return redirect(url_for('home'))
-        else:
-            if request.method == 'POST':
-                flash("Revisa tu correo electrónico para obtener tu código de verificación", 'success')
-                # Obtener el código ingresado por el usuario
-                user_code = request.form['code']
-                
-                # Verificar si el código es correcto
-                cur = mysql.connection.cursor()
-                # DICCIONARIO PARA EL MANEJO DE DATOS DE VERIFICACION
-                dicc_verify = {
-                    'paciente'      : ["paciente",    "codVeriPaci", "veriPaci", "activoPaci"],
-                    'practicante'   : ["practicante", "codVeriPrac", "veriPrac", "activoPrac"],
-                    'supervisor'    : ["supervisor",  "codVeriSup",  "veriSup",  "activoSup"],
-                    'admin'         : ["admin",       "codVeriAd",   "veriAd",   "activoAd"]
-                }
-                # VERIFICA EL CODIGO DE VERIFICACION DE CADA USUARIO
-                if verify_code(mysql, cur, session, dicc_verify, user_code, flash):
-                    return redirect(url_for('auth'))
-                
-                flash("Código de verificación incorrecto", 'danger')
-                cur.close()        
-            return render_template('verify.html')  
-    else:
-        return redirect(url_for('auth'))  
+    if 'login' not in session:
+        return redirect(url_for('auth'))
+
+    if session.get('verificado') == 2:
+        return redirect(url_for('home'))
+
+    if request.method == 'POST':
+        user_code = request.form['code']
+        flash("Revisa tu correo electrónico para obtener tu código de verificación", 'success')
+
+        # DICCIONARIO PARA EL MANEJO DE DATOS DE VERIFICACION
+        dicc_verify = {
+            'paciente':    ["paciente",    "codVeriPaci", "veriPaci", "activoPaci"],
+            'practicante': ["practicante", "codVeriPrac", "veriPrac", "activoPrac"],
+            'supervisor':  ["supervisor",  "codVeriSup",  "veriSup",  "activoSup"],
+            'admin':       ["admin",       "codVeriAd",   "veriAd",   "activoAd"]
+        }
+
+        # Verificar el código de verificación
+        if verify_code(mysql, session, dicc_verify, user_code):
+            return redirect(url_for('auth'))
+
+        flash("Código de verificación incorrecto", 'danger')
+
+    return render_template('verify.html')  
 
 
 def encriptado():
-    selectoken      =   mysql.connection.cursor()
-    selectoken.execute("SELECT clave FROM token")
-    cl              =   selectoken.fetchone()
+    with  mysql.connection.cursor() as selectoken:
+        selectoken.execute("SELECT clave FROM token")
+        cl              =   selectoken.fetchone()
 
     # SE CONVIERTE DE TUPLE A DICT
     clave   =   cl.get('clave')
@@ -493,44 +494,55 @@ def crearCuentaAdmin():
         veriAd      = 1
         priviAd     = 1
         
+        
         # Verificar si el correo ya está registrado en la base de datos
-        cur = mysql.connection.cursor()
-        result = cur.execute("SELECT * FROM admin WHERE correoAd=%s AND activoAd IS NOT NULL", [correoAd,])
-        if result > 0:
-            # Si el correo ya está registrado, mostrar un mensaje de error
-            flash("El correo ya está registrado", 'danger')
-            cur.close()
+        with mysql.connection.cursor() as cur:
+            cur.execute("SELECT * FROM admin WHERE correoAd=%s AND activoAd IS NOT NULL", [correoAd])
+            if cur.rowcount > 0:
+                flash("El correo ya está registrado", 'danger')
+                return redirect(url_for('verAdministrador'))
+
+        try:
+            with mysql.connection.cursor() as regAdmin:
+                regAdmin.execute(
+                    """
+                    INSERT INTO admin 
+                    (nombreAd, apellidoPAd, apellidoMAd, correoAd, contraAd, codVeriAd, activoAd, veriAd, priviAd) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (nombreAdCC, apellidoPAdCC, apellidoMAdCC, correoAd, hashed_password, codVeriAd, activoAd, veriAd, priviAd)
+                )
+                mysql.connection.commit()
+                idAd = regAdmin.lastrowid
+        
+            with mysql.connection.cursor() as selAd:
+                selAd.execute("SELECT nombreAd FROM admin WHERE idAd=%s", (idAd,))
+                ad = selAd.fetchone()
+                
+                
+            nombre_administrador = encriptar.decrypt(ad['nombreAd'].encode()).decode()
+
+        
+            # SE MANDA EL CORREO
+            msg = Message(
+                'Código de verificación', 
+                sender=PCapp.config['MAIL_USERNAME'], 
+                recipients=[correoAd]
+            )
+            msg.body = render_template('layoutmail.html', name=nombre_administrador, verification_code=codVeriAd)
+            msg.html = render_template('layoutmail.html', name=nombre_administrador, verification_code=codVeriAd)
+            mail.send(msg)
+            
+
+            flash("Revisa tu correo electrónico para ver los pasos para completar tu registro!", 'success')        
+            #MANDAR A UNA VENTANA PARA QUE META EL CODIGO DE VERFICIACION
             return redirect(url_for('verAdministrador'))
-
-        regAdmin = mysql.connection.cursor()
-        regAdmin.execute("INSERT INTO admin (nombreAd, apellidoPAd, apellidoMAd, correoAd, contraAd, codVeriAd, activoAd, veriAd, priviAd) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                            (nombreAdCC, apellidoPAdCC, apellidoMAdCC, correoAd, hashed_password, codVeriAd, activoAd, veriAd, priviAd))
-        mysql.connection.commit()
-
-        # MANDAR CORREO CON CODIGO DE VERIRIFICACION
-        idAd                = regAdmin.lastrowid
         
-        selAd               = mysql.connection.cursor()
-        selAd.execute("SELECT nombreAd FROM admin WHERE idAd=%s",(idAd,))
-        ad                  = selAd.fetchone()
+        except Exception as e:
+            mysql.connection.rollback()
+            flash("Ocurrió un error al crear la cuenta: " + str(e), 'danger')
+            return redirect(url_for('verAdministrador'))
         
-
-        nombr = ad.get('nombreAd')
-        nombr = nombr.encode()
-        nombr = encriptar.decrypt(nombr)
-        nombr = nombr.decode()
-
-        
-        # SE MANDA EL CORREO
-        msg = Message('Código de verificación', sender=PCapp.config['MAIL_USERNAME'], recipients=[correoAd])
-        msg.body = render_template('layoutmail.html', name=nombr, verification_code=codVeriAd)
-        msg.html = render_template('layoutmail.html', name=nombr, verification_code=codVeriAd)
-        mail.send(msg)
-        
-
-        flash("Revisa tu correo electrónico para ver los pasos para completar tu registro!", 'success')        
-        #MANDAR A UNA VENTANA PARA QUE META EL CODIGO DE VERFICIACION
-        return redirect(url_for('verAdministrador'))
     else:
         flash("Error al crear la cuenta", 'danger')
         return redirect(url_for('verAdministrador'))  
@@ -607,11 +619,16 @@ def indexPacientes():
     idPaci = session['idPaci']
 
     # FALTA PROBAR ESTO
-    selecCita       =   mysql.connection.cursor()
-    selecCita.execute("SELECT * FROM citas C INNER JOIN practicante PR ON C.idCitaPrac = PR.idPrac INNER JOIN paciente PA ON C.idCitaPaci = PA.idPaci WHERE idCitaPaci=%s AND estatusCita=%s",(idPaci,1))
-    cit              =   selecCita.fetchone()
+    with mysql.connection.cursor() as selecCita:
+        selecCita.execute("""
+            SELECT * FROM citas C 
+            INNER JOIN practicante PR ON C.idCitaPrac = PR.idPrac 
+            INNER JOIN paciente PA ON C.idCitaPaci = PA.idPaci 
+            WHERE idCitaPaci=%s AND estatusCita=%s
+        """,(idPaci,1))
+        cit = selecCita.fetchone()
 
-    if cit is not None:
+    if cit:
         fechaCita = cit.get('fechaCita')
         horaCita = cit.get('horaCita')
         # Formatear la fecha como una cadena
@@ -646,7 +663,7 @@ def indexPacientes():
         else:
             citaRealizada = 2
             print("La cita aún no ha pasado.")
-    
+
     else:
         citaRealizada = 1
 
@@ -659,7 +676,6 @@ def indexPacientes():
     hc, datosCitas = obtener_datos(list_campo, list_consult, mysql, encriptar, 2)
 
     return render_template('/paci/index_pacientes.html', hc = hc, datosCitas = datosCitas, cit = cit, citaRealizada = citaRealizada, username=session['name'], email=session['correoPaci'])
-
 
 
 ######################## Falta
@@ -702,169 +718,95 @@ def verPacientesAdm():
     return render_template('/adm/adm_pacie.html', paci = pac, datosPaci = datosPaci, username=session['name'], email=session['correoAd'])
 
 
-@PCapp.route('/CrearCita', methods=["GET", "POST"])
-@require_post
+@PCapp.route('/CrearCita', methods=["POST"])
+@csrf.exempt
+@login_required
+@verified_required
+@paciente_required
 def crearCita():
-        requestCOD = security_code()
+    if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+        return jsonify({'success': False, 'message': 'Solicitud no válida'}), 400
 
-        # USO SESION PARA OBTENER LOS DATOS DEL PACIENTE
-        idPaci      = session['idPaci']
-        correoPaci  = session['correoPaci']
+    try:
+        # Obtener datos del paciente desde la sesión
+        id_paci = session['idPaci']
+        correo_paci = session['correoPaci']
         
-        # RECUPERAR DATOS
-        idPrac      = request.form['idPrac']
-        correoPrac  = request.form['correoPrac']
-        tipoCita    = request.form['tipoCita']
-        # fechaCita   = request.form['fechaCita']
-        # horaCita    = request.form['horaCita']
-        fechaHoraCita = request.form['fechaHoraCita']
-
-        # HACER FORMATO ESPECIFICO FECHAS
-        # fecha_hora = datetime.datetime.strptime(f'{fechaCita} {horaCita}', '%Y-%m-%d %H:%M')
-        fecha_hora = datetime.datetime.strptime(fechaHoraCita, '%Y-%m-%dT%H:%M')
+        # Recuperar datos del formulario
+        id_prac = request.form['idPrac']
+        correo_prac = request.form['correoPrac']
+        tipo_cita = request.form['tipoCita']
+        fecha_hora_cita = request.form['fechaHoraCita']
+        
+        # Formatear fecha y hora
+        fecha_hora = datetime.datetime.strptime(fecha_hora_cita, '%Y-%m-%dT%H:%M')
         fecha = fecha_hora.date()
         hora = fecha_hora.time()
 
-        if tipoCita == "Presencial":
-            direCita = "Modulo X"
-        else:
-            direCita = "Virtual"
+        dire_cita = "Modulo X" if tipo_cita == "Presencial" else "Virtual"
         
-        estatusCita = 1
-
-        if direCita == "Modulo X":
-
-            """Shows basic usage of the Google Calendar API.
-            Prints the start and name of the next 10 events on the user's calendar.
-            """
-            creds = None
-            # The file token.json stores the user's access and refresh tokens, and is
-            # created automatically when the authorization flow completes for the first
-            # time.
-            if os.path.exists('token.json'):
-                creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-            # If there are no (valid) credentials available, let the user log in.
-            if not creds or not creds.valid:
-                if creds and creds.expired and creds.refresh_token:
-                    creds.refresh(Request())
-                else:
-                    flow = InstalledAppFlow.from_client_secrets_file(
-                        'credentials.json', SCOPES)
-                    creds = flow.run_local_server(port=0)
-                # Save the credentials for the next run
-                with open('token.json', 'w') as token:
-                    token.write(creds.to_json())
-
-            try:
-                service = build('calendar', 'v3', credentials=creds)
+        estatus_cita = 1
+        
+        # Configuración de Google Calendar
+        creds = None
+        if os.path.exists('token.json'):
+            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+                creds = flow.run_local_server(port=0)
+            with open('token.json', 'w') as token:
+                token.write(creds.to_json())
                 
-                event = crear_evento(direCita, tipoCita, fecha_hora, datetime, correoPrac, correoPaci)
+        service = build('calendar', 'v3', credentials=creds)
+        event = crear_evento(dire_cita, tipo_cita, fecha_hora, correo_prac, correo_paci)
 
-
-
-                event = service.events().insert(calendarId='primary', body=event, sendNotifications=True).execute()
-                print("Event created: %s" % (event.get('htmlLink')))
-                eventoId = event["id"]
-
-                print(eventoId)
-
-                editarPaciente      = mysql.connection.cursor()
-                editarPaciente.execute("UPDATE paciente SET citaActPaci=%s WHERE idPaci=%s",
-                            (estatusCita, idPaci,))
-                mysql.connection.commit()
-
-                editarPracticante   = mysql.connection.cursor()
-                editarPracticante.execute("UPDATE practicante SET estatusCitaPrac=%s WHERE idPrac=%s",
-                            (estatusCita, idPrac,))
-                mysql.connection.commit()
-
-                regCita = mysql.connection.cursor()
-                regCita.execute("INSERT INTO citas (tipo, correoCitaPra, correoCitaPac, direCita, fechaCita, horaCita, estatusCita, eventoId, idCitaPrac, idCitaPaci) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                            (tipoCita, correoPrac, correoPaci, direCita, fechaCita, horaCita, estatusCita, eventoId, idPrac, idPaci))
-                mysql.connection.commit()
-                
-
-
-                flash('Cita editada con exito.')
-                return redirect(url_for('indexPacientes'))
-
-
-            except HttpError as error:
-                print('An error occurred: %s' % error)
+        if dire_cita == "Virtual":
+            event['conferenceData'] = {
+                'createRequest': {
+                    'requestId': security_code(),
+                    'conferenceSolutionKey': {'type': 'hangoutsMeet'}
+                }
+            }
+            event = service.events().insert(
+                calendarId='primary',
+                body=event,
+                conferenceDataVersion=1,
+                sendNotifications=True
+            ).execute()
         else:
+            event = service.events().insert(
+                calendarId='primary',
+                body=event,
+                sendNotifications=True
+            ).execute()
+        
+        evento_id = event["id"]
+        print("Esta es la fecha:",fecha)
+        print("Esta es la hora:",hora)
 
-            """Shows basic usage of the Google Calendar API.
-            Prints the start and name of the next 10 events on the user's calendar.
-            """
-            creds = None
-            # The file token.json stores the user's access and refresh tokens, and is
-            # created automatically when the authorization flow completes for the first
-            # time.
-            if os.path.exists('token.json'):
-                creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-            # If there are no (valid) credentials available, let the user log in.
-            if not creds or not creds.valid:
-                if creds and creds.expired and creds.refresh_token:
-                    creds.refresh(Request())
-                else:
-                    flow = InstalledAppFlow.from_client_secrets_file(
-                        'credentials.json', SCOPES)
-                    creds = flow.run_local_server(port=0)
-                # Save the credentials for the next run
-                with open('token.json', 'w') as token:
-                    token.write(creds.to_json())
+        # Actualizar estado de la cita en la base de datos
+        with mysql.connection.cursor() as cursor:
+            cursor.execute("UPDATE paciente SET citaActPaci=%s WHERE idPaci=%s", (estatus_cita, id_paci))
+            cursor.execute("UPDATE practicante SET estatusCitaPrac=%s WHERE idPrac=%s", (estatus_cita, id_prac))
+            cursor.execute("""
+                INSERT INTO citas (tipo, correoCitaPra, correoCitaPac, direCita, fechaCita, horaCita, estatusCita, eventoId, idCitaPrac, idCitaPaci) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (tipo_cita, correo_prac, correo_paci, dire_cita, fecha, hora, estatus_cita, evento_id, id_prac, id_paci))
+            hora = hora.strftime('%H:%M')
+            cursor.execute("""
+                UPDATE horario SET permitido=%s WHERE fecha=%s AND hora=%s AND practicante_id=%s
+            """, (0, fecha, hora, id_prac))
+            mysql.connection.commit()
 
-            try:
-                service = build('calendar', 'v3', credentials=creds)
+        return jsonify({'success': True, 'message': 'Cita agendada con éxito.'})
 
-                event = crear_evento(direCita, tipoCita, fecha_hora, datetime, correoPrac, correoPaci)
-              
-                event['conferenceData'] = {
-                        'createRequest':{
-                            'requestId': requestCOD,
-                            'conferenceSolutionKey': {
-                                'type': 'hangoutsMeet'
-                            }
-                        }
-                    }
+    except Exception as e:
+        print(f'An error occurred: {str(e)}')
+        return jsonify({'success': False, 'message': f'Ocurrió un error al crear la cita: {str(e)}'}), 400
 
-
-
-                event = service.events().insert(calendarId='primary', body=event, conferenceDataVersion=1, sendNotifications=True).execute()
-                print("Event created: %s" % (event.get('htmlLink')))
-                eventoId = event["id"]
-
-                print(eventoId)
-
-                editarPaciente      = mysql.connection.cursor()
-                editarPaciente.execute("UPDATE paciente SET citaActPaci=%s WHERE idPaci=%s",
-                            (estatusCita, idPaci,))
-                mysql.connection.commit()
-
-                editarPracticante   = mysql.connection.cursor()
-                editarPracticante.execute("UPDATE practicante SET estatusCitaPrac=%s WHERE idPrac=%s",
-                            (estatusCita, idPrac,))
-                mysql.connection.commit()
-
-                regCita = mysql.connection.cursor()
-                regCita.execute("INSERT INTO citas (tipo, correoCitaPra, correoCitaPac, direCita, fechaCita, horaCita, estatusCita, eventoId, idCitaPrac, idCitaPaci) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                            (tipoCita, correoPrac, correoPaci, direCita, fechaCita, horaCita, estatusCita, eventoId, idPrac, idPaci))
-                mysql.connection.commit()
-                
-
-                # 
-                # horario = mysql.connection.cursor()
-                # horario.execute("INSERT INTO horario (fecha,hora,permitido,practicanye_id) VALUES(%s,%s,%s,%s)",
-                #            (fecha, hora, False, idPrac))
-                # mysql.connection.commit()
-
-
-                flash('Cita agendada con exito.')
-                return redirect(url_for('indexPacientes'))
-
-
-            except HttpError as error:
-                print('An error occurred: %s' % error)
         
 #~~~~~~~~~~~~~~~~~~~ Contestar Encuesta ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EncuestaPaciente', methods=["GET"])
@@ -872,85 +814,123 @@ def crearCita():
 @verified_required
 @paciente_required
 def encuestaPaciente():
-    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
+    # Crear instancia de encriptación
     encriptar = encriptado()
 
-    # USAR EL SESSION PARA OBTENER EL ID DEL PACIENTE
-    idPaci = session['idPaci']
-    datosCitas      =   []
-
-    # FALTA PROBAR ESTO
-    selecCita       =   mysql.connection.cursor()
-    selecCita.execute("SELECT * FROM citas C INNER JOIN practicante PR ON C.idCitaPrac = PR.idPrac INNER JOIN paciente PA ON C.idCitaPaci = PA.idPaci WHERE idCitaPaci=%s AND estatusCita=%s",(idPaci,1))
-    cit              =   selecCita.fetchone()
-
-    # SE CREA UNA LISTA CON LOS NOMBRES DE LOS CAMPOS
-    list_campo = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci', 'nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
+    # Obtener el ID del paciente de la sesión
+    id_paci = session['idPaci']
     
-    # SE AGREGA A UN DICCIONARIO
-    noCita = select_and_decode_atribute(cit, list_campo, encriptar)
-    
-    idCita = cit.get('idCita')
-    idPrac = cit.get('idPrac')
-    nombrPR = noCita.get('nombrePrac')
-    apelpPR = noCita.get('apellidoPPrac')
-    apelmPR = noCita.get('apellidoMPrac')
+    datos_citas = []
 
-    # SE ACTUALIZA EL DICCIONARIO QUE MANDA LA BD
-    cit.update(noCita)
+    # Ejecutar la consulta para obtener la cita actual del paciente
+    with mysql.connection.cursor() as cursor:
+        query = """
+            SELECT * 
+            FROM citas C 
+            INNER JOIN practicante PR ON C.idCitaPrac = PR.idPrac 
+            INNER JOIN paciente PA ON C.idCitaPaci = PA.idPaci 
+            WHERE C.idCitaPaci = %s AND C.estatusCita = %s
+        """
+        cursor.execute(query, (id_paci, 1))
+        cita = cursor.fetchone()
 
-    # SE AGREGA A UNA LISTA ANTERIORMENTE CREADA
-    datosCitas.append(cit)
+    if cita:
+        # Campos de la cita que necesitamos
+        list_campos = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci', 'nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
+        
+        # Decodificar los campos de la cita
+        cita_decoded = select_and_decode_atribute(cita, list_campos, encriptar)
+        
+        # Actualizar la cita con los campos decodificados
+        cita.update(cita_decoded)
+        
+        # Añadir la cita a la lista de datos
+        datos_citas.append(cita)
 
-    # LA LISTA LA CONVERTIMOS A TUPLE PARA PODER USARLA CON MAYOR COMODIDAD EN EL FRONT
-    datosCitas = tuple(datosCitas)
-    print(datosCitas)
+        # Desempaquetar datos para el renderizado
+        id_cita = cita.get('idCita')
+        id_prac = cita.get('idPrac')
+        nombre_prac = cita_decoded.get('nombrePrac')
+        apellido_p_prac = cita_decoded.get('apellidoPPrac')
+        apellido_m_prac = cita_decoded.get('apellidoMPrac')
+    else:
+        # Manejo de caso en que no se encuentra la cita
+        id_cita = id_prac = nombre_prac = apellido_p_prac = apellido_m_prac = None
 
-    return render_template('/paci/encuesta_paciente.html', nombrePrac = nombrPR, apellidoPPrac = apelpPR, apellidoMPrac = apelmPR, idCita = idCita, idPrac = idPrac, username=session['name'], email=session['correoPaci'])
+    # Renderizar la plantilla con los datos obtenidos
+    return render_template('/paci/encuesta_paciente.html', nombrePrac=nombre_prac, apellidoPPrac=apellido_p_prac, apellidoMPrac=apellido_m_prac, idCita=id_cita, idPrac=id_prac, username=session['name'], email=session['correoPaci'])
 
 
-#~~~~~~~~~~~~~~~~~~~ Respuestas Encuesta ~~~~~~~~~~~~~~~~~~~#
+# ~~~~~~~~~~~~~~~~~~~ Respuestas Encuesta ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/ContestarEncuesta', methods=["GET", "POST"])
 @login_required
 @verified_required
 @paciente_required
 def contestarEncuesta():
-    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
-    #encriptar = encriptado()
-
-    # USAR EL SESSION PARA OBTENER EL ID DEL PACIENTE
-    idPaci = session['idPaci']
-    idPrac = request.form['idPrac']
-    idCita = request.form['idCita']
-    pregunta1 = request.form['calificacion-1']
-    pregunta2 = request.form['calificacion-2']
-    pregunta3 = request.form['calificacion-3']
-    pregunta4 = request.form['calificacion-4']
-    pregunta5 = request.form['calificacion-5']
-    pregunta6 = request.form['calificacion-6']
-    pregunta7 = request.form['calificacion-7']
-    pregunta8 = request.form['calificacion-8']
-
+    # Obtener el ID del paciente desde la sesión
+    id_paci = session['idPaci']
     
-    regEncuesta = mysql.connection.cursor()
-    regEncuesta.execute("INSERT INTO encuesta (pregunta1Encu, pregunta2Encu, pregunta3Encu, pregunta4Encu, pregunta5Encu, pregunta6Encu, pregunta7Encu, pregunta8Encu, idEncuPaci, idEncuPrac) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                (pregunta1, pregunta2, pregunta3, pregunta4, pregunta5, pregunta6, pregunta7, pregunta8, idPaci, idPrac,))
-    mysql.connection.commit()
+    # Obtener los datos del formulario
+    id_prac = request.form.get('idPrac')
+    id_cita = request.form.get('idCita')
+    respuestas = [request.form.get(f'calificacion-{i}') for i in range(1, 9)]
 
-    idEncuesta = regEncuesta.lastrowid
+    # Validar que todas las respuestas están presentes
+    if not all(respuestas):
+        flash('Por favor, conteste todas las preguntas de la encuesta.', 'danger')
+        return redirect(url_for('indexPacientes'))
 
-    regEncuestaCita = mysql.connection.cursor()
-    regEncuestaCita.execute("UPDATE citas SET idEncuestaCita=%s, estatusCita=%s WHERE idCita=%s", (idEncuesta, 4, idCita,))
-                
-    mysql.connection.commit()
+    # Obtener el ID del supervisor asociado al practicante
+    try:
+        with mysql.connection.cursor() as cursor:
+            cursor.execute("SELECT idSupPrac FROM practicante WHERE idPrac = %s", (id_prac,))
+            supervisor_id = cursor.fetchone()['idSupPrac']
+    except mysql.connector.Error as err:
+        flash(f'Error al obtener el ID del supervisor: {err}', 'danger')
+        return redirect(url_for('indexPacientes'))
 
-    flash('Encuesta contestada con exito.')
+    # Insertar los datos de la encuesta en la base de datos
+    try:
+        with mysql.connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO encuesta (
+                    pregunta1Encu, pregunta2Encu, pregunta3Encu, pregunta4Encu,
+                    pregunta5Encu, pregunta6Encu, pregunta7Encu, pregunta8Encu,
+                    idEncuPaci, idEncuPrac, idSup
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (*respuestas, id_paci, id_prac, supervisor_id))
+            mysql.connection.commit()
+
+            # Obtener el ID de la encuesta insertada
+            id_encuesta = cursor.lastrowid
+
+            # Actualizar el estatus de la cita con el ID de la encuesta
+            cursor.execute("""
+                UPDATE citas 
+                SET idEncuestaCita = %s, estatusCita = %s 
+                WHERE idCita = %s
+            """, (id_encuesta, 4, id_cita))
+            mysql.connection.commit()
+        
+    except mysql.connector.Error as err:
+        flash(f'Error al procesar la encuesta: {err}', 'danger')
+        return redirect(url_for('indexPacientes'))
+
+    # Confirmar éxito y redirigir
+    flash('Encuesta contestada con éxito.', 'success')
     return redirect(url_for('indexPacientes'))
 
 
 @PCapp.route('/Calendario/<string:idPrac>', methods=['GET'])
 def calendario(idPrac):
-    return render_template('calendario.html', idPrac=idPrac)
+    with mysql.connection.cursor() as cursor:
+        cursor.execute("DELETE FROM horario WHERE fecha < CURDATE()")
+        mysql.connection.commit()
+        cursor.execute('SELECT idPrac, correoPrac FROM practicante WHERE idPrac = %s', (idPrac,))
+        practicante = cursor.fetchone()
+    
+    if practicante:
+        return render_template('calendario.html', idPrac=practicante['idPrac'],  correoPrac=practicante['correoPrac'], username=session['name'], email=session['correoPaci'])
 
 @PCapp.route('/Horario/<string:idPrac>', methods=['GET'])
 def obtener_horarios(idPrac):
@@ -959,6 +939,7 @@ def obtener_horarios(idPrac):
         cursor.execute("SELECT fecha, hora, permitido FROM horario WHERE practicante_id = %s", (idPrac,))
         horarios = cursor.fetchall()
         horarios_dict = [{'fecha': row['fecha'].strftime('%Y-%m-%d'), 'hora': row['hora'], 'permitido': row['permitido']} for row in horarios]
+        print("Horarios obtenidos:", horarios_dict)
         return jsonify(horarios_dict)
     except Exception as e:
         print(f"Error: {e}")
@@ -974,227 +955,205 @@ def obtener_horarios(idPrac):
 @supervisor_required
 def verEncuestasPracticante(idPrac):
     # USAR SESSION PARA OBTENER EL ID DE SUPERVISOR
-    idSup = session['idSup']
-    
+    id_Sup = session['idSup']
     
     # Verificar que el practicante pertenece al supervisor
-    verificarPracticante = mysql.connection.cursor()
-    verificarPracticante.execute("""
-        SELECT * 
-        FROM practicante
-        WHERE idPrac=%s AND idSupPrac=%s
-    """, (idPrac, idSup))
-    
-    pract = verificarPracticante.fetchone()
-    
-    if not pract:
-        flash("No tienes permiso para ver estas encuestas.")
+    try:
+        with mysql.connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT *
+                FROM practicante
+                WHERE idPrac = %s AND idSupPrac = %s
+            """, (idPrac, id_Sup))
+            if cursor.fetchone() is None:
+                flash("No tienes permiso para ver estas encuestas.")
+                return redirect(url_for('home'))
+    except Exception as e:
+        print(f"Error al verificar el practicante: {e}")
+        flash("Hubo un problema al verificar el practicante.")
         return redirect(url_for('home'))
-    
-    
+
     # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
     encriptar = encriptado()
 
-    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-    #                   0        1        2               3              4             5   
+    # Definición de listas para consulta de datos
     list_consult = ['encuesta', 'E', 'E.idEncuPrac', 'E.idEncuPaci', 'idEncuPrac', idPrac]
     list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
-    
-    # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
+
+
     encu, datosEncu = obtener_datos(list_campo, list_consult, mysql, encriptar, 2)
     
     return render_template('encuesta_practicante.html', datosEncu = datosEncu, username=session['name'], email=session['correoSup'])
 
 
-
-# ~~~~~~~~~~~~~~~~~~~ Ver Resultados de Practicantes ~~~~~~~~~~~~~~~~~~~#
-# @PCapp.route('/VerResultadosEncuesta/<string:idEncu>', methods=['GET', 'POST'])
-# @login_required
-# @verified_required
-# @supervisor_required
-# def verResultadosEncuesta(idEncu):
-#     # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
-#     selecEncuesta    =   mysql.connection.cursor()
-#     selecEncuesta.execute("SELECT * FROM encuesta WHERE idEncu=%s",(idEncu,))
-#     encu              =   selecEncuesta.fetchone()
-
-#     print(encu)
-
-#     return render_template('resultados_encuestas.html', resu = encu, username=session['name'], email=session['correoSup'])
-
-
-# ~~~~~~~~~~~~~~~~~~~ Ver Resultados de Practicantes ~~~~~~~~~~~~~~~~~~~#
-@PCapp.route('/VerResultadosEncuesta/<string:idEncu>', methods=['GET', 'POST'])
+# ~~~~~~~~~~~~~~~~~~~ Ver Resultados de Encuestas ~~~~~~~~~~~~~~~~~~~#
+@PCapp.route('/VerResultadosEncuesta/<string:idEncu>', methods=['GET'])
 @login_required
 @verified_required
 @supervisor_required
 def verResultadosEncuesta(idEncu):
     # Obtener el ID del supervisor desde la sesión
-    idSup = session['idSup']
+    id_sup = session['idSup']
     
-    # SELECCIONAR EL RESULTADO DE LA ENCUESTA Y VERIFICAR QUE PERTENEZCA AL SUPERVISOR
-    selecEncuesta = mysql.connection.cursor()
-    selecEncuesta.execute("""
-        SELECT * 
-        FROM encuesta 
-        WHERE idEncu=%s AND idSup=%s
-    """, (idEncu, idSup))
+    try:
+        # Seleccionar el resultado de la encuesta y verificar que pertenezca al supervisor
+        with mysql.connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT * 
+                FROM encuesta 
+                WHERE idEncu = %s AND idSup = %s
+            """, (idEncu, id_sup))
+            encuesta = cursor.fetchone()
+        
+        if not encuesta:
+            flash("No tienes permiso para ver estos resultados.", 'danger')
+            return redirect(url_for('home'))
+
+        return render_template('resultados_encuestas.html', resu=encuesta, username=session['name'], email=session['correoSup'])
     
-    encu = selecEncuesta.fetchone()
-    
-    if not encu:
-        flash("No tienes permiso para ver estos resultados.")
+    except mysql.connector.Error as err:
+        flash(f'Error al obtener los resultados de la encuesta: {err}', 'danger')
         return redirect(url_for('home'))
-
-    print(encu)
-    return render_template('resultados_encuestas.html', resu=encu, username=session['name'], email=session['correoSup'])
-
 
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Cita Paciente ~~~~~~~~~~~~~~~~~~~#
-@PCapp.route('/EliminarCitaPaciente', methods=["GET", "POST"])
+@PCapp.route('/EliminarCitaPaciente', methods=["POST"])
 @require_post
 def eliminarCitaPaciente():
-
-        # USO SESION PARA OBTENER LOS DATOS DEL PACIENTE
+    try:
+        # Recuperar datos del formulario
+        idCita = request.form['idCita']
+        fechaCita = request.form['fechaCita']
+        horaCita = request.form['horaCita']
+        eventoIdCita = request.form['eventoCita']
         
-        # RECUPERAR DATOS
-        idCita      = request.form['idCita']
-        fechaCita   = request.form['fechaCita']
-        horaCita    = request.form['horaCita']
-        eventoIdCita    = request.form['eventoCita']
+        fecha_hora_cita = datetime.datetime.strptime(f"{fechaCita} {horaCita}", '%Y-%m-%d %H:%M:%S')
         
-        estatusCita = 2
-
-        # Convertir la cadena de fecha a objeto datetime
-        fechaCita = datetime.datetime.strptime(fechaCita, '%Y-%m-%d').date()
-
-        # Convertir la cadena de hora a objeto datetime
-        horaCita = datetime.datetime.strptime(horaCita, '%H:%M:%S').time()
-
         # Obtener la fecha y hora actual
-        fecha_actual = datetime.datetime.now().date()
-        hora_actual = datetime.datetime.now().time()
-
-        # Combinar la fecha actual con la hora actual
-        fecha_hora_actual = datetime.datetime.combine(fecha_actual, hora_actual)
-
+        fecha_hora_actual = datetime.datetime.now()
+        
         # Calcular la diferencia entre la fecha y hora de la cita y la fecha y hora actual
-        diferencia = datetime.datetime.combine(fechaCita, horaCita) - fecha_hora_actual
+        diferencia = fecha_hora_cita - fecha_hora_actual
 
-        # Verificar si todavía hay más de 24 horas de diferencia antes de la cita
+        # Verificar si hay más de 24 horas antes de la cita
         if diferencia.total_seconds() > 24 * 3600:
-            print("Todavía hay más de 24 horas antes de la cita. Puedes cancelarla.")
-
-            """Shows basic usage of the Google Calendar API.
-            Prints the start and name of the next 10 events on the user's calendar.
-            """
+            # Configurar credenciales de Google Calendar API
             creds = None
-            # The file token.json stores the user's access and refresh tokens, and is
-            # created automatically when the authorization flow completes for the first
-            # time.
             if os.path.exists('token.json'):
                 creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-            # If there are no (valid) credentials available, let the user log in.
             if not creds or not creds.valid:
                 if creds and creds.expired and creds.refresh_token:
                     creds.refresh(Request())
                 else:
-                    flow = InstalledAppFlow.from_client_secrets_file(
-                        'credentials.json', SCOPES)
+                    flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
                     creds = flow.run_local_server(port=0)
-                # Save the credentials for the next run
                 with open('token.json', 'w') as token:
                     token.write(creds.to_json())
+            
+            # Eliminar evento de Google Calendar
+            service = build('calendar', 'v3', credentials=creds)
+            service.events().delete(calendarId='primary', eventId=eventoIdCita, sendNotifications=True).execute()
+            
+            # Actualizar estatus de la cita en la base de datos
+            with mysql.connection.cursor() as cursor:
+                cursor.execute("SELECT idCitaPrac FROM citas WHERE idCita = %s", (idCita,))
+                result = cursor.fetchone()
+                if result:
+                    id_prac = result['idCitaPrac']
+                else:
+                    flash('No se encontró la cita.')
+                    return redirect(url_for('indexPacientes'))
 
-            try:
-                service = build('calendar', 'v3', credentials=creds)
+                # Actualizar el estatus de la cita en la base de datos
+                cursor.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s", (2, idCita))
+                
+                # Actualizar la tabla horario
+                horaCita_obj = datetime.datetime.strptime(horaCita, '%H:%M:%S').time()
+                horaCita_formateada = horaCita_obj.strftime('%H:%M')
+                cursor.execute("UPDATE horario SET permitido=%s WHERE fecha=%s AND hora=%s AND practicante_id=%s", 
+                   (1, fechaCita,  horaCita_formateada, id_prac))
 
-                service.events().delete(calendarId='primary', eventId=eventoIdCita, sendNotifications=True).execute()
-
-                editarCita      = mysql.connection.cursor()
-                editarCita.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s",
-                            (estatusCita, idCita,))
                 mysql.connection.commit()
-
-                flash('Cita eliminada con exito.')
-                return redirect(url_for('indexPacientes'))
-
-
-            except HttpError as error:
-                print('An error occurred: %s' % error)
-        
+            
+            flash('Cita eliminada con éxito.')
         else:
-            print("Ya no puedes cancelar la cita. Ya pasaron menos de 24 horas.")
             flash("No se puede cancelar la cita, faltan menos de 24 horas")
-            return redirect(url_for('indexPacientes'))
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        flash("Hubo un problema al eliminar la cita.")
+
+    return redirect(url_for('indexPacientes'))
 
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Cita Supervisor ~~~~~~~~~~~~~~~~~~~#
-@PCapp.route('/EliminarCitaSupervisor', methods=["GET", "POST"])
+@PCapp.route('/EliminarCitaSupervisor', methods=["POST"])
 @require_post
 def eliminarCitaSupervisor():
-    # USO SESION PARA OBTENER LOS DATOS DEL PACIENTE
-        
-    # RECUPERAR DATOS
-    idCita          = request.form['idCita']
-    eventoIdCita    = request.form['eventoCita']
-    cancelacion     = request.form['cancelacion']
+    try:
+        # Recuperar datos del formulario
+        idCita = request.form['idCita']
+        eventoIdCita = request.form['eventoCita']
+        cancelacion = request.form['cancelacion']
 
-    # Verificar si todavía hay más de 24 horas de diferencia antes de la cita
-    if cancelacion == 'Si':
-        print("Como no pa, ahi te va tu cancelacion.")
+        if cancelacion == 'Si':
+            # Configurar credenciales de Google Calendar API
+            print("Como no pa, ahi te va tu cancelacion.")
 
-        """Shows basic usage of the Google Calendar API.
-        Prints the start and name of the next 10 events on the user's calendar.
-        """
-        creds = None
-        # The file token.json stores the user's access and refresh tokens, and is
-        # created automatically when the authorization flow completes for the first
-        # time.
-        if os.path.exists('token.json'):
-            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-        # If there are no (valid) credentials available, let the user log in.
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    'credentials.json', SCOPES)
-                creds = flow.run_local_server(port=0)
-            # Save the credentials for the next run
-            with open('token.json', 'w') as token:
-                token.write(creds.to_json())
+            creds = None
+            if os.path.exists('token.json'):
+                creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+            if not creds or not creds.valid:
+                if creds and creds.expired and creds.refresh_token:
+                    creds.refresh(Request())
+                else:
+                    flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+                    creds = flow.run_local_server(port=0)
+                with open('token.json', 'w') as token:
+                    token.write(creds.to_json())
 
-        try:
+            # Eliminar evento de Google Calendar
             service = build('calendar', 'v3', credentials=creds)
-
             service.events().delete(calendarId='primary', eventId=eventoIdCita, sendNotifications=True).execute()
 
-            estatusCita = 2
-            editarCita      = mysql.connection.cursor()
-            editarCita.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s",
-                        (estatusCita, idCita,))
+            # Actualizar estatus de la cita en la base de datos 
+            with mysql.connection.cursor() as cursor:
+                cursor.execute("SELECT idCitaPrac, fechaCita, horaCita FROM citas WHERE idCita = %s", (idCita,))
+                result = cursor.fetchone()
+                if result:
+                    id_prac   = result['idCitaPrac']
+                    fechaCita = result['fechaCita']
+                    horaCita  = result['horaCita']
+                else:
+                    flash('No se encontró la cita.')
+                    return redirect(url_for('home'))
+
+                # Actualizar el estatus de la cita en la base de datos
+                cursor.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s", (2, idCita))
+                
+                # Actualizar la tabla horario
+                horaCita_obj = datetime.datetime.strptime(horaCita, '%H:%M:%S').time()
+                horaCita_formateada = horaCita_obj.strftime('%H:%M')
+                cursor.execute("UPDATE horario SET permitido=%s WHERE fecha=%s AND hora=%s AND practicante_id=%s", 
+                   (1, fechaCita,  horaCita_formateada, id_prac))
+
+                mysql.connection.commit()
+            
+            flash('Cita eliminada con éxito.')
+        else:
+            cursor = mysql.connection.cursor()
+            cursor.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s", (1, idCita))
             mysql.connection.commit()
-
-            flash('Cita eliminada con exito.')
-            return redirect(url_for('indexSupervisor'))
-
-
-        except HttpError as error:
-            print('An error occurred: %s' % error)
+            cursor.close()
+            
+            flash("No se puede cancelar la cita, faltan menos de 24 horas")
     
-    else:
-        estatusCita = 1
-        editarCita      = mysql.connection.cursor()
-        editarCita.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s",
-                    (estatusCita, idCita,))
-        mysql.connection.commit()
-        print("Nel padrino, ahuevo ahora la bebes o la derramas")
-        flash("No se puede cancelar la cita, faltan menos de 24 horas")
-        return redirect(url_for('indexSupervisor'))
-    
+    except Exception as e:
+        print(f"Error: {e}")
+        flash("Hubo un problema al eliminar la cita.")
 
+    return redirect(url_for('indexSupervisor'))
+    
 
 # ~~~~~~~~~~~~~~~~~~~ Crear Cita ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/AgendarCita', methods=['GET', 'POST'])
@@ -1209,9 +1168,9 @@ def agendarCita():
     idPaci = session['idPaci']
 
     # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
-    selecPrac        =   mysql.connection.cursor()
-    selecPrac.execute("SELECT * FROM practicante WHERE activoPrac IS NOT NULL ORDER BY RAND() LIMIT 10")
-    pra              =   selecPrac.fetchall()
+    with mysql.connection.cursor() as selecPrac:
+        selecPrac.execute("SELECT * FROM practicante WHERE activoPrac IS NOT NULL ORDER BY RAND() LIMIT 10")
+        pra              =   selecPrac.fetchall()
 
     # SE CREA UNA LISTA
     datosPrac = []
@@ -1234,7 +1193,7 @@ def agendarCita():
     # LA LISTA LA CONVERTIMOS A TUPLE PARA PODER USARLA CON MAYOR COMODIDAD EN EL FRONT
     datosPrac = tuple(datosPrac)
     print(datosPrac)
-
+        
     return render_template('/paci/agenda_cita copy.html', datosPrac = datosPrac, username=session['name'], email=session['correoPaci'])
 
 
@@ -1268,10 +1227,10 @@ def eliminarCitaPracticante():
 
     # Verificar si todavía hay más de 2 horas de diferencia antes de la cita
     if diferencia.total_seconds() > 2 * 3600:
-        editarCita      = mysql.connection.cursor()
-        editarCita.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s",
-                    (estatusCita, idCita,))
-        mysql.connection.commit()
+        with mysql.connection.cursor() as editarCita:
+            editarCita.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s",
+                        (estatusCita, idCita,))
+            mysql.connection.commit()
 
         flash('Cita eliminada con exito.')
         print("Todavía hay más de 2 horas antes de la cita. Puedes cancelarla.")
@@ -1296,9 +1255,9 @@ def indexSupervisor():
     idSup = session['idSup']
 
     # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
-    selecPrac        =   mysql.connection.cursor()
-    selecPrac.execute("SELECT * FROM supervisor S INNER JOIN practicante P ON P.idSupPrac = S.idSup WHERE S.idSup=%s AND activoSup IS NOT NULL AND P.activoPrac IS NOT NULL",(idSup,))
-    pra              =   selecPrac.fetchall()
+    with mysql.connection.cursor() as selecPrac:
+        selecPrac.execute("SELECT * FROM supervisor S INNER JOIN practicante P ON P.idSupPrac = S.idSup WHERE S.idSup=%s AND activoSup IS NOT NULL AND P.activoPrac IS NOT NULL",(idSup,))
+        pra              =   selecPrac.fetchall()
 
     # SE CREA UNA LISTA
     datosPrac = []
@@ -1325,6 +1284,7 @@ def indexSupervisor():
     selecCitas        =   mysql.connection.cursor()
     selecCitas.execute("SELECT * FROM supervisor S INNER JOIN practicante P ON P.idSupPrac = S.idSup INNER JOIN citas C ON C.idCitaPrac = P.idPrac WHERE P.idSupPrac=%s AND activoSup IS NOT NULL AND C.estatusCita = %s AND P.activoPrac IS NOT NULL",(idSup, 3))
     cita              =   selecCitas.fetchall()
+    selecCitas.close()
 
     # SE CREA UNA LISTA
     datosCitas = []
@@ -1423,6 +1383,7 @@ def editarCuentaPracticantesAdm():
         picture             =   mysql.connection.cursor()
         picture.execute("UPDATE practicante SET fotoPrac=%s WHERE idPrac=%s", (fotoActual, idPrac,))
         mysql.connection.commit()
+        # picture.close()
         
     mysql.close()
     flash('Cuenta editada con exito.')
@@ -1454,6 +1415,7 @@ def editarCuentaPracticantesSup():
         picture             =   mysql.connection.cursor()
         picture.execute("UPDATE practicante SET fotoPrac=%s WHERE idPrac=%s", (fotoActual, idPrac,))
         mysql.connection.commit()
+        picture.close()
 
     flash('Cuenta editada con exito.')
     return redirect(url_for('indexSupervisor'))
@@ -1503,7 +1465,8 @@ def crearCuentaPracticantes():
             # Si el correo ya está registrado, mostrar un mensaje de error
             flash("El correo ya está registrado", 'danger')
             cur.close()
-            return redirect(url_for('indexSupervisor'))        
+            return redirect(url_for('indexSupervisor'))  
+        cur.close()      
         
         regPracticante = mysql.connection.cursor()
         regPracticante.execute("INSERT INTO practicante (nombrePrac, apellidoPPrac, apellidoMPrac, contraPrac, sexoPrac, codVeriPrac, correoPrac, fechaNacPrac, activoPrac, veriPrac, edadPrac, celPrac, codigoUPrac, idSupPrac) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
@@ -1519,6 +1482,7 @@ def crearCuentaPracticantes():
             picture             =   mysql.connection.cursor()
             picture.execute("UPDATE practicante SET fotoPrac=%s WHERE idPrac=%s", (fotoActual, idPrac,))
             mysql.connection.commit()
+            picture.close()
 
 
         # MANDAR CORREO CON CODIGO DE VERIRIFICACION
@@ -1531,6 +1495,9 @@ def crearCuentaPracticantes():
         nombr = nombr.encode()
         nombr = encriptar.decrypt(nombr)
         nombr = nombr.decode()
+        
+        regPracticante.close()
+        selPrac.close()
 
         # SE MANDA EL CORREO
         msg = Message('Código de verificación', sender=PCapp.config['MAIL_USERNAME'], recipients=[correoPrac])
@@ -1647,8 +1614,9 @@ def crearCuentaSupervisor():
             # Si el correo ya está registrado, mostrar un mensaje de error
             flash("El correo ya está registrado", 'danger')
             cur.close()
-            return redirect(url_for('verSupervisor')) 
-
+            return redirect(url_for('verSupervisor'))
+        
+        cur.close()
         regSupervisor = mysql.connection.cursor()
         regSupervisor.execute("INSERT INTO supervisor (nombreSup, apellidoPSup, apellidoMSup, correoSup, contraSup, codVeriSup, activoSup, veriSup, priviSup) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                             (nombreSupCC, apellidoPSupCC, apellidoMSupCC, correoSup, hashed_password, codVeriSup, activoSup, veriSup, priviSup))
@@ -1666,6 +1634,9 @@ def crearCuentaSupervisor():
         nombr = nombr.encode()
         nombr = encriptar.decrypt(nombr)
         nombr = nombr.decode()
+        
+        regSupervisor.close()
+        selSup.close()
 
         
         # SE MANDA EL CORREO

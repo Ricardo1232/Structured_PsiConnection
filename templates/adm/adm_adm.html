@@ -82,22 +82,25 @@
                                 <label for="nombreAd" class="form-label">Nombre</label>
                                 <input name="nombreAd" type="text" class="form-control border border-dark" id="nombreAd"
                                     value="" required
-                                    pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,35}"
-                                    title="Solo letras Minimo 2 Maximo 35" class="form-control" />
+                                    maxlength="20"
+                                    pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"
+                                    title="Solo letras Minimo 2 Maximo 20" class="form-control" />
                             </div>
                             <div class="form-group">
                                 <label for="apellidoPAd" class="form-label">Apellido Paterno</label>
                                 <input name="apellidoPAd" type="text" class="form-control border border-dark"
                                     id="apellidoPAd" value="" required
-                                    pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,25}"
-                                    title="Solo letras Minimo 2 Maximo 25" class="form-control" />
+                                    maxlength="15"
+                                    pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"
+                                    title="Solo letras Minimo 2 Maximo 15" class="form-control" />
                             </div>
                             <div class="form-group">
                                 <label for="apellidoMAd" class="form-label">Apellido Materno</label>
                                 <input name="apellidoMAd" type="text" class="form-control border border-dark"
                                     id="apellidoMAd" value="" required
-                                    pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,25}"
-                                    title="Solo letras Minimo 2 Maximo 25" class="form-control" />
+                                    maxlength="15"
+                                    pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"
+                                    title="Solo letras Minimo 2 Maximo 15" class="form-control" />
                             </div>
 
 
@@ -130,7 +133,7 @@
                             </div>
 
                             <div class="form-group password-toggle-container">
-                                <label for="contraAd_confirm" class="form-group">confirmar Contraseña</label>
+                                <label for="contraAd_confirm" class="form-group">Confirmar Contraseña</label>
                                 <input name="contraAd_confirm" id="contraAd_confirm" type="password"
                                     class="form-control border border-dark"
                                     pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{'?/:;.,]).{8,}" required
@@ -172,6 +175,7 @@
                                 <label for="nombreAd" class="form-label">Nombre</label>
                                 <input name="nombreAd" type="text" class="form-control border border-dark" id="nombreAd"
                                     value="" required
+                                    maxlength="20"
                                     pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"
                                     title="Solo letras Minimo 2 Maximo 20" class="form-control" />
                             </div>
@@ -179,6 +183,7 @@
                                 <label for="apellidoPAd" class="form-label">Apellido Paterno</label>
                                 <input name="apellidoPAd" type="text" class="form-control border border-dark"
                                     id="apellidoPAd" value="" required
+                                    maxlength="15"
                                     pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"
                                     title="Solo letras Minimo 2 Maximo 15" class="form-control" />
                             </div>
@@ -186,6 +191,7 @@
                                 <label for="apellidoMAd" class="form-label">Apellido Materno</label>
                                 <input name="apellidoMAd" type="text" class="form-control border border-dark"
                                     id="apellidoMAd" value="" required
+                                    maxlength="15"
                                     pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"
                                     title="Solo letras Minimo 2 Maximo 15" class="form-control" />
                             </div>

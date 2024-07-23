@@ -8,29 +8,33 @@
                 enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
                 <input type="hidden" name="idSup" value="{{a.idSup}}">
+               
 
                 <div class="col-md-4">
                     <label for="nombrePrac" class="form-group">Nombre(s)</label>
                     <input name="nombrePrac" id="nombrePrac" type="text" class="form-control border border-dark"
                         required
-                        pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,35}"
-                        title="Solo letras Minimo 2 Maximo 35" />
+                        maxlength="20"
+                        pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"
+                        title="Solo letras Minimo 2 Maximo 20" />
                 </div>
 
                 <div class="col-md-4">
                     <label for="apellidoPPrac" class="form-group">Apellido paterno</label>
                     <input name="apellidoPPrac" id="apellidoPPrac" type="text" class="form-control border border-dark"
                         required
-                        pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,35}"
-                        title="Solo letras Minimo 2 Maximo 35" />
+                        maxlength="15"
+                        pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"
+                        title="Solo letras Minimo 2 Maximo 15" />
                 </div>
 
                 <div class="col-md-4">
                     <label for="apellidoMPrac" class="form-group">Apellido Materno</label>
                     <input name="apellidoMPrac" id="apellidoMPrac" type="text" class="form-control border border-dark"
                         required
-                        pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,35}"
-                        title="Solo letras Minimo 2 Maximo 35" />
+                        maxlength="15"
+                        pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"
+                        title="Solo letras Minimo 2 Maximo 15" />
                 </div>
 
                 <div class="col-md-4">
@@ -74,12 +78,15 @@
                     <label for="telCelPrac" class="form-group">Teléfono Celular</label>
                     <input name="telCelPrac" id="telCelPrac" type="text" class="form-control border border-dark"
                         required pattern="^(\+|00)[1-9][0-9 \-\(\)\.]{10,15}$"
+                        maxlength="16"
                         title="Numero con lada, máximo 16 digitos" />
                 </div>
 
                 <div class="col-md-4">
                     <label for="codigoPrac" class="form-group">Código</label>
                     <input name="codigoPrac" id="codigoPrac" type="text" class="form-control border border-dark "
+                        maxlength="9"
+
                         required pattern="[0-9]{9}" title="Código Escolar, máximo 9 digitos" inputmode="numeric" />
                 </div>
 
