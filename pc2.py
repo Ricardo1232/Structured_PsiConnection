@@ -414,15 +414,14 @@ def results():
         return redirect(url_for('indexPacientes'))
     
     
-
 @PCapp.route('/verify', methods=['GET', 'POST'])
 def verify():
     if 'login' not in session:
         return redirect(url_for('auth'))
-
-    if session.get('verificado') == 2:
+    
+    if session['verificado'] == 2:
         return redirect(url_for('home'))
-
+    
     if request.method == 'POST':
         user_code = request.form['code']
         flash("Revisa tu correo electrónico para obtener tu código de verificación", 'success')
@@ -437,13 +436,14 @@ def verify():
 
         # Verificar el código de verificación
         if verify_code(mysql, session, dicc_verify, user_code):
+            flash("Registro completado con éxito", 'success')
             return redirect(url_for('auth'))
 
         flash("Código de verificación incorrecto", 'danger')
 
     return render_template('verify.html')  
-
-
+ 
+ 
 def encriptado():
     with  mysql.connection.cursor() as selectoken:
         selectoken.execute("SELECT clave FROM token")
@@ -675,7 +675,7 @@ def indexPacientes():
     # SE OBTIENEN LOS DATOS FORMATEADOS DE LA BASE DE DATOS PARA ENVIAR AL FRONT
     hc, datosCitas = obtener_datos(list_campo, list_consult, mysql, encriptar, 2)
 
-    return render_template('/paci/index_pacientes.html', hc = hc, datosCitas = datosCitas, cit = cit, citaRealizada = citaRealizada, username=session['name'], email=session['correoPaci'])
+    return render_template('/paci/index_pacientes.html', hc = hc, datosCitas = datosCitas, cit = cit, citaRealizada = citaRealizada, username=session['name'], email=session['correoPaci'], request=request)
 
 
 ######################## Falta
@@ -1281,10 +1281,9 @@ def indexSupervisor():
     datosPrac = tuple(datosPrac)
 
     # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
-    selecCitas        =   mysql.connection.cursor()
-    selecCitas.execute("SELECT * FROM supervisor S INNER JOIN practicante P ON P.idSupPrac = S.idSup INNER JOIN citas C ON C.idCitaPrac = P.idPrac WHERE P.idSupPrac=%s AND activoSup IS NOT NULL AND C.estatusCita = %s AND P.activoPrac IS NOT NULL",(idSup, 3))
-    cita              =   selecCitas.fetchall()
-    selecCitas.close()
+    with mysql.connection.cursor() as selecCitas:
+        selecCitas.execute("SELECT * FROM supervisor S INNER JOIN practicante P ON P.idSupPrac = S.idSup INNER JOIN citas C ON C.idCitaPrac = P.idPrac WHERE P.idSupPrac=%s AND activoSup IS NOT NULL AND C.estatusCita = %s AND P.activoPrac IS NOT NULL",(idSup, 3))
+        cita              =   selecCitas.fetchall()
 
     # SE CREA UNA LISTA
     datosCitas = []
@@ -1308,7 +1307,7 @@ def indexSupervisor():
     datosCitas = tuple(datosCitas)
 
 
-    return render_template('/sup/index_supervisor.html', pract = pra, datosPrac = datosPrac, datosCitas = datosCitas, username=session['name'], email=session['correoSup'])
+    return render_template('/sup/index_supervisor.html', pract = pra, datosPrac = datosPrac, datosCitas = datosCitas, username=session['name'], email=session['correoSup'], request=request)
 
 
 
@@ -1709,7 +1708,7 @@ def eliminarCuentaSupervisor():
 @verified_required
 @admin_required
 def indexAdministrador():
-    return render_template('/adm/index_admin.html', username=session['name'], email=session['correoAd'])
+    return render_template('/adm/index_admin.html', username=session['name'], email=session['correoAd'], request=request)
     
 
 #~~~~~~~~~~~~~~~~~~~ Index Practicantes ~~~~~~~~~~~~~~~~~~~#
@@ -1733,7 +1732,7 @@ def indexPracticantes():
     list_cosult = [idPrac, 4]
     praH, datosPracH = obtener_datos(list_campo, list_consult, mysql, encriptar, 3)
 
-    return render_template('/prac/index_practicante.html', pract = pra, datosPrac = datosPrac, datosPracH=datosPracH, username=session['name'], email=session['correoPrac'])
+    return render_template('/prac/index_practicante.html', pract = pra, datosPrac = datosPrac, datosPracH=datosPracH, username=session['name'], email=session['correoPrac'], request=request)
 
     
 

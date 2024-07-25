@@ -18,7 +18,7 @@
                             <div class="ms-4">
                                 <a href="" class="btn btn-success" data-bs-toggle="modal"
                                     data-bs-target="#addEmployeeModal">
-                                    <img class="align-items-center" src="/static/img/plus.svg" alt="" width="20px"
+                                    <img class="align-items-center" src="{{ url_for('static', filename='img/plus.svg')   }}" alt="" width="20px"
                                         height="20px" style="margin-top:-2px;">
                                     <span>Agregar administrador</span></a>
                             </div>
@@ -47,10 +47,10 @@
                             <td>{{adm.correoAd}}</td>
                             <td>
                                 <a href="#editEmployeeModal" class="btn-edit edit linkIcono" data-bs-toggle="modal">
-                                    <img class="Icono" src="/static/img/edit.svg" alt="Editar">
+                                    <img class="Icono" src="{{ url_for('static', filename='img/edit.svg')   }}" alt="Editar">
                                 </a>
                                 <a href="#deleteEmployeeModal" class="delete linkIcono" data-bs-toggle="modal">
-                                    <img class="Icono" src="/static/img/trash.svg" alt="Editar">
+                                    <img class="Icono" src="{{ url_for('static', filename='img/trash.svg')   }}" alt="Editar">
                                 </a>
                             </td>
                         </tr>
@@ -74,7 +74,7 @@
                     <div class="modal-body">
 
                         <!-- Formulario -->
-                        <form id="AgregarAdministrador" class="row g-3" action="/CrearCuentaAdmin" method="POST"
+                        <form id="AgregarAdministrador" class="row g-3" action="{{ url_for('crearCuentaAdmin') }}" method="POST"
                             enctype="multipart/form-data">
                             <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
 
@@ -164,7 +164,7 @@
 
                     <div class="modal-body">
 
-                        <form id="editAdmin" action="/EditarCuentaAdmin" method="POST" enctype="multipart/form-data">
+                        <form id="editAdmin" action="{{ url_for('editarCuentaAdmin') }}" method="POST" enctype="multipart/form-data">
 
                             <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
                             <input type="hidden" name="idAd" value="{{datosAd.idAd}}">
@@ -216,7 +216,7 @@
                     </div>
 
                     <div class="modal-body">
-                        <form id="deleteAdmin" action="/EliminarCuentaAdmin" method="POST">
+                        <form id="deleteAdmin" action="{{ url_for('eliminarCuentaAdmin') }}" method="POST">
                             <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
                             <input type="hidden" name="idAd" value="">
                             <div class="container">

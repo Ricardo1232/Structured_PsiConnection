@@ -11,7 +11,7 @@
         {% for cita in datosPrac %}
         <a href="{{ url_for('calendario', idPrac=cita.idPrac) }}" class="link-card-practicante">
             <div class="card card-practicante">
-                <img src="/static/img/{{cita.fotoPrac}}" class="card-img-top" alt="...">
+                <img src="{{ url_for('static', filename= 'img/' + cita.fotoPrac) }}" class="card-img-top" alt="...">
                 <div class="card-body">
                     <h5 class="card-title text-center">Practicante</h5>
 

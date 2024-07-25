@@ -1,5 +1,5 @@
 <header class="section">
-    <img class="imagen" src="/static/img/Fondos-de-pantalla-de-paisajes-naturales29.jpg" alt="Fondo superior">
+    {#<img class="imagen" src="/static/img/Fondos-de-pantalla-de-paisajes-naturales29.jpg" alt="Fondo superior">#}
     <section class="preloader">
         <div class="spinner">
             <span class="spinner-rotate"></span>
@@ -81,17 +81,17 @@
             <div class="row">
 
 
-                <!-- Esta clase solo debe de estar en los index -->
+                {% if request.path in ['/IndexAdministrador'] %}
                 <div class="col-lg-7 col-12">
                     <div class="hero-text">
                         <div class="espacio"></div>
                         <div class="hero-title-wrap d-flex align-items-center mb-4">
                             <h1 class="hero-title ms-3 mb-0">¡Bienvenido!</h1>
                         </div>
-                        <h2 class="text-center">{{username}}</h2>
+                        <h2 class="text-center">{{ username }}</h2>
                     </div>
                 </div>
-
+                {% endif %}
 
                 <div class="custom-shape-divider-top-1682744544">
                     <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"

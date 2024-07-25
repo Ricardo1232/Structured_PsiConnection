@@ -32,15 +32,13 @@
                                 <td>{{datos.nombrePaci}} {{datos.apellidoPPaci}} {{datos.apellidoMPaci}}</td>
                                 <td>{{datos.correoPrac}}</td>
                                 <td>{{datos.codigoUPrac}}</td>
-                                <td> <a href="/VerResultadosEncuesta/{{datos.idEncu}}">Ver Encuesta</a> </td>
+                                <td> <a href="{{ url_for('verResultadosEncuesta', idEncu=datos.idEncu) }}">Ver Encuesta</a> </td>
+
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
-
-            <!--**** Este section es lo que debe de cambiar en todos los html ******-->
-
         </section>
 {% endblock %}

@@ -44,15 +44,16 @@ def verify_code(mysql, session, dicc_verify, user_code):
         with mysql.connection.cursor() as cur:
             for clave, u in dicc_verify.items():
                 cur.execute(f"SELECT * FROM {u[0]} WHERE {u[1]}=%s", [user_code])
-                if cur.rowcount > 0:
+                result = cur.fetchone()
+                
+                if result:
                     # Si el código es correcto, actualizar el campo "verificado" a 1
                     cur.execute(f"UPDATE {u[0]} SET {u[2]} = %s, {u[3]} = %s WHERE {u[1]} = %s", (2, 1, user_code))
                     mysql.connection.commit()
-                    flash("Registro completado con éxito", 'success')
                     session.clear()
                     return True
     except Exception as e:
-        pass
+        print(f"Error: {e}")  # Imprimir el error para depuración
     return False
 
 # FUNCION QUE CREA EL CODIGO DE SGURIDAD

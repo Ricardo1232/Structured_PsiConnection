@@ -14,7 +14,10 @@ Error al editar nombre
     amd_pract -- ya
     indx_sup  -- ya
 
-    verificar, por favor.
+    --- verificar, por favor si el pattern esta bien en la cantidad maxima de caracteres. --- 
+
+    Agregar a todos los intpus el atributo  maxlength="XX" para que el usuario no escriba mas de lo necesario, solo en los intpus type text, no en contraseñas y correos.
+    --- comprobar si faltan ---
 -----------------------------------------------------------
 Login cambiar el minimo de caracteres para evitar problema en BD
 probar
@@ -27,23 +30,32 @@ Arreglar las citas
 calendario
     formato de la semanas en inlineblock
     cambiar horas para ser eliminadas automaticamente cuando pase la fecha actual
-
     estilos
 
 -----------------------------------------------------------
 crear cita 
-    comprobar funcionalidad
+    --- comprobar funcionalidad ---
 -----------------------------------------------------------
-Agregar a todos los intpus el atributo  maxlength="XX" para que el usuario no escriba mas de lo necesario.
-comprobar si faltan
 
 
 ----------------------------------------------------------------------------------------
 En las vistas asociadas a las contraseñas, mejorar la visualizacion (visible o no visible) y comparacion de las contraseñas.
+---------------------------------------------------------------------------------
+Sobre el js ordenado, dividirlo en diferentes archivos asociados a cada vista, asi solo cargando lo escencial a cada vista.
+        Migrar todo el js y actualizarlo.
 
 
 
 -------------------------- Aparte ----------------------------
 Modifique varias funciones en el apartado de conexion con la base de datos, usando el with esta mejor optimizado, usando try y except junto con los with para liberar los recursos.
+
+
+
+
+
+agregar_practicante.html ya tiene su js                    - corregido
+verify no funcionaban los flashes y daba errores           - corregido
+mensaje de bienvenida en solo los index's                  - corregido
+url_for todas las urls                                     - corregido
 
 

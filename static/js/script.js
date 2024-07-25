@@ -1,6 +1,5 @@
 /*global $, document, window, setTimeout, navigator, console, location*/
 $(document).ready(function () {
-
     'use strict';
 
     var usernameError = true,
@@ -18,13 +17,11 @@ $(document).ready(function () {
 
     // Label effect
     $('input').focus(function () {
-
         $(this).siblings('label').addClass('active');
     });
 
     // Form validation
     $('input').blur(function () {
-
         // User Name
         if ($(this).hasClass('name')) {
             if ($(this).val().length === 0) {
@@ -53,7 +50,7 @@ $(document).ready(function () {
             }
         }
 
-         // Apellido Materno
+        // Apellido Materno
         if ($(this).hasClass('apellidom')) {
             if ($(this).val().length === 0) {
                 $(this).siblings('span.error').text('Porfavor ingrese su Apellido Materno').fadeIn().parent('.form-group').addClass('hasError');
@@ -67,8 +64,7 @@ $(document).ready(function () {
             }
         }
 
-
-        //Fecha_de_nacimiento, el tipo de input es un date
+        //Fecha de nacimiento, el tipo de input es un date
         if ($(this).hasClass('fecha_nacimiento')) {
             if ($(this).val().length === 0) {
                 $(this).siblings('span.error').text('Porfavor ingrese su fecha de nacimiento').fadeIn().parent('.form-group').addClass('hasError');
@@ -78,7 +74,6 @@ $(document).ready(function () {
                 fechaError = false;
             }
         }
-
 
         // Sexo, el valor de sexo es un select
         if ($(this).hasClass('sexo')) {
@@ -104,6 +99,7 @@ $(document).ready(function () {
                 emailError = false;
             }
         }
+
         // PassWord
         if ($(this).hasClass('pass')) {
             if ($(this).val().length < 8) {
@@ -132,7 +128,6 @@ $(document).ready(function () {
         }
     });
 
-
     // form switch
     $('a.switch').click(function (e) {
         $(this).toggleClass('active');
@@ -145,9 +140,7 @@ $(document).ready(function () {
         }
     });
 
-
     //Alertas
-
     $(document).ready(function () {
         console.log('ready');
         // Mostrar las alertas con animación
@@ -167,62 +160,17 @@ $(document).ready(function () {
     // Crear una variable que almacene el elemento input
     var inputFecha = document.getElementById("fecha_nacimiento");
 
-    // Añadir un evento "change" al elemento input
-    inputFecha.addEventListener("change", function() {
-    // Dentro de la función, comprobar si el valor es una cadena vacía
-    if (inputFecha.value === "") {
-        // Si es así, cambiar el estilo del elemento input a transparente
-        inputFecha.style.color = "transparent";
-    } else {
-        // Si no, cambiar el estilo del elemento input a rojo
-        inputFecha.style.color = "black";
-    }
-    });
-
-
-
-
-});
-
-
-
-
-/* Form submit
-$('form.signup-form').submit(function (event) {
-    
-
-    if (usernameError == true || emailError == true || passwordError == true || passConfirm == true) {
-        $('.name, .email, .pass, .passConfirm').blur();
-    } else {
-        // Obtener los datos del formulario
-        var formData = {
-            'email': $('input[name=email]').val(),
-            'password': $('input[name=password]').val(),
-            'action': 'register'
-        };
-        
-        // Enviar los datos del formulario a la ruta /pythonlogin
-        $.ajax({
-            type: 'POST',
-            url: '/pythonlogin',
-            data: formData,
-            dataType: 'json',
-            encode: true
-        }).done(function(data) {
-            // Manejar la respuesta del servidor
-            // ...
-        });
-        
-            $('.signup, .login').addClass('switched');
-
-            setTimeout(function () { $('.signup, .login').hide(); }, 700);
-            setTimeout(function () { $('.brand').addClass('active'); }, 300);
-            setTimeout(function () { $('.heading').addClass('active'); }, 600);
-            setTimeout(function () { $('.success-msg p').addClass('active'); }, 900);
-            setTimeout(function () { $('.success-msg a').addClass('active'); }, 1050);
-            setTimeout(function () { $('.form').hide(); }, 700);
+    // Añadir una verificación antes de añadir el evento "change"
+    if (inputFecha) {
+        inputFecha.addEventListener("change", function() {
+            // Dentro de la función, comprobar si el valor es una cadena vacía
+            if (inputFecha.value === "") {
+                // Si es así, cambiar el estilo del elemento input a transparente
+                inputFecha.style.color = "transparent";
+            } else {
+                // Si no, cambiar el estilo del elemento input a negro
+                inputFecha.style.color = "black";
+            }
         });
     }
 });
-Mensaje recibido.
-*/

@@ -8,7 +8,7 @@
 
             <div class="mycard card">
                 <div class="nombre ">
-                    <img class="img-otro" src="/static/img/users-solid.svg">
+                    <img class="img-otro" src="{{ url_for('static', filename= 'img/users-solid.svg') }}">
                     <h2>Pacientes</h2>
                     <hr>
                     <div>
@@ -19,29 +19,29 @@
 
             <div class="mycard">
                 <div class="nombre ">
-                    <img class="img-otro" src="/static/img/user-nurse-solid.svg">
+                    <img class="img-otro" src="{{ url_for('static', filename= 'img/user-nurse-solid.svg') }}">
                     <h2>Practicantes</h2>
                     <hr>
                     <div>
-                        <a href="{{url_for('verPracticantesAdm')}}" class="saber">Acceder</a>
+                        <a href="{{ url_for('verPracticantesAdm') }}" class="saber">Acceder</a>
                     </div>
                 </div>
             </div>
 
             <div class="mycard ">
                 <div class="nombre ">
-                    <img class="img-otro" src="/static/img/user-tie-solid.svg">
+                    <img class="img-otro" src="{{ url_for('static', filename= 'img/user-tie-solid.svg') }}">
                     <h2>Supervisores</h2>
                     <hr>
                     <div>
-                        <a href="{{url_for('verSupervisor')}}" class="saber">Acceder</a>
+                        <a href="{{ url_for('verSupervisor') }}" class="saber">Acceder</a>
                     </div>
                 </div>
             </div>
 
             <div class="mycard ">
                 <div class="nombre ">
-                    <img class="img-otro" src="/static/img/user-secret-solid.svg">
+                    <img class="img-otro" src="{{ url_for('static', filename= 'img/user-secret-solid.svg') }}">
                     <h2>Administradores</h2>
                     <hr>
                     <div>

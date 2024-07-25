@@ -16,7 +16,7 @@
                             <div class="ms-4">
                                 <a href="" class="btn btn-success align-items-center" data-bs-toggle="modal"
                                     data-bs-target="#addEmployeeModal">
-                                    <img class="align-items-center" src="/static/img/plus.svg" alt="" width="20px"
+                                    <img class="align-items-center" src="{{ url_for('static', filename= 'img/plus.svg') }}" alt="" width="20px"
                                         height="20px" style="margin-top:-2px;">
                                     <span>Agregar supervisor</span></a>
                             </div>
@@ -47,10 +47,10 @@
                             <td>{{sup.correoSup}}</td>
                             <td>
                                 <a href="#editEmployeeModal" class="btn-edit edit linkIcono" data-bs-toggle="modal">
-                                    <img class="Icono" src="/static/img/edit.svg" alt="Editar">
+                                    <img class="Icono" src="{{ url_for('static', filename= 'img/edit.svg') }}" alt="Editar">
                                 </a>
                                 <a href="#deleteEmployeeModal" class="delete linkIcono" data-bs-toggle="modal">
-                                    <img class="Icono" src="/static/img/trash.svg" alt="Editar">
+                                    <img class="Icono" src="{{ url_for('static', filename= 'img/trash.svg') }}" alt="Editar">
                                 </a>
                             </td>
                         </tr>
@@ -70,7 +70,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     </div>
                     <div class="modal-body">
-                        <form class="row g-3" action="/CrearCuentaSupervisor" id="AgregarSupervisor" method="POST"
+                        <form class="row g-3" action="{{ url_for('crearCuentaSupervisor') }}" id="AgregarSupervisor" method="POST"
                             enctype="multipart/form-data">
                             <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
 
@@ -135,12 +135,12 @@
                                     onclick="togglePasswordVisibility('contraSup_confirm', 'toggleConfirmPassword')">Mostrar</button>
                             </div>
 
+                        </div>
                             <div class="modal-footer">
                                 <input type="button" class="btn btn-default" data-bs-dismiss="modal" value="Cancelar">
                                 <input type="submit" class="btn btn-info" value="Guardar">
                             </div>
                         </form>
-                    </div>
                 </div>
             </div>
         </div>
@@ -156,7 +156,7 @@
                     </div>
 
                     <div class="modal-body">
-                        <form id="editSup" action="/EditarCuentaSupervisor" method="POST" enctype="multipart/form-data">
+                        <form id="editSup" action="{{ url_for('editarCuentaSupervisor') }}" method="POST" enctype="multipart/form-data">
 
                             <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
                             <input type="hidden" name="idSup">
@@ -208,13 +208,13 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="deleteSup" action="/EliminarCuentaSupervisor" method="POST">
+                        <form id="deleteSup" action="{{ url_for('eliminarCuentaSupervisor') }}" method="POST">
                             <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
                             <input type="hidden" name="idSup" value="">
                             <div class="container">
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <img src="/static/img/PELIGRO 2@2x.png" alt="Ver Expediente" width="80px"
+                                        <img src="{{ url_for('static', filename= 'img/PELIGRO 2@2x.png') }}" alt="Ver Expediente" width="80px"
                                             style=" float: left; margin-right: 30px; margin-left: 20px;">
                                     </div>
 

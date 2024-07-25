@@ -5,7 +5,7 @@
 
         <section class="sect">
             <h2 class="text-center">Registro de Practicantes</h2>
-            <form id="agregarPacticante" class="row g-3 justify-content-center" action="/CrearCuentaPracticantes"
+            <form id="agregarPracticante" class="row g-3 justify-content-center" action="{{ url_for('crearCuentaPracticantes') }}"
                 method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
 
@@ -56,22 +56,18 @@
                 <div class="col-md-4 password-toggle-container">
                     <label for="contraPrac" class="form-group">Contraseña</label>
                     <input name="contraPrac" id="contraPrac" type="password" class="form-control border border-dark"
-                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{'?/:;.,]).{8,}" required
-                        title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
-                    <button type="button" id="togglePassword" class="password-toggle-button"
-                        onclick="togglePasswordVisibility('password', 'togglePassword')">Mostrar</button>
-
+                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;,.]).{8,}"
+                    required
+                    title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
+                    <button type="button" id="togglePassword" class="password-toggle-button">Mostrar</button>
                 </div>
-
+                
                 <div class="col-md-4 password-toggle-container">
-                    <label for="contraseña" class="form-group">Confirmar Contraseña</label>
-                    <input name="confirmPassword" id="confirmPassword" type="password"
-                        class="form-control border border-dark"
-                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{'?/:;.,]).{8,}" required
-                        oninput="checkPasswordMatch()"
-                        title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
-                    <button type="button" id="toggleConfirmPassword" class="password-toggle-button"
-                        onclick="togglePasswordVisibility('confirmPassword', 'toggleConfirmPassword')">Mostrar</button>
+                    <label for="confirmPassword" class="form-group">Confirmar Contraseña</label>
+                    <input name="confirmPassword" id="confirmPassword" type="password" class="form-control border border-dark"
+                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;,.]).{8,}" required                        
+                    title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
+                    <button type="button" id="toggleConfirmPassword" class="password-toggle-button">Mostrar</button>
                 </div>
 
                 <div class="col-md-4">
@@ -113,7 +109,7 @@
                 </div>
 
                 <div class="row  justify-content-center align-items-center ml-5">
-                    <div class="col-auto mt-5 ml-5"><a href="/templates/supervisor/index_supervisor.html"><button
+                    <div class="col-auto mt-5 ml-5"><a href="{{ url_for('indexSupervisor') }}"><button
                                 class="btn btn-secondary col-auto" type="button">Cancelar</button></a></div>
                     <div class="col-auto mt-5 ml-5"><button class="btn btn-primary col-auto"
                             type="submit">Enviar</button></div>
@@ -121,5 +117,5 @@
                 </div>
             </form>
         </section>
-
+        {#<script src="{{ url_for('static', filename= 'js/agregar_practicante.js')   }}"></script>#}
 {% endblock %}

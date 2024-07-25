@@ -15,7 +15,7 @@
                             </div>
                             <div class="ms-4">
                                 <a href="{{ url_for('agregarPracticante') }}" class="btn btn-success">
-                                    <img class="align-items-center" src="/static/img/plus.svg" alt="" width="20px"
+                                    <img class="align-items-center" src="{{ url_for('static', filename= 'img/plus.svg') }}" alt="" width="20px"
                                         height="20px" style="margin-top:-2px;">
                                     <span>Agregar practicante</span></a>
                             </div>
@@ -47,7 +47,7 @@
                             <td>{{sup.correoPrac}}</td>
                             <td>
                                 <a href="/VerEncuestasPracticante/{{sup.idPrac}}" class="btn btn-success">
-                                    <img class="Icono" src="/static/img/encuesta.svg" alt="">
+                                    <img class="Icono" src="{{ url_for('static', filename= 'img/encuesta.svg') }}" alt="">
                                     <span>Encuestas</span>
                                 </a>
                             </td>
@@ -55,10 +55,10 @@
                                 <!-- ------------------------ Tomar este para todos los botones ------------------------ -->
 
                                 <a href="#editEmployeeModal" class="btn-edit edit linkIcono" data-bs-toggle="modal">
-                                    <img class="Icono" src="/static/img/edit.svg" alt="Editar">
+                                    <img class="Icono" src="{{ url_for('static', filename= 'img/edit.svg') }}" alt="Editar">
                                 </a>
                                 <a href="#deleteEmployeeModal" class="delete linkIcono" data-bs-toggle="modal">
-                                    <img class="Icono" src="/static/img/trash.svg" alt="Editar">
+                                    <img class="Icono" src="{{ url_for('static', filename= 'img/trash.svg') }}" alt="Editar">
                                 </a>
 
                                 <!-- ------------------------ Tomar este para todos los botones ------------------------ -->
@@ -124,7 +124,7 @@
                     </div>
 
                     <div class="modal-body">
-                        <form id="editPrac" action="/EditarCuentaPracticantesSup" method="POST"
+                        <form id="editPrac" action="{{ url_for('editarCuentaPracticantesSup') }}" method="POST"
                             enctype="multipart/form-data">
 
                             <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
@@ -180,7 +180,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="deletePrac" action="/EliminarCuentaPracticantesSup" method="POST">
+                        <form id="deletePrac" action="{{ url_for('eliminarCuentaPracticantesSup') }}" method="POST">
 
                             <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
                             <input type="hidden" name="idPrac" value="">
@@ -188,7 +188,7 @@
                             <div class="container">
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <img src="/static/img/PELIGRO 2@2x.png" alt="Ver Expediente" width="80px"
+                                        <img src="{{ url_for('static', filename= 'img/PELIGRO 2@2x.png') }}" alt="Ver Expediente" width="80px"
                                             style=" float: left; margin-right: 30px; margin-left: 20px;">
                                     </div>
 

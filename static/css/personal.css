@@ -695,7 +695,7 @@ hr {
   padding: 20px;
 }
 .labeEncuestaPaci{
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
 }
 .botonEncuestaPaci{
   transform: scaleX(1.5)  scaleY(1.3);

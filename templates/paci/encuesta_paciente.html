@@ -4,12 +4,10 @@
 
     <section class="sect">
 
-        <!--***Este section es lo que debe de cambiar en todos los html *****-->
-
         <h2 class="text-center">Encuesta de Satisfacción</h2>
         <h3 class="text-center">Practicante: {{nombrePrac}} {{apellidoPPrac}} {{apellidoMPrac}}</h3>
 
-        <form id="EncuestaPaci" action="/ContestarEncuesta" method="POST" enctype="multipart/form-data">
+        <form id="EncuestaPaci" action="{{ url_for('contestarEncuesta') }}" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
             <input type="hidden" name="idCita" value="{{idCita}}">
             <input type="hidden" name="idPrac" value="{{idPrac}}">
@@ -126,7 +124,6 @@
             </div>
         </form>
 
-        <!--**** Este section es lo que debe de cambiar en todos los html ******-->
 
     </section>
 

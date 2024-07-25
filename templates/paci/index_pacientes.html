@@ -10,14 +10,14 @@
                 {% if cit == None %}
                 <div>
                     <p>Haga click en el boton de abajo para agendar una cita con nuestros psicologos.</p>
-                    <a href="/AgendarCita" class="btn btn-success" style="transform: scaleX(1.2) scaleY(1.3);">Agendar
+                    <a href="{{ url_for('agendarCita') }}" class="btn btn-success" style="transform: scaleX(1.2) scaleY(1.3);">Agendar
                         cita</a>
                 </div>
                 {% else %}
                 {% if citaRealizada == 1 %}
                 <div>
                     <p>Responda la encuesta para poder agendar un nueva cita.</p>
-                    <a href="/EncuestaPaciente" class="btn btn-success"
+                    <a href="{{ url_for('encuestaPaciente') }}" class="btn btn-success"
                         style="transform: scaleX(1.2) scaleY(1.3);">Encuesta</a>
                 </div>
                 {% endif %}
@@ -56,7 +56,7 @@
                                 <td>{{cita.direCita}}</td>
                                 <td>
                                     <a href="#deleteEmployeeModal" class="delete linkIcono" data-bs-toggle="modal">
-                                        <img class="Icono" src="/static/img/trash.svg" alt="Eliminar">
+                                        <img class="Icono" src="{{ url_for('static', filename= 'img/trash.svg') }}" alt="Eliminar">
                                     </a>
                                 </td>
                             </tr>
@@ -79,7 +79,7 @@
                         </div>
 
                         <div class="modal-body">
-                            <form id="borrarCita" action="/EliminarCitaPaciente" method="POST">
+                            <form id="borrarCita" action="{{ url_for('eliminarCitaPaciente') }}" method="POST">
                                 <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
                                 <input type="hidden" name="idCita" value="">
                                 <input type="hidden" name="eventoCita" value="">
@@ -88,7 +88,7 @@
                                 <div class="container">
                                     <div class="row">
                                         <div class="col-lg-6">
-                                            <img src="/static/img/PELIGRO 2@2x.png" alt="Ver Expediente" width="80px"
+                                            <img src="{{ url_for('static', filename= 'img/PELIGRO 2@2x.png') }}" alt="Ver Expediente" width="80px"
                                                 style=" float: left; margin-right: 30px; margin-left: 20px;">
                                         </div>
 

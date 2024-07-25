@@ -38,10 +38,12 @@
                             <td>{{prac.correoPrac}}</td>
                             <td>
                                 <a href="#editEmployeeModal" class="btn-edit edit linkIcono" data-bs-toggle="modal">
-                                    <img class="Icono" src="/static/img/edit.svg" alt="Editar">
+                                    <img class="Icono" src="{{ url_for('static', filename= 'img/edit.svg')
+   }}" alt="Editar">
                                 </a>
                                 <a href="#deleteEmployeeModal" class="delete linkIcono" data-bs-toggle="modal">
-                                    <img class="Icono" src="/static/img/trash.svg" alt="Editar">
+                                    <img class="Icono" src="{{ url_for('static', filename= 'img/trash.svg')
+   }}" alt="Editar">
                                 </a>
                             </td>
                         </tr>
@@ -63,7 +65,7 @@
                     </div>
 
                     <div class="modal-body">
-                        <form id="editPrac" action="/EditarCuentaPracticantesAdm" method="POST"
+                        <form id="editPrac" action="{{ url_for('editarCuentaPracticantesAdm') }}" method="POST"
                             enctype="multipart/form-data">
 
                             <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
@@ -115,13 +117,14 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="deletePrac" action="/EliminarCuentaPracticantesAdm" method="POST">
+                        <form id="deletePrac" action="{{ url_for('eliminarCuentaPracticantesAdm') }}" method="POST">
                             <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
                             <input type="hidden" name="idPrac" value="">
                             <div class="container">
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <img src="/static/img/PELIGRO 2@2x.png" alt="Ver Expediente" width="80px"
+                                        <img src="{{ url_for('static', filename= 'img/PELIGRO 2@2x.png')
+   }}" alt="Ver Expediente" width="80px"
                                             style=" float: left; margin-right: 30px; margin-left: 20px;">
                                     </div>
 
