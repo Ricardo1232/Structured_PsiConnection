@@ -106,44 +106,66 @@ if (currentUrl == "/VerAdministrador") {
     });
     // ------------------------------------ End Eliminar administrador ------------------------------------ //
 
-    // ------------------------------------ Correo Supervisor ------------------------------------ //
-    const editableInputAdm = document.getElementById('input-editable');
-    const readonlyInputAdm = document.getElementById('input-readonly');
-    const combinedInputAdm = document.getElementById('correoAd');
+    // ------------------------------------ Correo y contraseña Administrador ------------------------------------ //
+    const password = document.getElementById("contraAd");
+    const confirmPassword = document.getElementById("contraAd_confirm");
 
-    // Función para combinar los valores de los dos inputs
-    function combineInputs() {
-        const editableValue = editableInputAdm.value;
-        const readonlyValue = readonlyInputAdm.value;
-        combinedInputAdm.value = `${editableValue}${readonlyValue}`;
-        console.log(combinedInputAdm.value);
-    }
-
-    // Asignar el valor del input combinado antes de hacer el submit
-    document.getElementById('AgregarAdministrador').addEventListener('submit', function (event) {
-        combineInputs();
-    });
-
-    // Escuchar cambios en los dos inputs y actualizar el input combinado
-    editableInputAdm.addEventListener('input', combineInputs);
-    readonlyInputAdm.addEventListener('input', combineInputs);
-
-
-
-    // ------------------------------------ End Correo Supervisor ------------------------------------ //
-
-    // ------------------------------------- Contraseñas administrador ------------------------------------ //
-    function checkPasswordMatch() { //administrador
-        var password = document.getElementById("contraAd").value;
-        var confirmPassword = document.getElementById("contraAd_confirm").value;
-
-        if (password !== confirmPassword) {
-            document.getElementById("contraAd_confirm").setCustomValidity("Las contraseñas no coinciden");
+    // Función para verificar si las contraseñas coinciden
+    function checkPasswordMatch() {
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Las contraseñas no coinciden');
         } else {
-            document.getElementById("contraAd_confirm").setCustomValidity("");
+            confirmPassword.setCustomValidity('');
         }
     }
-    // ---------------------------------- End Contraseñas administrador ----------------------------------- //
+
+    // Evento para el botón de mostrar/ocultar contraseña
+    document.getElementById("togglePassword").addEventListener("click", function() {
+        togglePasswordVisibility('contraAd', 'togglePassword');
+    });
+
+    document.getElementById("toggleConfirmPassword").addEventListener("click", function() {
+        togglePasswordVisibility('contraAd_confirm', 'toggleConfirmPassword');
+    });
+
+    // Evento para verificar la coincidencia de contraseñas al escribir
+    password.addEventListener('input', checkPasswordMatch);
+    confirmPassword.addEventListener('input', checkPasswordMatch);
+
+    // Función para mostrar/ocultar contraseña
+    function togglePasswordVisibility(passwordId, toggleButtonId) {
+        const passwordInput = document.getElementById(passwordId);
+        const toggleButton = document.getElementById(toggleButtonId);
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleButton.textContent = "Ocultar";
+        } else {
+            passwordInput.type = "password";
+            toggleButton.textContent = "Mostrar";
+        }
+    }
+
+    // Evento para manejar el submit del formulario
+    document.getElementById('AgregarAdministrador').addEventListener('submit', function(event) {
+        var leftInput = document.getElementById('input-editable').value;
+        var rightInput = document.getElementById('input-readonly').value;
+        document.getElementById('correoAd').value = leftInput + rightInput;
+
+        var passwordValue = document.getElementById('contraAd').value;
+        var confirmPasswordValue = document.getElementById('contraAd_confirm').value;
+
+        // Patrón de la contraseña
+        var passwordPattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;,.]).{8,}$/;
+
+        if (!passwordPattern.test(passwordValue)) {
+            alert('La contraseña no cumple con los requisitos. Debe tener al menos 8 caracteres, una mayúscula y un carácter especial');
+            event.preventDefault();
+        } else if (passwordValue !== confirmPasswordValue) {
+            alert('Las contraseñas no coinciden.');
+            event.preventDefault();
+        }
+    });
+    // ---------------------------------- End Correo y contraseña administrador ----------------------------------- //
 }
 // ------------------------------------------- End Administrador ------------------------------------------- //
 // ------------------------------------------- End Administrador ------------------------------------------- //
@@ -213,44 +235,67 @@ if (currentUrl == "/VerSupervisor") {
     });
     // ------------------------------------ End Eliminar Supervisor ------------------------------------ //
 
-    // ------------------------------------ Correo Supervisor ------------------------------------ //
-    const editableInputSup = document.getElementById('input-editable');
-    const readonlyInputSup = document.getElementById('input-readonly');
-    const combinedInputSup = document.getElementById('correoSup');
+    // ------------------------------------ Correo y contraseña Supervisor ------------------------------------ //
+    const password = document.getElementById("contraSup");
+    const confirmPassword = document.getElementById("contraSup_confirm");
 
-    // Función para combinar los valores de los dos inputs
-    function combineInputs() {
-        const editableValue = editableInputSup.value;
-        const readonlyValue = readonlyInputSup.value;
-        combinedInputSup.value = `${editableValue}${readonlyValue}`;
-        console.log(combinedInputSup.value);
-    }
-
-    // Asignar el valor del input combinado antes de hacer el submit
-    document.getElementById('AgregarSupervisor').addEventListener('submit', function (event) {
-        combineInputs();
-    });
-
-    // Escuchar cambios en los dos inputs y actualizar el input combinado
-    editableInputSup.addEventListener('input', combineInputs);
-    readonlyInputSup.addEventListener('input', combineInputs);
-
-
-    // ------------------------------------ End Correo Supervisor ------------------------------------ //
-
-
-    // ----------------------------------------- Supervisor Contraseña ----------------------------------------- //
-    function checkPasswordMatch() { //supervisor
-        var password = document.getElementById("contraSup").value;
-        var confirmPassword = document.getElementById("contraSup_confirm").value;
-
-        if (password !== confirmPassword) {
-            document.getElementById("contraSup_confirm").setCustomValidity("Las contraseñas no coinciden");
+    // Función para verificar si las contraseñas coinciden
+    function checkPasswordMatch() {
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Las contraseñas no coinciden');
         } else {
-            document.getElementById("contraSup_confirm").setCustomValidity("");
+            confirmPassword.setCustomValidity('');
         }
     }
-    // ----------------------------------------- End Supervisor Contraseña ----------------------------------------- //
+
+    // Evento para el botón de mostrar/ocultar contraseña
+    document.getElementById("togglePassword").addEventListener("click", function() {
+        togglePasswordVisibility('contraSup', 'togglePassword');
+    });
+
+    document.getElementById("toggleConfirmPassword").addEventListener("click", function() {
+        togglePasswordVisibility('contraSup_confirm', 'toggleConfirmPassword');
+    });
+
+    // Evento para verificar la coincidencia de contraseñas al escribir
+    password.addEventListener('input', checkPasswordMatch);
+    confirmPassword.addEventListener('input', checkPasswordMatch);
+
+    // Función para mostrar/ocultar contraseña
+    function togglePasswordVisibility(passwordId, toggleButtonId) {
+        const passwordInput = document.getElementById(passwordId);
+        const toggleButton = document.getElementById(toggleButtonId);
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleButton.textContent = "Ocultar";
+        } else {
+            passwordInput.type = "password";
+            toggleButton.textContent = "Mostrar";
+        }
+    }
+
+    // Evento para manejar el submit del formulario
+    document.getElementById('AgregarSupervisor').addEventListener('submit', function(event) {
+        var leftInput = document.getElementById('input-editable').value;
+        var rightInput = document.getElementById('input-readonly').value;
+        document.getElementById('correoSup').value = leftInput + rightInput;
+
+        var passwordValue = document.getElementById('contraSup').value;
+        var confirmPasswordValue = document.getElementById('contraSup_confirm').value;
+
+        // Patrón de la contraseña
+        var passwordPattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;,.]).{8,}$/;
+
+        if (!passwordPattern.test(passwordValue)) {
+            alert('La contraseña no cumple con los requisitos. Debe tener al menos 8 caracteres, una mayúscula y un carácter especial');
+            event.preventDefault();
+        } else if (passwordValue !== confirmPasswordValue) {
+            alert('Las contraseñas no coinciden.');
+            event.preventDefault();
+        }
+    });
+
+    // ----------------------------------------- End Supervisor Contraseña y Correo ----------------------------------------- //
 }
 // ------------------------------------------- End Supervisor ------------------------------------------- //
 // ------------------------------------------- End Supervisor ------------------------------------------- //
@@ -390,76 +435,102 @@ if (currentUrl == "/VerPacientesAdm") {
 // ------------------------------------------- End Paciente  ------------------------------------------- //
 // ------------------------------------------- End Paciente  ------------------------------------------- //
 
+// ------------------------------------------- Agregar Practicante  ------------------------------------------- //
+// ------------------------------------------- Agregar Practicante  ------------------------------------------- //
 if (currentUrl == "/AgregarPracticante") {
     console.log('Agregar practicante');
-    // ------------------------------------ Correo practicante ------------------------------------ //
-    const editableInputPrac = document.getElementById('input-editable');
-    const readonlyInputPrac = document.getElementById('input-readonly');
-    const combinedInputPrac = document.getElementById('correoPrac');
+    document.addEventListener("DOMContentLoaded", function() {
 
-    // Función para combinar los valores de los dos inputs
-    function combineInputs() {
-        const editableValue = editableInputPrac.value;
-        const readonlyValue = readonlyInputPrac.value;
-        combinedInputPrac.value = `${editableValue}${readonlyValue}`;
-        console.log(combinedInputPrac.value);
-    }
-
-    // Asignar el valor del input combinado antes de hacer el submit
-    document.getElementById('agregarPacticante').addEventListener('submit', function (event) {
-        combineInputs();
-    });
-
-    // Escuchar cambios en los dos inputs y actualizar el input combinado
-    editableInputPrac.addEventListener('input', combineInputs);
-    readonlyInputPrac.addEventListener('input', combineInputs);
-
-
-    // ------------------------------------ End Correo Practicante ------------------------------------ //
-
-    // ------------------------------------ Contraseña practicante ------------------------------------ //
-
-    function checkPasswordMatch() {
-        var password = document.getElementById("contraPrac").value;
-        var confirmPassword = document.getElementById("confirmPassword").value;
-
-        if (password !== confirmPassword) {
-            document.getElementById("confirmPassword").setCustomValidity("Las contraseñas no coinciden");
-        } else {
-            document.getElementById("confirmPassword").setCustomValidity("");
+        var fechaActual = new Date();
+    
+        // Restar 18 años a la fecha actual
+        var fechaHace18Anios = new Date(fechaActual.getFullYear() - 18, fechaActual.getMonth(), fechaActual.getDate());
+      
+        // Obtener el campo de entrada de fecha
+        var fechaInput = document.getElementById('fechaNacPrac');
+      
+        // Establecer la fecha máxima permitida en el campo de entrada
+        fechaInput.max = fechaHace18Anios.toISOString().split('T')[0];
+        
+        // Validar la fecha seleccionada cada vez que cambie el valor del campo de entrada
+        fechaInput.addEventListener('input', function () {
+          var fechaSeleccionada = new Date(this.value);
+      
+          if (fechaSeleccionada > fechaHace18Anios) {
+            // La fecha seleccionada es menor a 18 años antes de la fecha actual
+            console.log('La fecha seleccionada no cumple con la restricción de edad mínima.');
+            // Aquí puedes agregar acciones adicionales, como mostrar un mensaje de error al usuario.
+          } else {
+            // La fecha seleccionada es mayor o igual a 18 años antes de la fecha actual
+            console.log('La fecha seleccionada cumple con la restricción de edad mínima.');
+            // Aquí puedes realizar las acciones adicionales necesarias en caso de que la fecha sea válida.
+          }
+        });
+    
+    
+        const password = document.getElementById("contraPrac");
+        const confirmPassword = document.getElementById("confirmPassword");
+    
+        // Función para verificar si las contraseñas coinciden
+        function checkPasswordMatch() {
+            if (password.value !== confirmPassword.value) {
+                confirmPassword.setCustomValidity('Las contraseñas no coinciden');
+            } else {
+                confirmPassword.setCustomValidity('');
+            }
         }
-    }
-    // ------------------------------------ End Contraseña practicante ------------------------------------ //
-
-    // ------------------------------------ Fecha practicante ------------------------------------ //
-  console.log(currentUrl);
-  // Obtener la fecha actual
-  var fechaActual = new Date();
-
-  // Restar 18 años a la fecha actual
-  var fechaHace18Anios = new Date(fechaActual.getFullYear() - 18, fechaActual.getMonth(), fechaActual.getDate());
-
-  // Obtener el campo de entrada de fecha
-  var fechaInput = document.getElementById('fechaNacPrac');
-
-  // Establecer la fecha máxima permitida en el campo de entrada
-  fechaInput.max = fechaHace18Anios.toISOString().split('T')[0];
-
-  // Validar la fecha seleccionada cada vez que cambie el valor del campo de entrada
-  fechaInput.addEventListener('input', function () {
-    var fechaSeleccionada = new Date(this.value);
-
-    if (fechaSeleccionada > fechaHace18Anios) {
-      // La fecha seleccionada es menor a 18 años antes de la fecha actual
-      console.log('La fecha seleccionada no cumple con la restricción de edad mínima.');
-      // Aquí puedes agregar acciones adicionales, como mostrar un mensaje de error al usuario.
-    } else {
-      // La fecha seleccionada es mayor o igual a 18 años antes de la fecha actual
-      console.log('La fecha seleccionada cumple con la restricción de edad mínima.');
-      // Aquí puedes realizar las acciones adicionales necesarias en caso de que la fecha sea válida.
-    }
-  });
+    
+        // Evento para el botón de mostrar/ocultar contraseña
+        document.getElementById("togglePassword").addEventListener("click", function() {
+            togglePasswordVisibility('contraPrac', 'togglePassword');
+        });
+    
+        document.getElementById("toggleConfirmPassword").addEventListener("click", function() {
+            togglePasswordVisibility('confirmPassword', 'toggleConfirmPassword');
+        });
+    
+        // Evento para verificar la coincidencia de contraseñas al escribir
+        password.addEventListener('input', checkPasswordMatch);
+        confirmPassword.addEventListener('input', checkPasswordMatch);
+    
+        // Función para mostrar/ocultar contraseña
+        function togglePasswordVisibility(passwordId, toggleButtonId) {
+            const passwordInput = document.getElementById(passwordId);
+            const toggleButton = document.getElementById(toggleButtonId);
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleButton.textContent = "Ocultar";
+            } else {
+                passwordInput.type = "password";
+                toggleButton.textContent = "Mostrar";
+            }
+        }
+    
+        // Evento para manejar el submit del formulario
+        document.getElementById('agregarPracticante').addEventListener('submit', function(event) {
+            var leftInput = document.getElementById('input-editable').value;
+            var rightInput = document.getElementById('input-readonly').value;
+            document.getElementById('correoPrac').value = leftInput + rightInput;
+    
+            var passwordValue = document.getElementById('contraPrac').value;
+            var confirmPasswordValue = document.getElementById('confirmPassword').value;
+    
+            // Patrón de la contraseña
+            var passwordPattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;,.]).{8,}$/;
+    
+            if (!passwordPattern.test(passwordValue)) {
+                alert('La contraseña no cumple con los requisitos. Debe tener al menos 8 caracteres, una mayúscula y un carácter especial');
+                event.preventDefault();
+            } else if (passwordValue !== confirmPasswordValue) {
+                alert('Las contraseñas no coinciden.');
+                event.preventDefault();
+            }
+        });
+    });
+    
 }
+// ------------------------------------------- End Agregar Practicante  ------------------------------------------- //
+// ------------------------------------------- End Agregar Practicante  ------------------------------------------- //
 
 
 // ----------------------------------------- Ocultar ----------------------------------------- //
@@ -476,6 +547,7 @@ function togglePasswordVisibility(inputId, buttonId) {
         toggleButton.textContent = "Mostrar";
     }
 }
+
 // ----------------------------------------- End Ocultar ----------------------------------------- //
 
 // ------------------------------------ Modal eliminar cita paciente ------------------------------------ //

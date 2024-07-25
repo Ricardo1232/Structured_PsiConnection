@@ -111,7 +111,8 @@
 
                                     <input name="input-editable" id="input-editable" type="text"
                                         class="left-input form-control border border-dark"
-                                        placeholder="Nombre de usuario" pattern="^[a-z]+\.[a-z]+\d{4}$" required
+                                        maxlength="35"
+                                        placeholder="Correo institucional" pattern="^[a-z]+\.[a-z]+\d{4}$" required
                                         title="Correo invalido">
 
                                     <input name="input-readonly" id="input-readonly" type="text"
@@ -128,8 +129,7 @@
                                     class="form-control border border-dark"
                                     pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{'?/:;.,]).{8,}" required
                                     title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
-                                <button type="button" id="togglePassword" class="password-toggle-button"
-                                    onclick="togglePasswordVisibility('contraAd', 'togglePassword')">Mostrar</button>
+                                <button type="button" id="togglePassword" class="password-toggle-button">Mostrar</button>
                             </div>
 
                             <div class="form-group password-toggle-container">
@@ -137,10 +137,8 @@
                                 <input name="contraAd_confirm" id="contraAd_confirm" type="password"
                                     class="form-control border border-dark"
                                     pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{'?/:;.,]).{8,}" required
-                                    oninput="checkPasswordMatch()"
                                     title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
-                                <button type="button" id="toggleConfirmPassword" class="password-toggle-button"
-                                    onclick="togglePasswordVisibility('contraAd_confirm', 'toggleConfirmPassword')">Mostrar</button>
+                                <button type="button" id="toggleConfirmPassword" class="password-toggle-button">Mostrar</button>
                             </div>
                     </div>
                     <div class="modal-footer">

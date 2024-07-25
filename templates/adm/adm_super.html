@@ -1,5 +1,5 @@
 {% extends "layaouts/layaout_adm.html" %}
-{% block title %}PsiConnection - Supervisors{% endblock %}
+{% block title %}PsiConnection - Supervisores{% endblock %}
 {% block content %}
 
         <section class="sect">
@@ -78,6 +78,7 @@
                                 <label for="nombreSup" class="form-label">Nombre</label>
                                 <input name="nombreSup" type="text" class="form-control border border-dark"
                                     id="nombreSup" value="" required
+                                    maxlength="20"
                                     pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"
                                     title="Solo letras Minimo 2 Maximo 20" class="form-control" />
                             </div>
@@ -85,6 +86,7 @@
                                 <label for="apellidoPSup" class="form-label">Apellido Paterno</label>
                                 <input name="apellidoPSup" type="text" class="form-control border border-dark"
                                     id="apellidoPSup" value="" required
+                                    maxlength="15"
                                     pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"
                                     title="Solo letras Minimo 2 Maximo 15" class="form-control" />
                             </div>
@@ -92,6 +94,7 @@
                                 <label for="apellidoMSup" class="form-label">Apellido Materno</label>
                                 <input name="apellidoMSup" type="text" class="form-control border border-dark"
                                     id="apellidoMSup" value="" required
+                                    maxlength="15"
                                     pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"
                                     title="Solo letras Minimo 2 Maximo 15" class="form-control" />
                             </div>
@@ -102,7 +105,8 @@
 
                                     <input name="input-editable" id="input-editable" type="text"
                                         class="left-input form-control border border-dark"
-                                        placeholder="Nombre de usuario" pattern="^[a-z]+\.[a-z]+\d{4}$" required
+                                        maxlength="35"
+                                        placeholder="Correo institucional" pattern="^[a-z]+\.[a-z]+\d{4}$" required
                                         title="Correo invalido">
 
                                     <input name="input-readonly" id="input-readonly" type="text"
@@ -120,7 +124,7 @@
                                     pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{'?/:;.,]).{8,}" required
                                     title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
                                 <button type="button" id="togglePassword" class="password-toggle-button"
-                                    onclick="togglePasswordVisibility('contraSup', 'togglePassword')">Mostrar</button>
+                                   >Mostrar</button>
 
                             </div>
 
@@ -129,10 +133,9 @@
                                 <input name="contraSup_confirm" id="contraSup_confirm" type="password"
                                     class="form-control border border-dark"
                                     pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{'?/:;.,]).{8,}" required
-                                    oninput="checkPasswordMatch()"
                                     title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
                                 <button type="button" id="toggleConfirmPassword" class="password-toggle-button"
-                                    onclick="togglePasswordVisibility('contraSup_confirm', 'toggleConfirmPassword')">Mostrar</button>
+                                    >Mostrar</button>
                             </div>
 
                         </div>

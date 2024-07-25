@@ -43,7 +43,8 @@
                     <div id="correo-conrtainer">
 
                         <input name="input-editable" id="input-editable" type="text"
-                            class="left-input form-control border border-dark" placeholder="Nombre de usuario"
+                            class="left-input form-control border border-dark" placeholder="Correo institucional"
+                            maxlength="35"
                             pattern="^[a-z]+\.[a-z]+\d{4}$" required title="Correo invalido">
 
                         <input name="input-readonly" id="input-readonly" type="text"
@@ -73,8 +74,8 @@
                 <div class="col-md-4">
                     <label for="celPrac" class="form-group">Teléfono Celular</label>
                     <input name="celPrac" id="celPrac" type="text" class="form-control border border-dark" required
-                        maxlength="16"
-                        pattern="^(\+|00)[1-9][0-9 \-\(\)\.]{10,15}$" title="Numero con lada, máximo 16 digitos" />
+                        maxlength="10"
+                        pattern="\d{10}" title="Numero sin lada, máximo 10 digitos" />
                 </div>
 
                 <div class="col-md-4">

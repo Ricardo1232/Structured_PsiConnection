@@ -566,8 +566,6 @@ def verAdministrador():
 
     return render_template('/adm/adm_adm.html', admin = ad, datosAd = datosAd, username=session['name'], email=session['correoAd'])    
 
-
-
 #~~~~~~~~~~~~~~~~~~~ Eliminar Adminsitradores ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCuentaAdmin', methods=["GET", "POST"])
 @login_required
@@ -921,11 +919,78 @@ def contestarEncuesta():
     return redirect(url_for('indexPacientes'))
 
 
+# ~~~~~~~~~~~~~~~~~~~ Calendario V1 ~~~~~~~~~~~~~~~~~~~#
+# @PCapp.route('/Calendario/<string:idPrac>', methods=['GET'])
+# def calendario(idPrac):
+#     with mysql.connection.cursor() as cursor:
+#         cursor.execute("DELETE FROM horario WHERE fecha < CURDATE()")
+#         mysql.connection.commit()
+#         cursor.execute('SELECT idPrac, correoPrac FROM practicante WHERE idPrac = %s', (idPrac,))
+#         practicante = cursor.fetchone()
+    
+#     if practicante:
+#         return render_template('calendario.html', idPrac=practicante['idPrac'],  correoPrac=practicante['correoPrac'], username=session['name'], email=session['correoPaci'])
+
+
+def generar_horarios(practicante_id, mysql, num_days=21):
+    # Fecha de inicio
+    start_date = datetime.datetime.now()
+
+    # Generar fechas y horarios para insertar
+    try:
+        with mysql.connection.cursor() as cursor:
+            for day in range(num_days):
+                current_date = start_date + datetime.timedelta(days=day)
+                
+                # Verificar si el día actual es un día de la semana (lunes a viernes)
+                if current_date.weekday() < 5:  # 0-4 representa lunes a viernes
+                    for hour in range(8, 21):  # Horas de 08:00 a 20:00
+                        # Formatear fecha y hora
+                        fecha = current_date.date()
+                        hora = f"{hour:02d}:00"
+                        
+                        # Si es el día actual, evitar horas que ya pasaron
+                        if current_date.date() == datetime.datetime.now().date() and hour <= datetime.datetime.now().hour:
+                            continue
+                        
+                        # Verificar si ya existe un registro con la misma fecha, hora y practicante
+                        cursor.execute("""
+                            SELECT COUNT(*) as count FROM horario
+                            WHERE fecha = %s AND hora = %s AND practicante_id = %s
+                        """, (fecha, hora, practicante_id))
+                        result = cursor.fetchone()
+                        
+                        # Insertar en la tabla horario si no existe ya un registro
+                        if result['count'] == 0:
+                            cursor.execute("""
+                                INSERT INTO horario (fecha, hora, permitido, practicante_id)
+                                VALUES (%s, %s, %s, %s)
+                            """, (fecha, hora, 1, practicante_id))  # Suponiendo que 'permitido' es 1 (disponible)
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        # Confirmar los cambios
+        mysql.connection.commit()
+
+# ~~~~~~~~~~~~~~~~~~~ Calendario V2 CON HORAS ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/Calendario/<string:idPrac>', methods=['GET'])
 def calendario(idPrac):
     with mysql.connection.cursor() as cursor:
-        cursor.execute("DELETE FROM horario WHERE fecha < CURDATE()")
+        # Eliminar registros anteriores a la fecha y hora actual
+        cursor.execute("DELETE FROM horario WHERE fecha < CURDATE() OR (fecha = CURDATE() AND hora < CURTIME())")
         mysql.connection.commit()
+        
+        # Verificar si ya existen horarios para este practicante en el futuro
+        cursor.execute("""
+            SELECT COUNT(*) as count FROM horario 
+            WHERE practicante_id = %s AND (fecha > CURDATE() OR (fecha = CURDATE() AND hora > CURTIME()))
+        """, (idPrac,))
+        result = cursor.fetchone()
+        
+        # Solo generar horarios si no existen registros futuros para este practicante
+        if result['count'] == 0:
+            generar_horarios(idPrac, mysql)
+
         cursor.execute('SELECT idPrac, correoPrac FROM practicante WHERE idPrac = %s', (idPrac,))
         practicante = cursor.fetchone()
     
@@ -939,7 +1004,6 @@ def obtener_horarios(idPrac):
         cursor.execute("SELECT fecha, hora, permitido FROM horario WHERE practicante_id = %s", (idPrac,))
         horarios = cursor.fetchall()
         horarios_dict = [{'fecha': row['fecha'].strftime('%Y-%m-%d'), 'hora': row['hora'], 'permitido': row['permitido']} for row in horarios]
-        print("Horarios obtenidos:", horarios_dict)
         return jsonify(horarios_dict)
     except Exception as e:
         print(f"Error: {e}")
@@ -1068,7 +1132,7 @@ def eliminarCitaPaciente():
                 cursor.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s", (2, idCita))
                 
                 # Actualizar la tabla horario
-                horaCita_obj = datetime.datetime.strptime(horaCita, '%H:%M:%S').time()
+                horaCita_obj = datetime.datetime.strptime(str(horaCita), '%H:%M:%S').time()
                 horaCita_formateada = horaCita_obj.strftime('%H:%M')
                 cursor.execute("UPDATE horario SET permitido=%s WHERE fecha=%s AND hora=%s AND practicante_id=%s", 
                    (1, fechaCita,  horaCita_formateada, id_prac))
@@ -1132,7 +1196,7 @@ def eliminarCitaSupervisor():
                 cursor.execute("UPDATE citas SET estatusCita=%s WHERE idCita=%s", (2, idCita))
                 
                 # Actualizar la tabla horario
-                horaCita_obj = datetime.datetime.strptime(horaCita, '%H:%M:%S').time()
+                horaCita_obj = datetime.datetime.strptime(str(horaCita), '%H:%M:%S').time()
                 horaCita_formateada = horaCita_obj.strftime('%H:%M')
                 cursor.execute("UPDATE horario SET permitido=%s WHERE fecha=%s AND hora=%s AND practicante_id=%s", 
                    (1, fechaCita,  horaCita_formateada, id_prac))
@@ -1373,18 +1437,7 @@ def editarCuentaPracticantesAdm():
     nombrePracCC, apellidoPPracCC, apellidoMPracCC = get_information_3_attributes(encriptar, request, list_campos)
     
     consult_edit(request,mysql,list_campos_consulta, nombrePracCC, apellidoPPracCC, apellidoMPracCC)
-
-    # PARA SUBIR LA FOTO
-    if request.files.get('foto'):
-        foto                =   request.files['foto']
-        fotoActual          =   secure_filename(foto.filename)
-        foto.save(os.path.join(PCapp.config['UPLOAD_FOLDER'], fotoActual))
-        picture             =   mysql.connection.cursor()
-        picture.execute("UPDATE practicante SET fotoPrac=%s WHERE idPrac=%s", (fotoActual, idPrac,))
-        mysql.connection.commit()
-        # picture.close()
-        
-    mysql.close()
+    
     flash('Cuenta editada con exito.')
     return redirect(url_for('verPracticantesAdm'))
 
@@ -1729,13 +1782,10 @@ def indexPracticantes():
     pra, datosPrac = obtener_datos(list_campo, list_consult, mysql, encriptar, 3)
 
     # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-    list_cosult = [idPrac, 4]
+    list_consult = [idPrac, 4]
     praH, datosPracH = obtener_datos(list_campo, list_consult, mysql, encriptar, 3)
 
     return render_template('/prac/index_practicante.html', pract = pra, datosPrac = datosPrac, datosPracH=datosPracH, username=session['name'], email=session['correoPrac'], request=request)
-
-    
-
 
 @PCapp.route('/')
 @login_required
@@ -1804,11 +1854,20 @@ if __name__ == '__main__':
     PCapp.register_error_handler(404,status_404)
     PCapp.run(port=3000,debug=True)
     
-
-
 #Cuenta un chiste
 # ¿Cuál es el animal más antiguo?
 # La cebra, porque está en blanco y negro
+
+#Cuenta otro chiste
+# ¿Qué hace una abeja en el gimnasio?
+# ¡Zum-ba!
+
+#Uno mas
+# ¿Por qué los pájaros no usan Facebook?
+# Porque ya tienen Twitter.
+
+# ¿Por qué los pájaros no usan computadoras?
+# Porque les da miedo el ratón.
 
 
 #E we, cuanto es 2 + 2?  = △⃒⃘
