@@ -1,34 +1,104 @@
-{% extends "layaouts/layaout.html" %}
-{% block title %}PsiConnection - Agendar cita{% endblock %}
-{% block content %}
+{% extends "layaouts/layaout.html" %} {% block title %}PsiConnection - Agendar
+cita{% endblock %} {% block content %}
 
 <section class="sect">
+  <!--***Este section es lo que debe de cambiar en todos los html *****-->
+  <h2 class="text-center">Elija al practicante</h2>
+  <div class="sectmycard2 row">
+    {% for cita in datosPrac %}
+    <a
+      href="{{ url_for('calendario', idPrac=cita.idPrac) }}"
+      class="link-card-practicante"
+    >
+      <div class="card card-practicante">
+        <img
+          src="{{ url_for('static', filename= 'img/' + cita.fotoPrac) }}"
+          class="card-img-top" style="height: 12rem; object-fit: cover; border-radius: 15px 15px 0 0; "
+          alt="..."
+        />
+        <div class="card-body">
+          <h5 class="card-title text-center">Practicante</h5>
 
-    <!--***Este section es lo que debe de cambiar en todos los html *****-->
-    <h2 class="text-center">Elija al practicante</h2>
-    <div class="sectmycard2 row">
+          <p id="nombrePrac" class="text-center mt-2">{{cita.nombrePrac}}</p>
+          <p id="apellidoPPrac" class="text-center mt-2">
+            {{cita.apellidoPPrac}}
+          </p>
+          <p id="apellidoMPrac" class="text-center mt-2">
+            {{cita.apellidoMPrac}}
+          </p>
 
-        {% for cita in datosPrac %}
-        <a href="{{ url_for('calendario', idPrac=cita.idPrac) }}" class="link-card-practicante">
-            <div class="card card-practicante">
-                <img src="{{ url_for('static', filename= 'img/' + cita.fotoPrac) }}" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title text-center">Practicante</h5>
+          <p id="correoPrac" class="text-center mt-2">{{cita.correoPrac}}</p>
+          <p id="correoPaci" class="text-center mt-2">{{cita.correoPaci}}</p>
 
-                    <p id="nombrePrac" class="text-center mt-2">{{cita.nombrePrac}}</p>
-                    <p id="apellidoPPrac" class="text-center mt-2">{{cita.apellidoPPrac}}</p>
-                    <p id="apellidoMPrac" class="text-center mt-2">{{cita.apellidoMPrac}}</p>
+          <p id="idPaci" display="none;">{{cita.idPaci}}</p>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
 
-                    <p id="correoPrac" class="text-center mt-2">{{cita.correoPrac}}</p>
-                    <p id="correoPaci" class="text-center mt-2">{{cita.correoPaci}}</p>
+  <style>
+    .new-card {
+        --gradient: linear-gradient(to left top, #DD2476 10%, #FF512F 90%) !important;
+        background: #111 !important;
+    }
+    .new-card > .card {
+      background: #222  !important;
+      border: 1px solid #dd2476  !important;
+      color: rgba(250, 250, 250, 0.8)  !important;
+      margin-bottom: 2rem  !important;
+    }
 
-                    <p id="idPaci" display="none;">{{cita.idPaci}}</p>
-                </div>
+    .new-card > .btn {
+      border: 5px solid  !important;
+      border-image-slice: 1  !important;
+      background: var(--gradient) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      border-image-source: var(--gradient) !important;
+      text-decoration: none  !important;
+      transition: all 0.4s ease  !important;
+    }
+
+    .new-card >.btn:hover,
+    .new-card > .btn:focus {
+      background: var(--gradient) !important;
+      -webkit-background-clip: none !important;
+      -webkit-text-fill-color: #fff !important;
+      border: 5px solid #fff !important;
+      box-shadow: #222 1px 0 10px  !important;
+      text-decoration: underline  !important;
+    }
+  </style>
+
+  <section class="new-card">
+    <div class="container mx-auto mt-4">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card" style="width: 18rem">
+            <img
+              src="https://i.imgur.com/ZTkt4I5.jpeg"
+              class="card-img-top"
+              alt="..."
+            />
+            <div class="card-body">
+              <h5 class="card-title">Card title</h5>
+              <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+              <p class="card-text">
+                Some quick example text to build on the card title and make up
+                the bulk of the card's content.
+              </p>
+              <a href="#" class="btn mr-2"
+                ><i class="fas fa-link"></i> Visit Site</a
+              >
+              <a href="#" class="btn"><i class="fab fa-github"></i> Github</a>
             </div>
-        </a>
-        {% endfor %}
-        
+          </div>
+        </div>
+      </div>
     </div>
+  </section>
+
 </section>
 
 {% endblock %}

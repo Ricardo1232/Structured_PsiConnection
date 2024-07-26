@@ -228,4 +228,7 @@ def validar_campos(request, campos_validacion, etiquetas):
         if 'pattern' in validacion and not re.match(validacion['pattern'], valor):
             errores.append(f"El campo {etiqueta} no cumple con el formato requerido.")
             
+        if 'valid_options' in validacion and valor not in validacion['valid_options']:
+            errores.append(f"El campo {etiqueta} tiene un valor no válido.")
+            
     return errores

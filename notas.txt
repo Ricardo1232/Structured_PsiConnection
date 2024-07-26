@@ -8,9 +8,9 @@ formulario
 
     validaciones de servidor
      crear - en rutas de python
-        adm_adm
-        adm_super
-        agregar_practicante
+        adm_adm             - ya 
+        adm_super           - ya
+        agregar_practicante - ya
 
      editar - en rutas de python
         adm_adm   - ya

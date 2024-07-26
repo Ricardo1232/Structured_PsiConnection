@@ -472,6 +472,34 @@ def encriptado():
 def crearCuentaAdmin():
    
     if request.method == 'POST':
+        campos_validacion_ad = {
+            'nombreAd':    {'max_length': 20, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"},
+            'apellidoPAd': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"},
+            'apellidoMAd': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"},
+            'correoAd': {'max_length': 35, 'pattern': r"^[a-z]+\.[a-z]+\d{4}@(alumnos\.udg\.mx|udg\.com\.mx|academicos\.udg\.mx)$"},
+            'contraAd': {'pattern': r"(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{'?/:;.,]).{8,}"}
+        }
+
+        etiquetas_ad = {
+            'nombreAd': 'Nombre',
+            'apellidoPAd': 'Apellido Paterno',
+            'apellidoMAd': 'Apellido Materno',
+            'correoAd': 'Correo',
+            'contraAd': 'Contraseña'
+        }
+        errores = validar_campos(request, campos_validacion_ad, etiquetas_ad)
+
+        if errores:
+            for error in errores:
+                flash(error)
+            return redirect(url_for('verAdministrador'))
+       
+       
+        # CONFIRMAR CORREO CON LA BD
+        correoAd        = request.form['correoAd']
+
+        contraAd        = request.form['contraAd']
+        
         #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
         encriptar = encriptado()
         
@@ -480,11 +508,6 @@ def crearCuentaAdmin():
         
         # SE RECIBE LA INFORMACION
         nombreAdCC, apellidoPAdCC , apellidoMAdCC = get_information_3_attributes(encriptar, request, list_campos)
-
-        # CONFIRMAR CORREO CON LA BD
-        correoAd        = request.form['correoAd']
-
-        contraAd        = request.form['contraAd']
         
         hashed_password = bcryptObj.generate_password_hash(contraAd).decode('utf-8')
 
@@ -1526,10 +1549,9 @@ def editarCuentaPracticantesSup():
         foto                =   request.files['foto']
         fotoActual          =   secure_filename(foto.filename)
         foto.save(os.path.join(PCapp.config['UPLOAD_FOLDER'], fotoActual))
-        picture             =   mysql.connection.cursor()
-        picture.execute("UPDATE practicante SET fotoPrac=%s WHERE idPrac=%s", (fotoActual, idPrac,))
-        mysql.connection.commit()
-        picture.close()
+        with mysql.connection.cursor() as picture:
+            picture.execute("UPDATE practicante SET fotoPrac=%s WHERE idPrac=%s", (fotoActual, idPrac,))
+            mysql.connection.commit()
 
     flash('Cuenta editada con exito.')
     return redirect(url_for('indexSupervisor'))
@@ -1540,15 +1562,38 @@ def editarCuentaPracticantesSup():
 @require_post
 def crearCuentaPracticantes():
     if request.method == 'POST':
-        #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
-        encriptar = encriptado()
+       
+        campos_validacion_prac = {
+            'nombrePrac':     {'max_length': 20, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"},
+            'apellidoPPrac':  {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"},
+            'apellidoMPrac':  {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"},
+            'sexoPrac':       {'valid_options': ['Hombre', 'Mujer', 'NoDecirlo']},
+            'fechaNacPrac':   {'pattern': r"\d{4}-\d{2}-\d{2}"},
+            'celPrac':        {'max_length': 10, 'pattern': r"\d{10}"},
+            'codigoUPrac':    {'max_length': 9, 'pattern': r"\d{9}"},
+            'correoPrac':     {'max_length': 35, 'pattern': r"^[a-z]+\.[a-z]+\d{4}(@alumnos\.udg\.mx|@udg\.com\.mx|@academicos\.udg\.mx)$"},
+            'contraPrac':     {'pattern': r"(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;,.]).{8,}"}
+        }
 
-        # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-        list_campos = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
+        etiquetas_prac = {
+            'nombrePrac': 'Nombre',
+            'apellidoPPrac': 'Apellido Paterno',
+            'apellidoMPrac': 'Apellido Materno',
+            'sexoPrac': 'Sexo',
+            'fechaNacPrac': 'Fecha de Nacimiento',
+            'celPrac': 'Teléfono Celular',
+            'codigoUPrac': 'Código',
+            'correoPrac': 'Correo',
+            'contraPrac': 'Contraseña'
+        }
+        errores = validar_campos(request, campos_validacion_prac, etiquetas_prac)
+    
+        if errores:
+            for error in errores:
+                flash(error)
+            return redirect(url_for('agregarPracticante'))
         
-        # SE RECIBE LA INFORMACION
-        nombrePracCC, apellidoPPracCC , apellidoMPracCC = get_information_3_attributes(encriptar, request, list_campos)
-
+        
         sexoPrac          = request.form['sexoPrac']
         fechaNacPrac      = request.form['fechaNacPrac']
         celPrac           = request.form['celPrac']
@@ -1560,6 +1605,16 @@ def crearCuentaPracticantes():
 
         # CAMBIAR EL HASH DE LA CONTRA POR BCRYPT
         contraPrac        = request.form['contraPrac']
+        
+        
+        #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
+        encriptar = encriptado()
+
+        # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
+        list_campos = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
+        
+        # SE RECIBE LA INFORMACION
+        nombrePracCC, apellidoPPracCC , apellidoMPracCC = get_information_3_attributes(encriptar, request, list_campos)
         
         hashed_password = bcryptObj.generate_password_hash(contraPrac).decode('utf-8')
         
@@ -1712,7 +1767,32 @@ def eliminarCuentaPacienteSup():
 @require_post
 def crearCuentaSupervisor():
     if request.method == 'POST':
-        # -------------------------------------------------------------------------
+        campos_validacion_sup = {
+            'nombreSup':    {'max_length': 20, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"},
+            'apellidoPSup': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"},
+            'apellidoMSup': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"},
+            'correoSup': {'max_length': 35, 'pattern': r"^[a-z]+\.[a-z]+\d{4}@(alumnos\.udg\.mx|udg\.com\.mx|academicos\.udg\.mx)$"},
+            'contraSup': {'pattern': r"(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{'?/:;.,]).{8,}"}
+        }
+
+        etiquetas_sup = {
+            'nombreSup': 'Nombre',
+            'apellidoPSup': 'Apellido Paterno',
+            'apellidoMSup': 'Apellido Materno',
+            'correoSup': 'Correo',
+            'contraSup': 'Contraseña'
+        }
+        errores = validar_campos(request, campos_validacion_sup, etiquetas_sup)
+
+        if errores:
+            for error in errores:
+                flash(error)
+            return redirect(url_for('verSupervisor'))
+
+        # CONFIRMAR CORREO CON LA BD
+        correoSup        = request.form['correoSup']
+
+        contraSup        = request.form['contraSup']
         #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
         encriptar = encriptado()
         
@@ -1721,11 +1801,7 @@ def crearCuentaSupervisor():
         
         # SE RECIBE LA INFORMACION
         nombreSupCC, apellidoPSupCC, apellidoMSupCC = get_information_3_attributes(encriptar, request, list_campos)
-
-        # CONFIRMAR CORREO CON LA BD
-        correoSup        = request.form['correoSup']
-
-        contraSup        = request.form['contraSup']
+        
         hashed_password = bcryptObj.generate_password_hash(contraSup).decode('utf-8')
 
         # CODIGO DE SEGURIDAD

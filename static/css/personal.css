@@ -676,6 +676,15 @@ hr {
 
 .card-practicante {
   padding: unset;
+
+  width: 12rem; /* Ajusta el ancho según sea necesario */
+  height: 30rem; /* Ajusta el alto según sea necesario */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 15px;
+  box-shadow: 0px 0px 24px -5px rgba(134, 182, 212, 0.663);
+  
 }
 
 /* -------------------------------- End Card practicante -------------------------------- */
