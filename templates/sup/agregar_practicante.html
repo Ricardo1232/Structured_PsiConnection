@@ -47,8 +47,11 @@
                             maxlength="35"
                             pattern="^[a-z]+\.[a-z]+\d{4}$" required title="Correo invalido">
 
-                        <input name="input-readonly" id="input-readonly" type="text"
-                            class="right-input form-control border border-dark" value="@alumnos.udg.mx" readonly />
+                        <select name="input-readonly" id="input-readonly" type="text" class="right-input form-control border border-dark">
+                                <option value="@alumnos.udg.mx">@alumnos.udg.mx</option>
+                                <option value="@udg.com.mx">@udg.com.mx</option>
+                                <option value="@academicos.udg.mx">@academicos.udg.mx</option>
+                        </select>
 
                         <input type="hidden" name="correoPrac" id="correoPrac">
                     </div>
@@ -118,5 +121,4 @@
                 </div>
             </form>
         </section>
-        {#<script src="{{ url_for('static', filename= 'js/agregar_practicante.js')   }}"></script>#}
 {% endblock %}

@@ -1,29 +1,29 @@
 ####################################################################################################################################        
-Error al editar nombre
-    max caracteres es de 15 
-    Causa error en la base de datos
-    Cambiar en la base de datos a maximo 120 caracteres cuando es codificada en los nombres
-
-    Cambiar html en editar
-    En nombre maximo 20
-    apellidos maximo 15
-
-    adm_adm   -- ya -- completo
-    adm_pac   -- ya -- completo
-    adm_super -- ya -- completo
-    amd_pract -- ya -- completo
-    indx_sup  -- ya
-
+formulario
     --- verificar, por favor si el pattern esta bien en la cantidad maxima de caracteres. --- 
+        Agregar a todos los intpus el atributo  maxlength="XX" para que el usuario no escriba mas de lo necesario, solo en los intpus type text, no en contraseñas y correos.
+            --- comprobar si faltan ---
 
-    Agregar a todos los intpus el atributo  maxlength="XX" para que el usuario no escriba mas de lo necesario, solo en los intpus type text, no en contraseñas y correos.
-    --- comprobar si faltan ---
+    maximo de caracteres en contraseña y correo
+
+    validaciones de servidor
+     crear - en rutas de python
+        adm_adm
+        adm_super
+        agregar_practicante
+
+     editar - en rutas de python
+        adm_adm   - ya
+        adm_pract - ya
+        adm_pac   - ya
+        adm_super - ya
+        indx_sup  - ya
 -----------------------------------------------------------
 Login cambiar el minimo de caracteres para evitar problema en BD
 probar
 -----------------------------------------------------------
 Arreglar las citas
-    etc
+    testear
 -----------------------------------------------------------
 
 calendario
@@ -31,27 +31,12 @@ calendario
 
 -----------------------------------------------------------
 crear cita 
+    testear
 -----------------------------------------------------------
 
-formulario
-    adm_adm
-    adm_super
 
-    dar opcion de tipo de correo, un select
 
 ----------------------------------------------------------------------------------------
-En las vistas asociadas a las contraseñas, mejorar la visualizacion (visible o no visible) y comparacion de las contraseñas.
----------------------------------------------------------------------------------
-
-
-
-
-
-agregar_practicante.html ya tiene su js                    - corregido
-verify no funcionaban los flashes y daba errores           - corregido
-mensaje de bienvenida en solo los index's                  - corregido
-url_for todas las urls                                     - corregido
-
 
 # Tipos de estatus: 1 = ACTIVA | 2 = CANCELADA | 3 = PENDIENTE POR CANCELAR | 4 = TERMINADA
 

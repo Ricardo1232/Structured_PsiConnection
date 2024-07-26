@@ -109,9 +109,11 @@
                                         placeholder="Correo institucional" pattern="^[a-z]+\.[a-z]+\d{4}$" required
                                         title="Correo invalido">
 
-                                    <input name="input-readonly" id="input-readonly" type="text"
-                                        class="right-input form-control border border-dark" value="@alumnos.udg.mx"
-                                        readonly />
+                                    <select name="input-readonly" id="input-readonly" type="text" class="right-input form-control border border-dark">
+                                            <option value="@alumnos.udg.mx">@alumnos.udg.mx</option>
+                                            <option value="@udg.com.mx">@udg.com.mx</option>
+                                            <option value="@academicos.udg.mx">@academicos.udg.mx</option>
+                                    </select>
 
                                     <input type="hidden" name="correoSup" id="correoSup">
                                 </div>
@@ -129,7 +131,7 @@
                             </div>
 
                             <div class="form-group password-toggle-container">
-                                <label for="contraSup_confirm" class="form-group">confirmar Contraseña</label>
+                                <label for="contraSup_confirm" class="form-group">Confirmar Contraseña</label>
                                 <input name="contraSup_confirm" id="contraSup_confirm" type="password"
                                     class="form-control border border-dark"
                                     pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{'?/:;.,]).{8,}" required

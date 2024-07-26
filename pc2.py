@@ -587,6 +587,27 @@ def eliminarCuentaAdmin():
 @admin_required
 @require_post
 def editarCuentaAdmin():
+    
+    # Validacion de campos
+    campos_validacion = {
+        'nombreAd':    {'max_length': 20, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"},
+        'apellidoPAd': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"},
+        'apellidoMAd': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"}
+    }
+    etiquetas = {
+        'nombreAd': 'Nombre',
+        'apellidoPAd': 'Apellido Paterno',
+        'apellidoMAd': 'Apellido Materno'
+     }
+    
+    errores = validar_campos(request, campos_validacion, etiquetas)
+    
+    if errores:
+        for error in errores:
+            flash(error)
+        return redirect(url_for('verAdministrador'))
+    
+    
     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
     encriptar = encriptado()
     
@@ -1424,6 +1445,26 @@ def eliminarCuentaPracticantesSup():
 @PCapp.route('/EditarCuentaPracticantesAdm', methods=["GET", "POST"])
 @require_post
 def editarCuentaPracticantesAdm():
+
+    # Validacion de campos
+    campos_validacion = {
+        'nombrePrac':    {'max_length': 20, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"},
+        'apellidoPPrac': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"},
+        'apellidoMPrac': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"}
+    }
+    etiquetas = {
+        'nombrePrac': 'Nombre',
+        'apellidoPPrac': 'Apellido Paterno',
+        'apellidoMPrac': 'Apellido Materno'
+     }
+    
+    errores = validar_campos(request, campos_validacion, etiquetas)
+    
+    if errores:
+        for error in errores:
+            flash(error)
+        return redirect(url_for('verPracticantesAdm'))
+    
     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
     encriptar = encriptado()
     
@@ -1445,11 +1486,32 @@ def editarCuentaPracticantesAdm():
 @PCapp.route('/EditarCuentaPracticantesSup', methods=["GET", "POST"])
 @require_post
 def editarCuentaPracticantesSup():
+
+    # Validacion de campos
+    campos_validacion = {
+        'nombrePrac':    {'max_length': 20, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"},
+        'apellidoPPrac': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"},
+        'apellidoMPrac': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"}
+    }
+    etiquetas = {
+        'nombrePrac': 'Nombre',
+        'apellidoPPrac': 'Apellido Paterno',
+        'apellidoMPrac': 'Apellido Materno'
+     }
+    
+    errores = validar_campos(request, campos_validacion, etiquetas)
+    
+    if errores:
+        for error in errores:
+            flash(error)
+        return redirect(url_for('indexSupervisor'))
+    
+    
     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
     encriptar = encriptado()
 
     idPrac               = request.form['idPrac']
-
+    
     # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
     list_campos = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
     list_campos_consulta = ['idPrac', 'practicante', 'nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
@@ -1510,47 +1572,39 @@ def crearCuentaPracticantes():
 
         
          # Verificar si el correo ya está registrado en la base de datos
-        cur = mysql.connection.cursor()
-        result = cur.execute("SELECT * FROM practicante WHERE correoPrac=%s AND activoPrac IS NOT NULL", [correoPrac,])
+        with mysql.connection.cursor() as cur:
+            result = cur.execute("SELECT * FROM practicante WHERE correoPrac=%s AND activoPrac IS NOT NULL", [correoPrac,])
+            if result > 0:
+                # Si el correo ya está registrado, mostrar un mensaje de error
+                flash("El correo ya está registrado", 'danger')
+                return redirect(url_for('indexSupervisor'))  
         
-        if result > 0:
-            # Si el correo ya está registrado, mostrar un mensaje de error
-            flash("El correo ya está registrado", 'danger')
-            cur.close()
-            return redirect(url_for('indexSupervisor'))  
-        cur.close()      
-        
-        regPracticante = mysql.connection.cursor()
-        regPracticante.execute("INSERT INTO practicante (nombrePrac, apellidoPPrac, apellidoMPrac, contraPrac, sexoPrac, codVeriPrac, correoPrac, fechaNacPrac, activoPrac, veriPrac, edadPrac, celPrac, codigoUPrac, idSupPrac) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                            (nombrePracCC, apellidoPPracCC, apellidoMPracCC, hashed_password, sexoPrac, codVeriPrac, correoPrac, fechaNacPrac, activoPrac, veriPrac, edad, celPrac, codigoUPrac, idSupPrac,))
-        mysql.connection.commit()
+        with mysql.connection.cursor() as regPracticante:
+            regPracticante.execute("INSERT INTO practicante (nombrePrac, apellidoPPrac, apellidoMPrac, contraPrac, sexoPrac, codVeriPrac, correoPrac, fechaNacPrac, activoPrac, veriPrac, edadPrac, celPrac, codigoUPrac, idSupPrac) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                                (nombrePracCC, apellidoPPracCC, apellidoMPracCC, hashed_password, sexoPrac, codVeriPrac, correoPrac, fechaNacPrac, activoPrac, veriPrac, edad, celPrac, codigoUPrac, idSupPrac,))
+            mysql.connection.commit()
 
-        # PARA SUBIR LA FOTO
-        if request.files.get('foto'):
             idPrac              =   regPracticante.lastrowid
+            
+            # PARA SUBIR LA FOTO
+        if request.files.get('foto'):
             foto                =   request.files['foto']
             fotoActual          =   secure_filename(foto.filename)
             foto.save(os.path.join(PCapp.config['UPLOAD_FOLDER'], fotoActual))
-            picture             =   mysql.connection.cursor()
-            picture.execute("UPDATE practicante SET fotoPrac=%s WHERE idPrac=%s", (fotoActual, idPrac,))
-            mysql.connection.commit()
-            picture.close()
-
+            with mysql.connection.cursor() as picture:
+                picture.execute("UPDATE practicante SET fotoPrac=%s WHERE idPrac=%s", (fotoActual, idPrac,))
+                mysql.connection.commit()
 
         # MANDAR CORREO CON CODIGO DE VERIRIFICACION
-        idPrac              = regPracticante.lastrowid
-        selPrac             = mysql.connection.cursor()
-        selPrac.execute("SELECT * FROM practicante WHERE idPrac=%s",(idPrac,))
-        pra                 = selPrac.fetchone()
+        with mysql.connection.cursor() as selPrac:
+            selPrac.execute("SELECT * FROM practicante WHERE idPrac=%s",(idPrac,))
+            pra                 = selPrac.fetchone()
 
         nombr = pra.get('nombrePrac')
         nombr = nombr.encode()
         nombr = encriptar.decrypt(nombr)
         nombr = nombr.decode()
         
-        regPracticante.close()
-        selPrac.close()
-
         # SE MANDA EL CORREO
         msg = Message('Código de verificación', sender=PCapp.config['MAIL_USERNAME'], recipients=[correoPrac])
         msg.body = render_template('layoutmail.html', name=nombr, verification_code=codVeriPrac)
@@ -1570,6 +1624,27 @@ def crearCuentaPracticantes():
 @PCapp.route('/EditarCuentaPacienteAdm', methods=["GET", "POST"])
 @require_post
 def editarCuentaPacienteAdm():
+    
+    # Validacion de campos
+    campos_validacion = {
+        'nombrePaci':    {'max_length': 20, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"},
+        'apellidoPPaci': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"},
+        'apellidoMPaci': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"}
+    }
+
+    etiquetas = {
+        'nombrePaci': 'Nombre',
+        'apellidoPPaci': 'Apellido Paterno',
+        'apellidoMPaci': 'Apellido Materno'
+    }
+    
+    errores = validar_campos(request, campos_validacion, etiquetas)
+
+    if errores:
+        for error in errores:
+            flash(error)
+        return redirect(url_for('verPacientesAdm'))
+    
     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
     encriptar = encriptado()
     
@@ -1585,25 +1660,25 @@ def editarCuentaPacienteAdm():
     flash('Cuenta editada con exito.')
     return redirect(url_for('verPacientesAdm'))
 
-
+#Esto para que sirve?
 # ~~~~~~~~~~~~~~~~~~~ Editar Pacientes Supervisor ~~~~~~~~~~~~~~~~~~~#
-@PCapp.route('/EditarCuentaPacienteSup', methods=["GET", "POST"])
-@require_post
-def editarCuentaPacienteSup():
-    #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
-    encriptar = encriptado()
+# @PCapp.route('/EditarCuentaPacienteSup', methods=["GET", "POST"])
+# @require_post
+# def editarCuentaPacienteSup():
+#     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
+#     encriptar = encriptado()
     
-    # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-    list_campos = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
-    list_campos_consulta = ['idPaci', 'paciente', 'nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
+#     # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
+#     list_campos = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
+#     list_campos_consulta = ['idPaci', 'paciente', 'nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
     
-    # SE RECIBE LA INFORMACION
-    nombrePaciCC, apellidoPPaciCC , apellidoMAdCC =  get_information_3_attributes(encriptar, request, list_campos)
+#     # SE RECIBE LA INFORMACION
+#     nombrePaciCC, apellidoPPaciCC , apellidoMAdCC =  get_information_3_attributes(encriptar, request, list_campos)
    
-    consult_edit(request, mysql, list_campos_consulta, nombrePaciCC, apellidoPPaciCC, apellidoMAdCC)
+#     consult_edit(request, mysql, list_campos_consulta, nombrePaciCC, apellidoPPaciCC, apellidoMAdCC)
     
-    flash('Cuenta editada con exito.')
-    return redirect(url_for('verPaciente'))
+#     flash('Cuenta editada con exito.')
+#     return redirect(url_for('verPaciente'))
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Pacientes ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCuentaPacienteAdm', methods=["GET", "POST"])
@@ -1660,36 +1735,29 @@ def crearCuentaSupervisor():
         priviSup    = 2
         
         # Verificar si el correo ya está registrado en la base de datos
-        cur = mysql.connection.cursor()
-        result = cur.execute("SELECT * FROM supervisor WHERE correoSup=%s AND activoSup IS NOT NULL", [correoSup,])
-        if result > 0:
-            # Si el correo ya está registrado, mostrar un mensaje de error
-            flash("El correo ya está registrado", 'danger')
-            cur.close()
-            return redirect(url_for('verSupervisor'))
+        with mysql.connection.cursor() as cur:
+            result = cur.execute("SELECT * FROM supervisor WHERE correoSup=%s AND activoSup IS NOT NULL", [correoSup,])
+            if result > 0:
+                # Si el correo ya está registrado, mostrar un mensaje de error
+                flash("El correo ya está registrado", 'danger')
+                return redirect(url_for('verSupervisor'))
         
-        cur.close()
-        regSupervisor = mysql.connection.cursor()
-        regSupervisor.execute("INSERT INTO supervisor (nombreSup, apellidoPSup, apellidoMSup, correoSup, contraSup, codVeriSup, activoSup, veriSup, priviSup) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                            (nombreSupCC, apellidoPSupCC, apellidoMSupCC, correoSup, hashed_password, codVeriSup, activoSup, veriSup, priviSup))
-        mysql.connection.commit()
+        with mysql.connection.cursor() as regSupervisor:
+            regSupervisor.execute("INSERT INTO supervisor (nombreSup, apellidoPSup, apellidoMSup, correoSup, contraSup, codVeriSup, activoSup, veriSup, priviSup) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                                (nombreSupCC, apellidoPSupCC, apellidoMSupCC, correoSup, hashed_password, codVeriSup, activoSup, veriSup, priviSup))
+            mysql.connection.commit()
 
-        # MANDAR CORREO CON CODIGO DE VERIRIFICACION
-
-        idSup               = regSupervisor.lastrowid
-        selSup              = mysql.connection.cursor()
-        selSup.execute("SELECT * FROM supervisor WHERE idSup=%s",(idSup,))
-        sup                 = selSup.fetchone()
-       
-
+            # MANDAR CORREO CON CODIGO DE VERIRIFICACION
+            idSup               = regSupervisor.lastrowid
+            
+        with mysql.connection.cursor() as selSup:
+            selSup.execute("SELECT * FROM supervisor WHERE idSup=%s",(idSup,))
+            sup                 = selSup.fetchone()
+        
         nombr = sup.get('nombreSup')
         nombr = nombr.encode()
         nombr = encriptar.decrypt(nombr)
         nombr = nombr.decode()
-        
-        regSupervisor.close()
-        selSup.close()
-
         
         # SE MANDA EL CORREO
         msg = Message('Código de verificación', sender=PCapp.config['MAIL_USERNAME'], recipients=[correoSup])
@@ -1728,6 +1796,27 @@ def verSupervisor():
 @PCapp.route('/EditarCuentaSupervisor', methods=["GET", "POST"])
 @require_post
 def editarCuentaSupervisor():
+    # Se crea un diccionario de validaciones
+    campos_validacion_sup = {
+        'nombreSup':    {'max_length': 20, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"},
+        'apellidoPSup': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"},
+        'apellidoMSup': {'max_length': 15, 'pattern': r"[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"}
+    }
+    # Se crea un diccionario de etiquetas sobre los campos
+    etiquetas_sup = {
+        'nombreSup': 'Nombre',
+        'apellidoPSup': 'Apellido Paterno',
+        'apellidoMSup': 'Apellido Materno'
+    }
+    
+    errores = validar_campos(request, campos_validacion_sup, etiquetas_sup)
+
+    if errores:
+        for error in errores:
+            flash(error)
+        return redirect(url_for('verSupervisor'))
+    
+        
     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
     encriptar = encriptado()
     

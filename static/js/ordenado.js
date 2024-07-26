@@ -279,6 +279,7 @@ if (currentUrl == "/VerSupervisor") {
         var leftInput = document.getElementById('input-editable').value;
         var rightInput = document.getElementById('input-readonly').value;
         document.getElementById('correoSup').value = leftInput + rightInput;
+        console.log(document.getElementById('correoSup').value);
 
         var passwordValue = document.getElementById('contraSup').value;
         var confirmPasswordValue = document.getElementById('contraSup_confirm').value;

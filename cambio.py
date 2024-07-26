@@ -209,3 +209,23 @@ def date_to_age(fecha_nacimiento):
     return edad
 
     
+
+import re
+
+def validar_campos(request, campos_validacion, etiquetas):
+    errores = []
+    for campo, validacion in campos_validacion.items():
+        valor = request.form.get(campo)
+        etiqueta = etiquetas.get(campo, campo)  # Usa la etiqueta amigable o el nombre del campo si no hay etiqueta
+
+        if not valor:
+            errores.append(f"El campo {etiqueta} es requerido.")
+            continue
+        
+        if 'max_length' in validacion and len(valor) > validacion['max_length']:
+            errores.append(f"El campo {etiqueta} no puede tener más de {validacion['max_length']} caracteres.")
+        
+        if 'pattern' in validacion and not re.match(validacion['pattern'], valor):
+            errores.append(f"El campo {etiqueta} no cumple con el formato requerido.")
+            
+    return errores
