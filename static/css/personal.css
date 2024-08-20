@@ -655,7 +655,7 @@ hr {
 .sectmycard2 {
   width: 100%;
   display: flex;
-  gap: 30px;
+  gap: 3rem;
   flex-wrap: wrap;
   padding: 0px 0px 80px 0px;
   justify-content: center;
@@ -664,9 +664,13 @@ hr {
 }
 
 .link-card-practicante {
-  padding: unset;
-  border-radius: 15px;
-  width: 12rem;
+  z-index: 1;
+  border-radius: 10px !important;
+  width: 100%; /* Ajusta el ancho para adaptarse al contenedor */
+  max-width: 16rem; /*Ajusta el ancho máximo de las cards*/
+  background:  linear-gradient(183deg, #8bb8d4be 1%, #73ecf0d7 40%, #329cb1dd 80%);
+  padding: .7px 1.3px; /*Ajusta el grosor del borde del gradiente */
+  box-shadow: 0px 0px 24px -5px rgba(134, 182, 212, 0.663);
 }
 
 .link-card-practicante:hover {
@@ -675,16 +679,17 @@ hr {
 }
 
 .card-practicante {
+  z-index: 1;
   padding: unset;
-
-  width: 12rem; /* Ajusta el ancho según sea necesario */
+  width: 100%; /* Ajusta el ancho para adaptarse al contenedor */
+  max-width: 16rem; /* Ajusta el ancho máximo de las cards */
   height: 30rem; /* Ajusta el alto según sea necesario */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border-radius: 15px;
+  border-radius: 10px !important;
+  overflow: hidden;
   box-shadow: 0px 0px 24px -5px rgba(134, 182, 212, 0.663);
-  
 }
 
 /* -------------------------------- End Card practicante -------------------------------- */

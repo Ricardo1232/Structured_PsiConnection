@@ -343,6 +343,10 @@ SYMPTOMS = {
     "misofonia": [
         "irritabilidad", "enfado", "ansiedad", "nauseas", "sudoracion", 
         "necesidad_escapar", "sonidos_desencadenantes"
+    ],
+    "trastorno_antisocial": [
+        "desprecio_normas_sociales", "manipulacion_engano", "falta_empatia_remordimiento", 
+        "comportamiento_impulsivo_agresivo", "incapacidad_relaciones_estables"
     ]
 }
 
