@@ -33,8 +33,8 @@ calendario
 crear cita 
     testear
 -----------------------------------------------------------
-nueva vista para ver mas detalles del practicente, hora realizadas, pacientes atendidos, encuestas, historial de practicante tambien en ver encuestas practicantes del supervisor
-
+Sobre VerEncuestasPracticante
+Poner un boton para cambiar registros para el historial y las encuestas, maximo 9 por el momento por pagina.
 
 ----------------------------------------------------------------------------------------
 para generar antecedentes, crear una encuesta con la finalidad de conocer la opnion de los estudiantes de cucei acerca de la atencion de psicologia en el plantel univeritario
@@ -44,7 +44,7 @@ para generar antecedentes, crear una encuesta con la finalidad de conocer la opn
 
 
 
-
+Este codigo es para la validacion de la edad y las contraseñas.
  var fechaActual = new Date();
     
         // Restar 18 años a la fecha actual
@@ -141,8 +141,10 @@ para generar antecedentes, crear una encuesta con la finalidad de conocer la opn
 
 
 
+------------------------------------------------------ AI ----------------------------------------------------------------------------------------
 
-
+Corregir porcentajes
+Sobre entrenado o falta entrenamiento.
 
 # Datos de prueba (Ejemplo)
 test_symptoms = [

@@ -86,7 +86,7 @@ def save_to_file(data, filename):
         file.write("]\n")
 
 if __name__ == "__main__":
-    num_entries = 25000  # Número de entradas a generar
+    num_entries = 50000  # Número de entradas a generar
     symptoms_data = generate_symptoms_data(num_entries)
     save_to_file(symptoms_data, 'symptoms_data.py')
     print(f"Data has been saved to 'symptoms_data.py'.")

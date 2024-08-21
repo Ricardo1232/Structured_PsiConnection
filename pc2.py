@@ -302,8 +302,8 @@ def auth():
             
             # Enviar el código de verificación por correo electrónico
             msg = Message('Código de verificación', sender=PCapp.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = render_template('layoutmail.html', name=name ,  verification_code=verification_code)
-            msg.html = render_template('layoutmail.html', name=name ,  verification_code=verification_code)
+            msg.body = render_template('(/layaouts/layoutmail.html', name=name ,  verification_code=verification_code)
+            msg.html = render_template('/layaouts/layoutmail.html', name=name ,  verification_code=verification_code)
             mail.send(msg)
             
             flash("Revisa tu correo electrónico para ver los pasos para completar tu registro!", 'success')
@@ -770,8 +770,8 @@ def verPacientesAdm():
 @verified_required
 @paciente_required
 def crearCita():
-    if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
-        return jsonify({'success': False, 'message': 'Solicitud no válida'}), 400
+    # if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+    #     return jsonify({'success': False, 'message': 'Solicitud no válida'}), 400
 
     try:
         # Obtener datos del paciente desde la sesión
@@ -1069,6 +1069,9 @@ def verEncuestasPracticante(idPrac):
     # USAR SESSION PARA OBTENER EL ID DE SUPERVISOR
     id_Sup = session['idSup']
     
+    # SE MANDA A LLAMAR LA FUNCION PARA ENCRIPTAR
+    encriptar = encriptado()
+    
     # Verificar que el practicante pertenece al supervisor
     try:
         with mysql.connection.cursor() as cursor:
@@ -1085,17 +1088,51 @@ def verEncuestasPracticante(idPrac):
         flash("Hubo un problema al verificar el practicante.")
         return redirect(url_for('home'))
 
-    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
-    encriptar = encriptado()
+    # Obtener total de horas registradas (asumiendo 1 hora por cita)
+    with mysql.connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT COUNT(*) as totalHoras
+            FROM citas
+            WHERE idCitaPrac = %s AND estatusCita = 4
+        """, (idPrac,))
+        totalHoras = cursor.fetchone()['totalHoras']
 
-    # Definición de listas para consulta de datos
+    # Obtener total de citas completadas
+    with mysql.connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT COUNT(*) as totalCitas
+            FROM citas
+            WHERE idCitaPrac = %s AND estatusCita = 4
+        """, (idPrac,))
+        totalCitas = cursor.fetchone()['totalCitas']
+
+    # Obtener total de encuestas contestadas
+    with mysql.connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT COUNT(*) as totalEncuestas
+            FROM encuesta
+            WHERE idEncuPrac = %s
+        """, (idPrac,))
+        totalEncuestas = cursor.fetchone()['totalEncuestas']
+
+    # Obtener historial de citas
+    list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
+    list_consult = [idPrac, 4]  # Asumiendo que estatusCita 4 significa completada
+    praH, datosPracH = obtener_datos(list_campo, list_consult, mysql, encriptar, 3)
+
+    # Obtener encuestas del practicante
     list_consult = ['encuesta', 'E', 'E.idEncuPrac', 'E.idEncuPaci', 'idEncuPrac', idPrac]
     list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
-
-
     encu, datosEncu = obtener_datos(list_campo, list_consult, mysql, encriptar, 2)
     
-    return render_template('encuesta_practicante.html', datosEncu = datosEncu, username=session['name'], email=session['correoSup'])
+    return render_template('/sup/encuesta_practicante.html', 
+                           datosEncu=datosEncu, 
+                           datosPracH=datosPracH, 
+                           totalHoras=totalHoras,
+                           totalCitas=totalCitas,
+                           totalEncuestas=totalEncuestas,
+                           username=session['name'], 
+                           email=session['correoSup'])
 
 
 # ~~~~~~~~~~~~~~~~~~~ Ver Resultados de Encuestas ~~~~~~~~~~~~~~~~~~~#

@@ -39,7 +39,7 @@ SYMPTOMS = {
 
 # Listado de todos los síntomas en el mismo orden
 all_symptoms = sorted(set(symptom for symptoms in SYMPTOMS.values() for symptom in symptoms))
-
+print(len(all_symptoms))
 # Creación de X e y
 def create_synthetic_data(num_samples=1000):
     X = []

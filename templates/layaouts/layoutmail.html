@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Código de Verificación</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+      }
+      
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      }
+      
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      
+      p {
+        font-size: 16px;
+        line-height: 1.5;
+        color: #333;
+      }
+      
+      .code {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        margin: 20px 0;
+      }
+      
+      .button {
+        display: inline-block;
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-top: 20px;
+      }
+      
+      .button:hover {
+        background-color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Código de Verificación</h1>
+      <p>¡Bienvenido  {{name}} !</p>
+      <p>Gracias por registrarte a PSICONNECTION.</p>
+      <p>Tu código de verificación es:</p>
+      <p class="code"> {{verification_code}} </p>
+      <p>Pasos a seguir para verificar tu cuenta: </p>
+      <ol>
+        <li>Ingresa a la pagina de psiconnection e inicia sesion normalmente</li>
+        <li>Tendras que ingresar un codigo de verificación</li>
+        <li>Ingresa el codigo que se te proporciono en este <span>correo</span></li>
+        <li>Una vez que ingresaste el codigo tu cuenta estara verificada!</li>
+        <li>Inicia sesion nuevamente con normalidad para poder disfrutar de todos los servicios!</li>
+      </ol>
+      <p style=" font-size:small ">¿No has sido tú? No te preocupes, simplemente haz caso omiso a este correo.</p>
+      <a href="#" class="button">Ir a PSICONNECTION</a>
+      <p style="font-size: smaller;">Para aclaraciones y dudas enviar un correo a psi.connection09@gmail.com</p>
+    </div>
+  </body>
+</html>
