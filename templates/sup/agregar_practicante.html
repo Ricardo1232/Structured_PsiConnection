@@ -2,115 +2,115 @@
 {% block title %}Agregar practicante{% endblock %}
 {% block content %}
 
-
         <section class="sect">
             <h2 class="text-center">Registro de Practicantes</h2>
             <form id="agregarPracticante" class="row g-3 justify-content-center" action="{{ url_for('crearCuentaPracticantes') }}"
                 method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{csrf_token() }}">
 
-
-                <div class="col-md-4">
+                <!-- Nombre(s), Apellido Paterno, Apellido Materno y Teléfono Celular -->
+                <div class="col-md-3">
                     <label for="nombrePrac" class="form-group">Nombre(s)</label>
-                    <input name="nombrePrac" id="nombrePrac" type="text" class="form-control border border-dark"
-                        required
+                    <input name="nombrePrac" id="nombrePrac" type="text" class="form-control border border-dark" required
                         maxlength="20"
                         pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,20}"
                         title="Solo letras Minimo 2 Maximo 20" />
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="apellidoPPrac" class="form-group">Apellido paterno</label>
-                    <input name="apellidoPPrac" id="apellidoPPrac" type="text" class="form-control border border-dark"
-                        required
+                    <input name="apellidoPPrac" id="apellidoPPrac" type="text" class="form-control border border-dark" required
                         maxlength="15"
                         pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"
                         title="Solo letras Minimo 2 Maximo 15" />
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="apellidoMPrac" class="form-group">Apellido Materno</label>
-                    <input name="apellidoMPrac" id="apellidoMPrac" type="text" class="form-control border border-dark"
-                        required
+                    <input name="apellidoMPrac" id="apellidoMPrac" type="text" class="form-control border border-dark" required
                         maxlength="15"
                         pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"
                         title="Solo letras Minimo 2 Maximo 15" />
                 </div>
 
-                <div class="col-md-4">
-                    <label for="correoPrac" class="form-group">Correo</label>
-
-                    <div id="correo-conrtainer">
-
-                        <input name="input-editable" id="input-editable" type="text"
-                            class="left-input form-control border border-dark" placeholder="Correo institucional"
-                            maxlength="35"
-                            pattern="^[a-z]+\.[a-z]+\d{4}$" required title="Correo invalido">
-
-                        <select name="input-readonly" id="input-readonly" type="text" class="right-input form-control border border-dark">
-                                <option value="@alumnos.udg.mx">@alumnos.udg.mx</option>
-                                <option value="@udg.com.mx">@udg.com.mx</option>
-                                <option value="@academicos.udg.mx">@academicos.udg.mx</option>
-                        </select>
-
-                        <input type="hidden" name="correoPrac" id="correoPrac">
-                    </div>
-                </div>
-
-                <div class="col-md-4 password-toggle-container">
-                    <label for="contraPrac" class="form-group">Contraseña</label>
-                    <input name="contraPrac" id="contraPrac" type="password" class="form-control border border-dark"
-                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;,.]).{8,}"
-                    required
-                    title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
-                    <button type="button" id="togglePassword" class="password-toggle-button">Mostrar</button>
-                </div>
-                
-                <div class="col-md-4 password-toggle-container">
-                    <label for="confirmPassword" class="form-group">Confirmar Contraseña</label>
-                    <input name="confirmPassword" id="confirmPassword" type="password" class="form-control border border-dark"
-                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;,.]).{8,}" required                        
-                    title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
-                    <button type="button" id="toggleConfirmPassword" class="password-toggle-button">Mostrar</button>
-                </div>
-
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="celPrac" class="form-group">Teléfono Celular</label>
                     <input name="celPrac" id="celPrac" type="text" class="form-control border border-dark" required
                         maxlength="10"
                         pattern="\d{10}" title="Numero sin lada, máximo 10 digitos" />
                 </div>
 
-                <div class="col-md-4">
+                <!-- Correo, Contraseña, Confirmar Contraseña y Código -->
+                <div class="col-md-3">
+                    <label for="correoPrac" class="form-group">Correo</label>
+                    <div id="correo-conrtainer">
+                        <input name="input-editable" id="input-editable" type="text"
+                            class="left-input form-control border border-dark" placeholder="Correo institucional" maxlength="35"
+                            pattern="^[a-z]+\.[a-z]+\d{4}$" required title="Correo invalido">
+                        <select name="input-readonly" id="input-readonly" type="text" class="right-input form-control border border-dark">
+                            <option value="@alumnos.udg.mx">@alumnos.udg.mx</option>
+                            <option value="@udg.com.mx">@udg.com.mx</option>
+                            <option value="@academicos.udg.mx">@academicos.udg.mx</option>
+                        </select>
+                        <input type="hidden" name="correoPrac" id="correoPrac">
+                    </div>
+                </div>
+
+                <div class="col-md-3 password-toggle-container">
+                    <label for="contraPrac" class="form-group">Contraseña</label>
+                    <input name="contraPrac" id="contraPrac" type="password" class="form-control border border-dark"
+                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;,.]).{8,}" required
+                        title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
+                    <button type="button" id="togglePassword" class="password-toggle-button">Mostrar</button>
+                </div>
+
+                <div class="col-md-3 password-toggle-container">
+                    <label for="confirmPassword" class="form-group">Confirmar Contraseña</label>
+                    <input name="confirmPassword" id="confirmPassword" type="password" class="form-control border border-dark"
+                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;,.]).{8,}" required
+                        title="Debe tener al menos 8 caracteres, una mayúscula y un carácter especial">
+                    <button type="button" id="toggleConfirmPassword" class="password-toggle-button">Mostrar</button>
+                </div>
+
+                <div class="col-md-3">
                     <label for="codigoUPrac" class="form-group">Código</label>
                     <input name="codigoUPrac" id="codigoUPrac" type="text" class="form-control border border-dark"
-                        maxlength="9"
-                        pattern="[0-9]{9}" title="Código Escolar, máximo 9 digitos" inputmode="numeric" />
+                        maxlength="9" pattern="[0-9]{9}" title="Código Escolar, máximo 9 digitos" inputmode="numeric" />
                 </div>
 
-                <div class="col-xl-5 col-xl-5">
+                <!-- Fecha de Nacimiento, Foto, Sexo -->
+                <div class="col-md-4">
                     <label for="fechaNacPrac" class="control-label">Fecha de Nacimiento</label>
-                    <input name="fechaNacPrac" id="fechaNacPrac" type="date"
-                        class="form-control form-control border border-dark" required>
+                    <input name="fechaNacPrac" id="fechaNacPrac" type="date" class="form-control form-control border border-dark"
+                        required>
                 </div>
 
-                <div class="col-xl-5 col-xl-5">
-                    <label for="foto" class="control-label ">Inserte tu Foto</label>
+                <div class="col-md-4">
+                    <label for="foto" class="control-label">Inserte tu Foto</label>
                     <input name="foto" id="foto" type="file" class="form-control form-control border border-dark"
                         accept="image/*" required>
                 </div>
 
                 <div class="col-md-4">
                     <label for="sexoPrac" class="control-label">Sexo</label>
-                    <select name="sexoPrac" id="sexoPrac"
-                        class="form-select form-select-sm form-control border border-dark"
+                    <select name="sexoPrac" id="sexoPrac" class="form-select form-select-sm form-control border border-dark"
                         aria-label=".form-select-sm example" required>
                         <option selected></option>
                         <option value="Hombre">Hombre</option>
-                        <option value="Hombre">Mujer</option>
+                        <option value="Mujer">Mujer</option>
                         <option value="NoDecirlo">Prefiero no decirlo</option>
                     </select>
                 </div>
+                
+                <div class="col-md-4">
+                    <label for="turnoPrac" class="control-label">Turno</label>
+                    <select name="turnoPrac" id="turnoPrac" class="form-select form-select-sm form-control border border-dark"
+                        aria-label=".form-select-sm example" required>
+                        <option selected></option>
+                        <option value="MATUTINO">MATUTINO</option>
+                        <option value="VESPERTINO">VESPERTINO</option>
+                    </select>
+                </div>                
 
                 <div class="row  justify-content-center align-items-center ml-5">
                     <div class="col-auto mt-5 ml-5"><a href="{{ url_for('indexSupervisor') }}"><button

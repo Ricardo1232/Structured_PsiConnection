@@ -79,11 +79,11 @@ def get_information_3_attributes(encriptar, request, list_campos):
     return valor_encriptado
 
 # EDITAR GENERAL
-def consult_edit(request, mysql, user, nombreCC, apellidoPCC, apellidoMCC):
+def consult_edit(request, mysql, user, nombreCC, apellidoPCC, apellidoMCC, turnoPrac):
     id         = request.form[user[0]]
     with mysql.connection.cursor() as editar:
-        editar.execute(f"UPDATE {user[1]} set {user[2]}=%s, {user[3]}=%s, {user[4]}=%s WHERE {user[0]}=%s",
-                            (nombreCC, apellidoPCC, apellidoMCC, id,))
+        editar.execute(f"UPDATE {user[1]} set {user[2]}=%s, {user[3]}=%s, {user[4]}=%s, {user[5]}=%s WHERE {user[0]}=%s",
+                            (nombreCC, apellidoPCC, apellidoMCC, turnoPrac, id,))
         mysql.connection.commit()
     
 # ELIMINAR GENERAR PARA CUALQUIER TIPO USUARIO 

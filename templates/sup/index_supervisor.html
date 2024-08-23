@@ -31,7 +31,7 @@
                             <th>Apellido paterno</th>
                             <th>Apellido materno</th>
                             <th>Correo</th>
-                            <th>Encuestas</th>
+                            <th>Estadisticas</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -48,7 +48,7 @@
                             <td>
                                 <a href="/VerEncuestasPracticante/{{sup.idPrac}}" class="btn btn-success">
                                     <img class="Icono" src="{{ url_for('static', filename= 'img/encuesta.svg') }}" alt="">
-                                    <span>Encuestas</span>
+                                    <span>Estadisticas</span>
                                 </a>
                             </td>
                             <td>
@@ -156,6 +156,15 @@
                                     maxlength="15"
                                     pattern="[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{2,15}"
                                     title="Solo letras Minimo 2 Maximo 15" class="form-control" />
+                            </div>
+
+                            <!-- Nuevo campo para el turno -->
+                            <div class="form-group">
+                                <label for="turnoPrac" class="form-label">Turno</label>
+                                <select name="turnoPrac" id="turnoPrac" class="form-control border border-dark" required>
+                                    <option value="MATUTINO">MATUTINO</option>
+                                    <option value="VESPERTINO">VESPERTINO</option>
+                                </select>   
                             </div>
 
                             <div class="form-group">

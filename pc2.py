@@ -38,7 +38,7 @@ mysql                                   = MySQL(PCapp)
 csrf=CSRFProtect()
 PCapp.config['MYSQL_HOST']              = 'localhost'
 PCapp.config['MYSQL_USER']              = 'root'
-PCapp.config['MYSQL_PASSWORD']          = 'root'
+PCapp.config['MYSQL_PASSWORD']          = ''
 PCapp.config['MYSQL_DB']                = 'psiconnection'
 PCapp.config['MYSQL_CURSORCLASS']       = 'DictCursor'
 PCapp.config['UPLOAD_FOLDER']           = './static/img/'
@@ -984,6 +984,17 @@ def generar_horarios(practicante_id, mysql, num_days=21):
     # Fecha de inicio
     start_date = datetime.datetime.now()
 
+    # Obtener el turno del practicante
+    with mysql.connection.cursor() as cursor:
+        cursor.execute("SELECT turnoPrac FROM practicante WHERE idPrac = %s", (practicante_id,))
+        turno = cursor.fetchone()['turnoPrac']
+
+    # Definir el rango de horas según el turno
+    if turno == 'MATUTINO':
+        rango_horas = range(8, 15)  # 8:00 a 14:00
+    else:  # VESPERTINO
+        rango_horas = range(15, 21)  # 15:00 a 20:00
+
     # Generar fechas y horarios para insertar
     try:
         with mysql.connection.cursor() as cursor:
@@ -992,7 +1003,7 @@ def generar_horarios(practicante_id, mysql, num_days=21):
                 
                 # Verificar si el día actual es un día de la semana (lunes a viernes)
                 if current_date.weekday() < 5:  # 0-4 representa lunes a viernes
-                    for hour in range(8, 21):  # Horas de 08:00 a 20:00
+                    for hour in rango_horas:
                         # Formatear fecha y hora
                         fecha = current_date.date()
                         hora = f"{hour:02d}:00"
@@ -1563,6 +1574,9 @@ def editarCuentaPracticantesSup():
         'apellidoMPrac': 'Apellido Materno'
      }
     
+    campos_validacion['turnoPrac'] = {'pattern': r'^(MATUTINO|VESPERTINO)$'}
+    etiquetas['turnoPrac'] = 'Turno'
+    
     errores = validar_campos(request, campos_validacion, etiquetas)
     
     if errores:
@@ -1578,12 +1592,15 @@ def editarCuentaPracticantesSup():
     
     # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
     list_campos = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
-    list_campos_consulta = ['idPrac', 'practicante', 'nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
+    list_campos_consulta = ['idPrac', 'practicante', 'nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'turnoPrac']
     
     # SE RECIBE LA INFORMACION
     nombrePracCC, apellidoPPracCC, apellidoMPracCC =  get_information_3_attributes(encriptar, request, list_campos)
     
-    consult_edit(request,mysql,list_campos_consulta, nombrePracCC, apellidoPPracCC, apellidoMPracCC)
+    # Obtener el turno directamente del formulario
+    turnoPrac = request.form['turnoPrac']
+    
+    consult_edit(request,mysql,list_campos_consulta, nombrePracCC, apellidoPPracCC, apellidoMPracCC, turnoPrac)
 
     # PARA SUBIR LA FOTO
     if request.files.get('foto'):
@@ -1596,6 +1613,7 @@ def editarCuentaPracticantesSup():
 
     flash('Cuenta editada con exito.')
     return redirect(url_for('indexSupervisor'))
+
 
 
 #~~~~~~~~~~~~~~~~~~~ Crear Practicantes ~~~~~~~~~~~~~~~~~~~#
@@ -1640,6 +1658,7 @@ def crearCuentaPracticantes():
         celPrac           = request.form['celPrac']
         codigoUPrac       = request.form['codigoUPrac']
         idSupPrac         = session['idSup']
+        turnoPrac         = request.form['turnoPrac']
         
         # CONFIRMAR CORREO CON LA BD
         correoPrac        = request.form['correoPrac']
@@ -1676,8 +1695,13 @@ def crearCuentaPracticantes():
                 return redirect(url_for('indexSupervisor'))  
         
         with mysql.connection.cursor() as regPracticante:
-            regPracticante.execute("INSERT INTO practicante (nombrePrac, apellidoPPrac, apellidoMPrac, contraPrac, sexoPrac, codVeriPrac, correoPrac, fechaNacPrac, activoPrac, veriPrac, edadPrac, celPrac, codigoUPrac, idSupPrac) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                                (nombrePracCC, apellidoPPracCC, apellidoMPracCC, hashed_password, sexoPrac, codVeriPrac, correoPrac, fechaNacPrac, activoPrac, veriPrac, edad, celPrac, codigoUPrac, idSupPrac,))
+            regPracticante.execute("""
+                INSERT INTO practicante (nombrePrac, apellidoPPrac, apellidoMPrac, contraPrac, sexoPrac, 
+                codVeriPrac, correoPrac, fechaNacPrac, activoPrac, veriPrac, edadPrac, celPrac, codigoUPrac, 
+                idSupPrac, turnoPrac) 
+                VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (nombrePracCC, apellidoPPracCC, apellidoMPracCC, hashed_password, sexoPrac, codVeriPrac, 
+                  correoPrac, fechaNacPrac, activoPrac, veriPrac, edad, celPrac, codigoUPrac, idSupPrac, turnoPrac))
             mysql.connection.commit()
 
             idPrac              =   regPracticante.lastrowid
@@ -1703,8 +1727,8 @@ def crearCuentaPracticantes():
         
         # SE MANDA EL CORREO
         msg = Message('Código de verificación', sender=PCapp.config['MAIL_USERNAME'], recipients=[correoPrac])
-        msg.body = render_template('layoutmail.html', name=nombr, verification_code=codVeriPrac)
-        msg.html = render_template('layoutmail.html', name=nombr, verification_code=codVeriPrac)
+        msg.body = render_template('layaouts/layoutmail.html', name=nombr, verification_code=codVeriPrac)
+        msg.html = render_template('layaouts/layoutmail.html', name=nombr, verification_code=codVeriPrac)
         mail.send(msg)       
     
         flash('Cuenta creada con exito.')
