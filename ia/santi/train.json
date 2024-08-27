@@ -1,0 +1,5 @@
+[
+    {"preocupacion_excesiva": 1, "nerviosismo": 1, "enfermedad": "trastorno_ansiedad"},
+    {"sentimientos_tristeza": 1, "perdida_interes": 1, "enfermedad": "depresion"},
+    {"dificultad_atencion": 1, "hiperactividad": 1, "impulsividad": 1, "enfermedad": "tdah"}
+]

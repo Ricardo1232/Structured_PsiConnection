@@ -1,0 +1,106 @@
+Loss: 0.03683849051594734
+Accuracy: 0.86545729637146
+42/42 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step 
+C:\Users\Fabian\AppData\Roaming\Python\Python310\site-packages\keras\src\layers\core\dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+  super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+C:\Users\Fabian\AppData\Roaming\Python\Python310\site-packages\keras\src\layers\activations\leaky_relu.py:41: UserWarning: Argument `alpha` is deprecated. Use `negative_slope` instead.
+  warnings.warn(
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 62ms/step
+['preocupacion_excesiva', 'nerviosismo', 'fatiga', 'problemas_concentracion', 'irritabilidad', 'tension_muscular', 'problemas_sueno']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 99.91, 'depresion': 8.7, 'tdah': 19.87, 'parkinson': 3.0, 'alzheimer': 11.36, 'trastorno_bipolar': 1.37, 'toc': 0.45, 'misofonia': 1.18, 'trastorno_antisocial': 4.91}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+['sentimientos_tristeza', 'perdida_interes', 'cambios_apetito_peso', 'problemas_sueno', 'fatiga', 'pensamientos_suicidio']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 5.82, 'depresion': 99.67, 'tdah': 15.37, 'parkinson': 2.42, 'alzheimer': 10.69, 'trastorno_bipolar': 2.42, 'toc': 1.35, 'misofonia': 0.94, 'trastorno_antisocial': 2.3}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step
+['dificultad_atencion', 'hiperactividad', 'impulsividad', 'dificultades_instrucciones']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 2.73, 'depresion': 0.9, 'tdah': 99.87, 'parkinson': 1.96, 'alzheimer': 1.54, 'trastorno_bipolar': 1.09, 'toc': 2.75, 'misofonia': 3.83, 'trastorno_antisocial': 1.59}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 23ms/step
+['temblor_reposo', 'rigidez_muscular', 'lentitud_movimientos', 'problemas_equilibrio_coordinacion', 'dificultad_hablar_escribir']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 3.32, 'depresion': 12.12, 'tdah': 9.84, 'parkinson': 99.87, 'alzheimer': 9.89, 'trastorno_bipolar': 0.79, 'toc': 1.71, 'misofonia': 0.5, 'trastorno_antisocial': 5.86}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 15ms/step
+['perdida_memoria', 'dificultad_palabras_conversaciones', 'desorientacion_espacial_temporal', 'cambios_estado_animo_comportamiento', 'dificultad_tareas_cotidianas']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 1.61, 'depresion': 1.91, 'tdah': 4.85, 'parkinson': 10.42, 'alzheimer': 99.84, 'trastorno_bipolar': 0.82, 'toc': 0.14, 'misofonia': 1.19, 'trastorno_antisocial': 5.15}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 15ms/step
+['episodios_mania', 'episodios_depresion', 'cambios_bruscos_humor_actividad']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 2.26, 'depresion': 7.85, 'tdah': 7.83, 'parkinson': 3.0, 'alzheimer': 23.74, 'trastorno_bipolar': 99.81, 'toc': 0.97, 'misofonia': 0.37, 'trastorno_antisocial': 0.23}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+['obsesiones', 'compulsiones', 'reconocimiento_ineficacia_control']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 3.66, 'depresion': 2.35, 'tdah': 1.24, 'parkinson': 1.41, 'alzheimer': 1.45, 'trastorno_bipolar': 0.86, 'toc': 99.97, 'misofonia': 2.06, 'trastorno_antisocial': 0.34}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step
+['irritabilidad_ruido', 'enfado', 'ansiedad', 'nauseas', 'sudoracion', 'necesidad_escapar', 'sonidos_desencadenantes']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 1.21, 'depresion': 5.84, 'tdah': 4.55, 'parkinson': 1.1, 'alzheimer': 5.43, 'trastorno_bipolar': 0.54, 'toc': 1.62, 'misofonia': 99.44, 'trastorno_antisocial': 2.13}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+['desprecio_normas_sociales', 'manipulacion_engano', 'falta_empatia_remordimiento', 'comportamiento_impulsivo_agresivo', 'incapacidad_relaciones_estables']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 1.54, 'depresion': 3.08, 'tdah': 3.96, 'parkinson': 2.06, 'alzheimer': 2.7, 'trastorno_bipolar': 0.05, 'toc': 1.52, 'misofonia': 1.94, 'trastorno_antisocial': 99.66}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step
+['preocupacion_excesiva', 'nerviosismo', 'fatiga', 'problemas_concentracion', 'irritabilidad']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 99.87, 'depresion': 3.52, 'tdah': 8.51, 'parkinson': 2.24, 'alzheimer': 6.56, 'trastorno_bipolar': 1.17, 'toc': 0.47, 'misofonia': 1.82, 'trastorno_antisocial': 6.04}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+['sentimientos_tristeza', 'perdida_interes', 'cambios_apetito_peso']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 0.62, 'depresion': 99.43, 'tdah': 7.49, 'parkinson': 2.69, 'alzheimer': 6.36, 'trastorno_bipolar': 1.01, 'toc': 2.44, 'misofonia': 1.95, 'trastorno_antisocial': 1.91}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+['dificultad_atencion', 'hiperactividad', 'impulsividad']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 1.55, 'depresion': 0.56, 'tdah': 99.85, 'parkinson': 1.61, 'alzheimer': 1.67, 'trastorno_bipolar': 0.88, 'toc': 2.1, 'misofonia': 2.27, 'trastorno_antisocial': 1.15}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+['temblor_reposo', 'rigidez_muscular', 'lentitud_movimientos']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 2.78, 'depresion': 8.78, 'tdah': 12.07, 'parkinson': 99.76, 'alzheimer': 11.42, 'trastorno_bipolar': 0.73, 'toc': 1.31, 'misofonia': 0.68, 'trastorno_antisocial': 3.17}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step
+['perdida_memoria', 'dificultad_palabras_conversaciones', 'desorientacion_espacial_temporal', 'cambios_estado_animo_comportamiento']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 1.57, 'depresion': 1.82, 'tdah': 4.53, 'parkinson': 7.75, 'alzheimer': 99.81, 'trastorno_bipolar': 0.69, 'toc': 0.19, 'misofonia': 0.94, 'trastorno_antisocial': 3.58}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step
+['episodios_mania', 'episodios_depresion', 'cambios_bruscos_humor_actividad']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 2.26, 'depresion': 7.85, 'tdah': 7.83, 'parkinson': 3.0, 'alzheimer': 23.74, 'trastorno_bipolar': 99.81, 'toc': 0.97, 'misofonia': 0.37, 'trastorno_antisocial': 0.23}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 15ms/step
+['obsesiones', 'compulsiones']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 4.12, 'depresion': 3.02, 'tdah': 1.83, 'parkinson': 1.97, 'alzheimer': 1.92, 'trastorno_bipolar': 0.77, 'toc': 99.74, 'misofonia': 2.63, 'trastorno_antisocial': 0.43}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step
+['irritabilidad', 'enfado', 'ansiedad', 'nauseas', 'sonidos_desencadenantes']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 13.96, 'depresion': 2.3, 'tdah': 2.17, 'parkinson': 0.7, 'alzheimer': 2.73, 'trastorno_bipolar': 0.37, 'toc': 1.2, 'misofonia': 99.27, 'trastorno_antisocial': 1.89}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+['desprecio_normas_sociales', 'manipulacion_engano', 'comportamiento_impulsivo_agresivo']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 1.62, 'depresion': 2.4, 'tdah': 3.07, 'parkinson': 1.97, 'alzheimer': 1.63, 'trastorno_bipolar': 0.12, 'toc': 0.92, 'misofonia': 1.27, 'trastorno_antisocial': 99.45}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step
+['nerviosismo', 'fatiga', 'problemas_concentracion', 'irritabilidad']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 99.72, 'depresion': 4.02, 'tdah': 6.54, 'parkinson': 1.84, 'alzheimer': 6.67, 'trastorno_bipolar': 0.84, 'toc': 0.61, 'misofonia': 2.08, 'trastorno_antisocial': 6.33}
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step
+['nerviosismo', 'fatiga', 'problemas_concentracion', 'irritabilidad', 'enfado', 'ansiedad', 'nauseas', 'sonidos_desencadenantes', 'desprecio_normas_sociales', 'manipulacion_engano', 'comportamiento_impulsivo_agresivo']
+Predicciones de las enfermedades con porcentajes de coincidencia:
+{'trastorno_ansiedad': 97.63, 'depresion': 0.28, 'tdah': 0.45, 'parkinson': 0.07, 'alzheimer': 0.78, 'trastorno_bipolar': 0.01, 'toc': 0.46, 'misofonia': 98.43, 'trastorno_antisocial': 98.71}
