@@ -32,6 +32,16 @@ import secrets
 import re
 import datetime
 import os.path
+import json
+
+
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras import regularizers
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, LeakyReLU,Input
+import numpy as np
+
 
 PCapp                                   = Flask(__name__)
 mysql                                   = MySQL(PCapp)
@@ -311,19 +321,97 @@ def auth():
 
     return render_template('login.html')
 
-SYMPTOMS = {
+# SYMPTOMS = {
+#     "trastorno_ansiedad": [
+#         "preocupacion_excesiva", "nerviosismo", "fatiga", 
+#         "problemas_concentracion", "irritabilidad", "tension_muscular", 
+#         "problemas_sueno"
+#     ],
+#     "depresion": [
+#         "sentimientos_tristeza", "perdida_interes", "cambios_apetito_peso", 
+#         "problemas_sueno", "fatiga", "pensamientos_suicidio"
+#     ],
+#     "tdah": [
+#         "dificultad_atencion", "hiperactividad", "impulsividad", 
+#         "dificultades_instrucciones"
+#     ],
+#     "parkinson": [
+#         "temblor_reposo", "rigidez_muscular", "lentitud_movimientos", 
+#         "problemas_equilibrio_coordinacion", "dificultad_hablar_escribir"
+#     ],
+#     "alzheimer": [
+#         "perdida_memoria", "dificultad_palabras_conversaciones", 
+#         "desorientacion_espacial_temporal", "cambios_estado_animo_comportamiento", 
+#         "dificultad_tareas_cotidianas"
+#     ],
+#     "trastorno_bipolar": [
+#         "episodios_mania", "episodios_depresion", "cambios_bruscos_humor_actividad"
+#     ],
+#     "toc": [
+#         "obsesiones", "compulsiones", "reconocimiento_ineficacia_control"
+#     ],
+#     "misofonia": [
+#         "irritabilidad", "enfado", "ansiedad", "nauseas", "sudoracion", 
+#         "necesidad_escapar", "sonidos_desencadenantes"
+#     ],
+#     "trastorno_antisocial": [
+#         "desprecio_normas_sociales", "manipulacion_engano", "falta_empatia_remordimiento", 
+#         "comportamiento_impulsivo_agresivo", "incapacidad_relaciones_estables"
+#     ]
+# }
+
+
+
+# def count_symptoms(disorder_symptoms: List[str], reported_symptoms: List[str]) -> int:
+#     return sum(1 for symptom in disorder_symptoms if symptom in reported_symptoms)
+
+# def calculate_percentage(count: int, total: int) -> float:
+#     return (count / total) * 100
+
+# def diagnose(reported_symptoms: List[str]) -> Dict[str, float]:
+#     diagnoses_p = {}
+#     diagnoses_s = {}
+#     for disorder, symptoms in SYMPTOMS.items():
+#         count = count_symptoms(symptoms, reported_symptoms)
+#         percentage = calculate_percentage(count, len(symptoms))
+#         if percentage >= 80:
+#             diagnoses_p[disorder] = percentage
+#         if percentage >= 50 and percentage < 80:
+#             diagnoses_s[disorder] = percentage
+#     return diagnoses_p, diagnoses_s
+
+def crear_modelo(input_dim, output_dim):
+    model = Sequential()
+    model.add(Input(shape=(input_dim,)))
+    model.add(Dense(86, input_dim=input_dim, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
+
+    
+    model.add(Dense(86, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
+    model.add(LeakyReLU(alpha=0.01))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.4))
+    
+    model.add(Dense(86, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
+    model.add(LeakyReLU(alpha=0.01))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.3))
+    
+    model.add(Dense(output_dim, activation='sigmoid'))
+    model.compile(optimizer=Adam(learning_rate=0.0009), loss='binary_crossentropy', metrics=['accuracy'])
+    return model
+
+# Definición de enfermedades y síntomas
+enfermedades = {
     "trastorno_ansiedad": [
-        "preocupacion_excesiva", "nerviosismo", "fatiga", 
-        "problemas_concentracion", "irritabilidad", "tension_muscular", 
-        "problemas_sueno"
+        "preocupacion_excesiva", "nerviosismo", "fatiga", "problemas_concentracion", 
+        "irritabilidad", "tension_muscular", "problemas_sueno"
     ],
     "depresion": [
         "sentimientos_tristeza", "perdida_interes", "cambios_apetito_peso", 
         "problemas_sueno", "fatiga", "pensamientos_suicidio"
     ],
     "tdah": [
-        "dificultad_atencion", "hiperactividad", "impulsividad", 
-        "dificultades_instrucciones"
+        "dificultad_atencion", "hiperactividad", "impulsividad", "dificultades_instrucciones"
     ],
     "parkinson": [
         "temblor_reposo", "rigidez_muscular", "lentitud_movimientos", 
@@ -341,32 +429,36 @@ SYMPTOMS = {
         "obsesiones", "compulsiones", "reconocimiento_ineficacia_control"
     ],
     "misofonia": [
-        "irritabilidad", "enfado", "ansiedad", "nauseas", "sudoracion", 
+        "irritabilidad_ruido", "enfado", "ansiedad", "nauseas", "sudoracion", 
         "necesidad_escapar", "sonidos_desencadenantes"
     ],
     "trastorno_antisocial": [
-        "desprecio_normas_sociales", "manipulacion_engano", "falta_empatia_remordimiento", 
-        "comportamiento_impulsivo_agresivo", "incapacidad_relaciones_estables"
+        "desprecio_normas_sociales", "manipulacion_engano", 
+        "falta_empatia_remordimiento", "comportamiento_impulsivo_agresivo", 
+        "incapacidad_relaciones_estables"
     ]
 }
 
-def count_symptoms(disorder_symptoms: List[str], reported_symptoms: List[str]) -> int:
-    return sum(1 for symptom in disorder_symptoms if symptom in reported_symptoms)
 
-def calculate_percentage(count: int, total: int) -> float:
-    return (count / total) * 100
+todos_los_sintomas = [
+    "preocupacion_excesiva", "nerviosismo", "fatiga", "problemas_concentracion", "irritabilidad", "tension_muscular", "problemas_sueno",  # trastorno_ansiedad
+    "sentimientos_tristeza", "perdida_interes", "cambios_apetito_peso", "pensamientos_suicidio",  # depresion
+    "dificultad_atencion", "hiperactividad", "impulsividad", "dificultades_instrucciones",  # tdah
+    "temblor_reposo", "rigidez_muscular", "lentitud_movimientos", "problemas_equilibrio_coordinacion", "dificultad_hablar_escribir",  # parkinson
+    "perdida_memoria", "dificultad_palabras_conversaciones", "desorientacion_espacial_temporal", "cambios_estado_animo_comportamiento", "dificultad_tareas_cotidianas",  # alzheimer
+    "episodios_mania", "episodios_depresion", "cambios_bruscos_humor_actividad",  # trastorno_bipolar
+    "obsesiones", "compulsiones", "reconocimiento_ineficacia_control",  # toc
+    "irritabilidad_ruido", "enfado", "ansiedad", "nauseas", "sudoracion", "necesidad_escapar", "sonidos_desencadenantes",  # misofonia
+    "desprecio_normas_sociales", "manipulacion_engano", "falta_empatia_remordimiento", "comportamiento_impulsivo_agresivo", "incapacidad_relaciones_estables"  # trastorno_antisocial
+]
 
-def diagnose(reported_symptoms: List[str]) -> Dict[str, float]:
-    diagnoses_p = {}
-    diagnoses_s = {}
-    for disorder, symptoms in SYMPTOMS.items():
-        count = count_symptoms(symptoms, reported_symptoms)
-        percentage = calculate_percentage(count, len(symptoms))
-        if percentage >= 80:
-            diagnoses_p[disorder] = percentage
-        if percentage >= 50 and percentage < 80:
-            diagnoses_s[disorder] = percentage
-    return diagnoses_p, diagnoses_s
+
+# Función para crear un vector de síntomas
+def crear_vector_sintomas(symptom_list):
+    return [1 if symptom in symptom_list else 0 for symptom in todos_los_sintomas]
+
+
+
 
 
 @PCapp.route('/SurveyV2modcopy')
@@ -382,29 +474,49 @@ def survey_v2():
 @require_post
 def results():
         reported_symptoms = [symptom for symptom, value in request.form.items() if value == 'si']
-        print(f"{reported_symptoms}")
-        diagnoses_p, diagnoses_s = diagnose(reported_symptoms)
-        print(diagnoses_p)
-        print(diagnoses_s)
+        vector_paciente = np.array([crear_vector_sintomas(reported_symptoms)])
+        
+        predicciones = model.predict(vector_paciente)
+
+        # Convertir las predicciones a porcentajes
+        percentages = [float(p) * 100 for p in predicciones[0]]
+
+        # Mostrar el resultado en formato de diccionario
+        diagnoses = {enfermedad: round(float(porcentaje), 2) for enfermedad, porcentaje in zip(enfermedades.keys(), percentages)}
+        print(f"{diagnoses}")
+        # diagnoses_p, diagnoses_s = diagnose(reported_symptoms)
+        # print(diagnoses_p)
+        # print(diagnoses_s)
+        
+        
+        try:
+            # Serializar el diccionario a JSON
+            diagnoses_json = json.dumps(diagnoses)
+            print("Diagnoses JSON:", diagnoses_json)
+        except TypeError as e:
+            print(f"Error de serialización a JSON: {e}")
+            flash("Error al procesar los datos", 'danger')
+            return redirect(url_for('auth'))
         
         correo_paciente = session.get('correoPaci')
         print(correo_paciente)
         
         if not correo_paciente:
             flash("Error: No se pudo identificar al paciente", 'danger')
-            return redirect(url_for('auth'))        
+            return redirect(url_for('auth'))
+        
         
         # Guardar los resultados en la base de datos
         cur = mysql.connection.cursor()
         try:
-            cur.execute("UPDATE paciente SET sint_pri = %s, sint_sec = %s, veriSurvey = %s WHERE correoPaci = %s",
-                        (str(diagnoses_p), str(diagnoses_s), 1, correo_paciente))
+            cur.execute("UPDATE paciente SET sint_pri = %s, veriSurvey = %s, respuestas = %s WHERE correoPaci = %s",
+                        (str(diagnoses_json), 1, reported_symptoms, correo_paciente))
             mysql.connection.commit()
         
             # Guardar los síntomas reportados en la sesión para uso futuro si es necesario
             session['reported_symptoms'] = reported_symptoms
-            session['diagnoses_p'] = diagnoses_p
-            session['diagnoses_s'] = diagnoses_s
+            session['diagnoses'] = diagnoses_json
+            # session['diagnoses_s'] = diagnoses_s
             session['survey'] = 1
         
         
@@ -2077,6 +2189,9 @@ def list_routes():
 
 
 if __name__ == '__main__':
+    model = crear_modelo(43, 9)
+    modelo_guardado = r'ia/modelo/modelo_enfermedades3 - god.h5'
+    model.load_weights(modelo_guardado)
     PCapp.secret_key = '123'
     PCapp.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=6) 
     csrf.init_app(PCapp)
