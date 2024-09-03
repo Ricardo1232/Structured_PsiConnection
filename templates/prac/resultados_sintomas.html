@@ -1,0 +1,57 @@
+{% extends "layaouts/layaout.html" %}
+{% block title %}PsiConnection - Resultados de Síntomas{% endblock %}
+{% block content %}
+
+<section class="sect">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="textoPresentacion">Resultados de: {{paciente.nombrePaci}} {{paciente.apellidoPPaci}} {{paciente.apellidoMPaci}}</h2>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h3>Síntomas Reportados</h3>
+                <p>A continuación se muestran los síntomas que el paciente ha reportado como presentes en su situación actual. Estos síntomas son el resultado de las respuestas afirmativas a las preguntas de la encuesta realizada:</p>
+                <ul>
+                    {% if respuestas is mapping %}
+                        {% for sintoma, valor in respuestas.items() %}
+                            {% if valor == 'si' %}
+                                <li>{{ preguntas_completas.get(sintoma, sintoma) }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    {% elif respuestas is iterable %}
+                        {% for sintoma in respuestas %}
+                            <li>{{ preguntas_completas.get(sintoma, sintoma) }}</li>
+                        {% endfor %}
+                    {% else %}
+                        <li>No se encontraron síntomas reportados</li>
+                    {% endif %}
+                </ul>
+                
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h3>Diagnóstico</h3>
+                <ul>
+                    {% for enfermedad, porcentaje in diagnostico.items() %}
+                        <li><strong>{{ enfermedad }}:</strong> {{ porcentaje|round(2) }}%</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <p><strong>Nota:</strong> Esta lista de síntomas es una herramienta de apoyo y no constituye un diagnóstico definitivo. Se recomienda una evaluación profesional completa para un diagnóstico preciso.</p>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <a href="{{ url_for('indexPracticantes') }}" class="btn btn-primary">Volver al Índice</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

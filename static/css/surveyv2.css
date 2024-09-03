@@ -20,7 +20,6 @@
     color: #000;
     overflow-x: hidden;
     height: 100%;
-    background: linear-gradient(180deg, #2196F3 250px, #FFF 250px);
     background-repeat: no-repeat;
 }
 
@@ -82,15 +81,15 @@
 }
 
 .active {
-    background-color: #2196F3;
+    background-color: rgb(33, 90, 120);
     color: #fff !important;
-    border-left: 1px solid #2196F3;
-    border-right: 1px solid #2196F3;
+    border-left: 1px solid rgb(33, 90, 120);
+    border-right: 1px solid rgb(33, 90, 120);
 }
 
 .active .fa-circle {
     background-color: #fff !important;
-    color: #2196F3;
+    color: #14B789;
 }
 
 .fa-check {
@@ -201,7 +200,7 @@ button {
 
 .toggle input[type="radio"]:checked + .label-text:before{
 	content: "\f205";
-	color: #16a085;
+	color: rgb(33, 90, 120);
 	animation: effect 250ms ease-in;
 }
 
@@ -240,3 +239,49 @@ input[type="checkbox"], input[type="radio"]{
         float: none;
     }
 }
+
+.custom-btn-success {
+    background-color: #198754 !important; /* Color de fondo personalizado */
+    border-color: #198754 !important; /* Color del borde personalizado */
+    color: #fff !important; /* Color del texto personalizado */
+    text-decoration: none !important; /* Elimina el subrayado si lo hay */
+    font-weight: 400 !important; /* Peso de la fuente */
+    font-size: 1rem !important; /* Tamaño de la fuente */
+    line-height: 1.5 !important; /* Altura de línea */
+    padding: .375rem .75rem !important; /* Relleno */
+    border-radius: .25rem !important; /* Bordes redondeados */
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out !important; /* Transiciones */
+}
+
+.custom-btn-success:hover {
+    background-color: #157347 !important; /* Color de fondo al hacer hover */
+    border-color: #146c43 !important; /* Color del borde al hacer hover */
+    color: #fff !important; /* Color del texto al hacer hover */
+}
+
+.custom-shape-divider-top-1682744544 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    transform: rotate(180deg);
+  }
+  
+  .custom-shape-divider-top-1682744544 svg {
+    position: relative;
+    display: block;
+    width: calc(137% + 1.3px);
+    height: 156px;
+  }
+  
+  .row .custom-shape-divider-top-1682744544 {
+    padding-right: unset;
+    padding-left: unset;
+  }
+  
+  /* Color de la figura del header */
+  .custom-shape-divider-top-1682744544 .shape-fill {
+    fill: #215A6D;
+  }

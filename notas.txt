@@ -1,3 +1,13 @@
+AQUI LLEGO AUDAZ
+************************************************************************************************************************************************************
+EL BOTON DE VER PREDIAGNOSTICO ES DE OTRO COLOR (AZUL CIELO) - DEBE DE SER VERDE
+CAMBIAR EL COLOR DEL Login
+HIPERVINCULO DEL LOGIN HACIA LA PAGINA DE LA UDG NO SIRVE
+CREAR PAGINA DE ACERCA DE NOSOTROS
+DAR FORMATO AL COMO SE MUESTRAN LOS RESULTADOS DE LA ENCUESTA
+VERIFICAR ACCESOS POR URL
+
+
 ####################################################################################################################################        
 formulario
     --- verificar, por favor si el pattern esta bien en la cantidad maxima de caracteres. --- 

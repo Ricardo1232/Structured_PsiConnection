@@ -7,16 +7,16 @@ import numpy as np
 def crear_modelo(input_dim, output_dim):
     model = Sequential()
     model.add(Input(shape=(input_dim,)))
-    model.add(Dense(86, input_dim=input_dim, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
+    model.add(Dense(86, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
 
     
     model.add(Dense(86, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
-    model.add(LeakyReLU(alpha=0.01))
+    model.add(LeakyReLU(negative_slope=0.01))
     model.add(BatchNormalization())
     model.add(Dropout(0.4))
     
     model.add(Dense(86, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
-    model.add(LeakyReLU(alpha=0.01))
+    model.add(LeakyReLU(negative_slope=0.01))
     model.add(BatchNormalization())
     model.add(Dropout(0.3))
     
@@ -86,29 +86,29 @@ if __name__ == "__main__":
 
     symptoms = [
         #completos
-    # [ "preocupacion_excesiva", "nerviosismo", "fatiga", "problemas_concentracion", "irritabilidad", "tension_muscular", "problemas_sueno"],
-    # ["sentimientos_tristeza", "perdida_interes", "cambios_apetito_peso",  "problemas_sueno", "fatiga", "pensamientos_suicidio"],
-    # [ "dificultad_atencion", "hiperactividad", "impulsividad", "dificultades_instrucciones"],
-    # ["temblor_reposo", "rigidez_muscular", "lentitud_movimientos",  "problemas_equilibrio_coordinacion", "dificultad_hablar_escribir"],
-    # [ "perdida_memoria", "dificultad_palabras_conversaciones",  "desorientacion_espacial_temporal", "cambios_estado_animo_comportamiento",  "dificultad_tareas_cotidianas"],
-    # ["episodios_mania", "episodios_depresion", "cambios_bruscos_humor_actividad"],
-    # ["obsesiones", "compulsiones", "reconocimiento_ineficacia_control"],
-    # ["irritabilidad_ruido", "enfado", "ansiedad", "nauseas", "sudoracion", "necesidad_escapar", "sonidos_desencadenantes"],
-    # [ "desprecio_normas_sociales", "manipulacion_engano",  "falta_empatia_remordimiento", "comportamiento_impulsivo_agresivo", "incapacidad_relaciones_estables"],
+    [ "preocupacion_excesiva", "nerviosismo", "fatiga", "problemas_concentracion", "irritabilidad", "tension_muscular", "problemas_sueno"],
+    ["sentimientos_tristeza", "perdida_interes", "cambios_apetito_peso",  "problemas_sueno", "fatiga", "pensamientos_suicidio"],
+    [ "dificultad_atencion", "hiperactividad", "impulsividad", "dificultades_instrucciones"],
+    ["temblor_reposo", "rigidez_muscular", "lentitud_movimientos",  "problemas_equilibrio_coordinacion", "dificultad_hablar_escribir"],
+    [ "perdida_memoria", "dificultad_palabras_conversaciones",  "desorientacion_espacial_temporal", "cambios_estado_animo_comportamiento",  "dificultad_tareas_cotidianas"],
+    ["episodios_mania", "episodios_depresion", "cambios_bruscos_humor_actividad"],
+    ["obsesiones", "compulsiones", "reconocimiento_ineficacia_control"],
+    ["irritabilidad_ruido", "enfado", "ansiedad", "nauseas", "sudoracion", "necesidad_escapar", "sonidos_desencadenantes"],
+    [ "desprecio_normas_sociales", "manipulacion_engano",  "falta_empatia_remordimiento", "comportamiento_impulsivo_agresivo", "incapacidad_relaciones_estables"],
         
         
         
-    # ["preocupacion_excesiva", "nerviosismo", "fatiga", "problemas_concentracion", "irritabilidad"],  # Ejemplo con síntomas de ansiedad
-    # ["sentimientos_tristeza", "perdida_interes", "cambios_apetito_peso"],  # Ejemplo con síntomas de depresión
-    # ["dificultad_atencion", "hiperactividad", "impulsividad"],  # Ejemplo con síntomas de TDAH
-    # ["temblor_reposo", "rigidez_muscular", "lentitud_movimientos"],  # Ejemplo con síntomas de Parkinson
-    # ["perdida_memoria", "dificultad_palabras_conversaciones", "desorientacion_espacial_temporal", "cambios_estado_animo_comportamiento"],  # Ejemplo con síntomas de Alzheimer
-    # ["episodios_mania", "episodios_depresion", "cambios_bruscos_humor_actividad"],  # Ejemplo con síntomas de trastorno bipolar
-    # ["obsesiones", "compulsiones"],  # Ejemplo con síntomas de TOC
-    # ["irritabilidad", "enfado", "ansiedad", "nauseas", "sonidos_desencadenantes"],  # Ejemplo con síntomas de misofonía
-    # ["desprecio_normas_sociales", "manipulacion_engano", "comportamiento_impulsivo_agresivo"],  # Ejemplo con síntomas de trastorno antisocial
-    # ['nerviosismo', 'fatiga', 'problemas_concentracion', 'irritabilidad'],
-    # ['nerviosismo', 'fatiga', 'problemas_concentracion', 'irritabilidad', "enfado", "ansiedad", "nauseas", "sonidos_desencadenantes", "desprecio_normas_sociales", "manipulacion_engano", "comportamiento_impulsivo_agresivo"]
+    ["preocupacion_excesiva", "nerviosismo", "fatiga", "problemas_concentracion", "irritabilidad"],  # Ejemplo con síntomas de ansiedad
+    ["sentimientos_tristeza", "perdida_interes", "cambios_apetito_peso"],  # Ejemplo con síntomas de depresión
+    ["dificultad_atencion", "hiperactividad", "impulsividad"],  # Ejemplo con síntomas de TDAH
+    ["temblor_reposo", "rigidez_muscular", "lentitud_movimientos"],  # Ejemplo con síntomas de Parkinson
+    ["perdida_memoria", "dificultad_palabras_conversaciones", "desorientacion_espacial_temporal", "cambios_estado_animo_comportamiento"],  # Ejemplo con síntomas de Alzheimer
+    ["episodios_mania", "episodios_depresion", "cambios_bruscos_humor_actividad"],  # Ejemplo con síntomas de trastorno bipolar
+    ["obsesiones", "compulsiones"],  # Ejemplo con síntomas de TOC
+    ["irritabilidad", "enfado", "ansiedad", "nauseas", "sonidos_desencadenantes"],  # Ejemplo con síntomas de misofonía
+    ["desprecio_normas_sociales", "manipulacion_engano", "comportamiento_impulsivo_agresivo"],  # Ejemplo con síntomas de trastorno antisocial
+    ['nerviosismo', 'fatiga', 'problemas_concentracion', 'irritabilidad'],
+    ['nerviosismo', 'fatiga', 'problemas_concentracion', 'irritabilidad', "enfado", "ansiedad", "nauseas", "sonidos_desencadenantes", "desprecio_normas_sociales", "manipulacion_engano", "comportamiento_impulsivo_agresivo"],
     ["preocupacion_excesiva","problemas_concentracion", "sentimientos_tristeza", "perdida_interes" ]
     ]
     model = crear_modelo(43, 9)

@@ -13,6 +13,7 @@ from functools              import wraps
 from werkzeug.utils         import secure_filename
 from datetime               import date, datetime, timedelta
 from cryptography.fernet    import Fernet
+from cryptography.fernet import InvalidToken
 from typing                 import List, Dict
 
 from google.oauth2.credentials import Credentials
@@ -33,6 +34,7 @@ import re
 import datetime
 import os.path
 import json
+import html
 
 
 
@@ -383,16 +385,16 @@ def auth():
 def crear_modelo(input_dim, output_dim):
     model = Sequential()
     model.add(Input(shape=(input_dim,)))
-    model.add(Dense(86, input_dim=input_dim, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
+    model.add(Dense(86, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
 
     
     model.add(Dense(86, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
-    model.add(LeakyReLU(alpha=0.01))
+    model.add(LeakyReLU(negative_slope=0.01))
     model.add(BatchNormalization())
     model.add(Dropout(0.4))
     
     model.add(Dense(86, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
-    model.add(LeakyReLU(alpha=0.01))
+    model.add(LeakyReLU(negative_slope=0.01))
     model.add(BatchNormalization())
     model.add(Dropout(0.3))
     
@@ -469,66 +471,186 @@ def crear_vector_sintomas(symptom_list):
 def survey_v2():
     return render_template('/paci/SurveyV2modcopy.html')
 
-
+#Version 2
 @PCapp.route('/results', methods=['POST'])
 @require_post
 def results():
-        reported_symptoms = [symptom for symptom, value in request.form.items() if value == 'si']
-        vector_paciente = np.array([crear_vector_sintomas(reported_symptoms)])
-        
-        predicciones = model.predict(vector_paciente)
-
-        # Convertir las predicciones a porcentajes
-        percentages = [float(p) * 100 for p in predicciones[0]]
-
-        # Mostrar el resultado en formato de diccionario
-        diagnoses = {enfermedad: round(float(porcentaje), 2) for enfermedad, porcentaje in zip(enfermedades.keys(), percentages)}
-        print(f"{diagnoses}")
-        # diagnoses_p, diagnoses_s = diagnose(reported_symptoms)
-        # print(diagnoses_p)
-        # print(diagnoses_s)
-        
-        
-        try:
-            # Serializar el diccionario a JSON
-            diagnoses_json = json.dumps(diagnoses)
-            print("Diagnoses JSON:", diagnoses_json)
-        except TypeError as e:
-            print(f"Error de serialización a JSON: {e}")
-            flash("Error al procesar los datos", 'danger')
-            return redirect(url_for('auth'))
-        
-        correo_paciente = session.get('correoPaci')
-        print(correo_paciente)
-        
-        if not correo_paciente:
-            flash("Error: No se pudo identificar al paciente", 'danger')
-            return redirect(url_for('auth'))
-        
-        
-        # Guardar los resultados en la base de datos
-        cur = mysql.connection.cursor()
-        try:
-            cur.execute("UPDATE paciente SET sint_pri = %s, veriSurvey = %s, respuestas = %s WHERE correoPaci = %s",
-                        (str(diagnoses_json), 1, reported_symptoms, correo_paciente))
-            mysql.connection.commit()
-        
-            # Guardar los síntomas reportados en la sesión para uso futuro si es necesario
-            session['reported_symptoms'] = reported_symptoms
-            session['diagnoses'] = diagnoses_json
-            # session['diagnoses_s'] = diagnoses_s
-            session['survey'] = 1
-        
-        
-            flash("Encuesta completada con éxito", 'success')
-        except MySQLdb.Error as e:
-            flash(f"Error al guardar los resultados de la encuesta: {e}", 'danger')
-            mysql.connection.rollback()
-        finally:
-            cur.close()      
-              
-        return redirect(url_for('indexPacientes'))
+    reported_symptoms = [symptom for symptom, value in request.form.items() if value == 'si']
+    vector_paciente = np.array([crear_vector_sintomas(reported_symptoms)])
     
+    predicciones = model.predict(vector_paciente)
+
+    # Convertir las predicciones a porcentajes
+    percentages = [float(p) * 100 for p in predicciones[0]]
+
+    # Mostrar el resultado en formato de diccionario
+    diagnoses = {enfermedad: round(float(porcentaje), 2) for enfermedad, porcentaje in zip(enfermedades.keys(), percentages)}
+    print(f"Diagnóstico: {diagnoses}")
+    
+    try:
+        # Serializar el diccionario a JSON
+        diagnoses_json = json.dumps(diagnoses)
+        print("Diagnoses JSON:", diagnoses_json)
+    except TypeError as e:
+        print(f"Error de serialización a JSON: {e}")
+        flash("Error al procesar los datos", 'danger')
+        return redirect(url_for('auth'))
+    
+    correo_paciente = session.get('correoPaci')
+    print(f"Correo del paciente: {correo_paciente}")
+    
+    if not correo_paciente:
+        flash("Error: No se pudo identificar al paciente", 'danger')
+        return redirect(url_for('auth'))
+    
+    # Guardar los resultados en la base de datos
+    cur = mysql.connection.cursor()
+    try:
+        # Convertir reported_symptoms a una cadena JSON
+        reported_symptoms_json = json.dumps(reported_symptoms)
+        
+        cur.execute("UPDATE paciente SET sint_pri = %s, veriSurvey = %s, respuestas = %s WHERE correoPaci = %s",
+                    (diagnoses_json, 1, reported_symptoms_json, correo_paciente))
+        mysql.connection.commit()
+        
+        print("Diagnoses JSON guardado:", diagnoses_json)
+        print("Reported Symptoms guardados:", reported_symptoms_json)
+        print("veriSurvey guardado: 1")
+        
+        # Verificar que los datos se guardaron correctamente
+        cur.execute("SELECT sint_pri, veriSurvey, respuestas FROM paciente WHERE correoPaci = %s", (correo_paciente,))
+        result = cur.fetchone()
+        if result:
+            print("Datos guardados en la BD:")
+            print(f"sint_pri: {result['sint_pri']}")
+            print(f"veriSurvey: {result['veriSurvey']}")
+            print(f"respuestas: {result['respuestas']}")
+        else:
+            print("No se encontraron datos guardados para este paciente")
+    
+        # Guardar los síntomas reportados en la sesión para uso futuro si es necesario
+        session['reported_symptoms'] = reported_symptoms
+        session['diagnoses'] = diagnoses_json
+        session['survey'] = 1
+    
+        flash("Encuesta completada con éxito", 'success')
+    except MySQLdb.Error as e:
+        print(f"Error MySQL al guardar los resultados: {e}")
+        flash(f"Error al guardar los resultados de la encuesta: {e}", 'danger')
+        mysql.connection.rollback()
+    finally:
+        cur.close()      
+          
+    return redirect(url_for('indexPacientes'))
+
+# Version 1
+# @PCapp.route('/results', methods=['POST'])
+# @require_post
+# def results():
+#         reported_symptoms = [symptom for symptom, value in request.form.items() if value == 'si']
+#         vector_paciente = np.array([crear_vector_sintomas(reported_symptoms)])
+        
+#         predicciones = model.predict(vector_paciente)
+
+#         # Convertir las predicciones a porcentajes
+#         percentages = [float(p) * 100 for p in predicciones[0]]
+
+#         # Mostrar el resultado en formato de diccionario
+#         diagnoses = {enfermedad: round(float(porcentaje), 2) for enfermedad, porcentaje in zip(enfermedades.keys(), percentages)}
+#         print(f"{diagnoses}")
+#         # diagnoses_p, diagnoses_s = diagnose(reported_symptoms)
+#         # print(diagnoses_p)
+#         # print(diagnoses_s)
+        
+        
+#         try:
+#             # Serializar el diccionario a JSON
+#             diagnoses_json = json.dumps(diagnoses)
+#             print("Diagnoses JSON:", diagnoses_json)
+#         except TypeError as e:
+#             print(f"Error de serialización a JSON: {e}")
+#             flash("Error al procesar los datos", 'danger')
+#             return redirect(url_for('auth'))
+        
+#         correo_paciente = session.get('correoPaci')
+#         print(correo_paciente)
+        
+#         if not correo_paciente:
+#             flash("Error: No se pudo identificar al paciente", 'danger')
+#             return redirect(url_for('auth'))
+        
+        
+#         # Guardar los resultados en la base de datos
+#         cur = mysql.connection.cursor()
+#         try:
+#             cur.execute("UPDATE paciente SET sint_pri = %s, veriSurvey = %s, respuestas = %s WHERE correoPaci = %s",
+#                         (str(diagnoses_json), 1, reported_symptoms, correo_paciente))
+#             mysql.connection.commit()
+            
+#             print("Diagnoses JSON:")
+#             print(diagnoses_json)
+            
+#             print("Reported Symptoms:")
+#             print(reported_symptoms)
+            
+            
+        
+#             # Guardar los síntomas reportados en la sesión para uso futuro si es necesario
+#             session['reported_symptoms'] = reported_symptoms
+#             session['diagnoses'] = diagnoses_json
+#             # session['diagnoses_s'] = diagnoses_s
+#             session['survey'] = 1
+        
+        
+#             flash("Encuesta completada con éxito", 'success')
+#         except MySQLdb.Error as e:
+#             flash(f"Error al guardar los resultados de la encuesta: {e}", 'danger')
+#             mysql.connection.rollback()
+#         finally:
+#             cur.close()      
+              
+#         return redirect(url_for('indexPacientes'))
+    
+    
+#Version anterior
+# @PCapp.route('/results', methods=['POST'])
+# @require_post
+# def results():
+#         reported_symptoms = [symptom for symptom, value in request.form.items() if value == 'si']
+#         print(f"{reported_symptoms}")
+#         diagnoses_p, diagnoses_s = diagnose(reported_symptoms)
+#         print(diagnoses_p)
+#         print(diagnoses_s)
+        
+#         correo_paciente = session.get('correoPaci')
+#         print(correo_paciente)
+        
+#         if not correo_paciente:
+#             flash("Error: No se pudo identificar al paciente", 'danger')
+#             return redirect(url_for('auth'))        
+        
+#         # Guardar los resultados en la base de datos
+#         cur = mysql.connection.cursor()
+#         try:
+#             cur.execute("UPDATE paciente SET sint_pri = %s, sint_sec = %s, veriSurvey = %s WHERE correoPaci = %s",
+#                         (str(diagnoses_p), str(diagnoses_s), 1, correo_paciente))
+#             mysql.connection.commit()
+        
+#             # Guardar los síntomas reportados en la sesión para uso futuro si es necesario
+#             session['reported_symptoms'] = reported_symptoms
+#             session['diagnoses_p'] = diagnoses_p
+#             session['diagnoses_s'] = diagnoses_s
+#             session['survey'] = 1
+        
+        
+#             flash("Encuesta completada con éxito", 'success')
+#         except MySQLdb.Error as e:
+#             flash(f"Error al guardar los resultados de la encuesta: {e}", 'danger')
+#             mysql.connection.rollback()
+#         finally:
+#             cur.close()      
+              
+#         return redirect(url_for('indexPacientes'))
     
 @PCapp.route('/verify', methods=['GET', 'POST'])
 def verify():
@@ -1287,6 +1409,86 @@ def verResultadosEncuesta(idEncu):
         flash(f'Error al obtener los resultados de la encuesta: {err}', 'danger')
         return redirect(url_for('home'))
 
+
+# VER RESULTADOS DE SÍNTOMAS DEL PACIENTE
+# VERSION 1
+@PCapp.route('/ResultadosSintomas/<int:idPaci>', methods=['GET', 'POST'])
+@login_required
+@verified_required
+@practicante_required
+def resultadosSintomas(idPaci):
+    # SE MANDA A LLAMAR LA FUNCION PARA DESENCRIPTAR
+    encriptar = encriptado()
+    
+    # USAR SESSION PARA OBTENER EL ID DEL PRACTICANTE
+    idPrac = session['idPrac']
+
+    # SE SELECCIONAN LOS DATOS DEL PACIENTE Y SUS SÍNTOMAS
+    with mysql.connection.cursor() as selecPaci:
+        selecPaci.execute("SELECT * FROM paciente WHERE idPaci=%s AND activoPaci IS NOT NULL", (idPaci,))
+        paci = selecPaci.fetchone()
+
+    if paci:
+        # SE CREA UNA LISTA CON LOS NOMBRES DE LOS CAMPOS A DESENCRIPTAR
+        list_campo = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
+        
+        try:
+            # SE DESENCRIPTAN LOS DATOS DEL PACIENTE
+            datosPaci = {}
+            for campo in list_campo:
+                if campo in paci and paci[campo].startswith('gAAAAAB'):
+                    datosPaci[campo] = encriptar.decrypt(paci[campo].encode()).decode()
+                else:
+                    datosPaci[campo] = paci[campo]
+            
+            # Agregamos el correo sin desencriptar
+            datosPaci['correoPaci'] = paci['correoPaci']
+        except InvalidToken as e:
+            # Si hay un error de desencriptación, lo manejamos
+            print(f"Error al desencriptar: {e}")
+            flash('Error al desencriptar los datos del paciente. Por favor, contacte al administrador.', 'error')
+            return redirect(url_for('indexPracticantes'))
+        
+        # SE ACTUALIZA EL DICCIONARIO CON LOS DATOS DESENCRIPTADOS
+        paci.update(datosPaci)
+
+        # SE OBTIENEN LOS SÍNTOMAS REPORTADOS Y EL DIAGNÓSTICO
+        respuestas = json.loads(paci['respuestas']) if paci['respuestas'] else {}
+        diagnostico = json.loads(paci['sint_pri']) if paci['sint_pri'] else {}
+        
+        # Obtener las preguntas completas del archivo JS
+        with open('static/js/surveyv2modcopy.js', 'r', encoding='utf-8') as file:
+            js_content = file.read()
+            questions_match = re.search(r'const surveyQuestions = (\[.*?\]);', js_content, re.DOTALL)
+            if questions_match:
+                questions_json = questions_match.group(1)
+                questions_json = questions_json.replace("'", '"')
+                questions_json = re.sub(r'(\w+):', r'"\1":', questions_json)
+                try:
+                    survey_questions = json.loads(questions_json)
+                    # Decodificar entidades HTML
+                    for question in survey_questions:
+                        question['question'] = html.unescape(question['question'])
+                except json.JSONDecodeError as e:
+                    print(f"Error al decodificar JSON: {e}")
+                    survey_questions = []
+            else:
+                survey_questions = []
+
+        # Crear un diccionario con las preguntas completas
+        preguntas_completas = {q['name']: q['question'] for q in survey_questions}
+
+        return render_template('/prac/resultados_sintomas.html', 
+                               paciente=paci, 
+                               respuestas=respuestas,
+                               diagnostico=diagnostico,
+                               preguntas_completas=preguntas_completas,
+                               username=session['name'], 
+                               email=session['correoPrac'], 
+                               request=request)
+    else:
+        flash('Paciente no encontrado', 'error')
+        return redirect(url_for('indexPracticantes'))
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Cita Paciente ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCitaPaciente', methods=["POST"])
@@ -2186,12 +2388,11 @@ def list_routes():
         print(line)
 
 
-
+model = crear_modelo(43, 9)
+modelo_guardado = r'ia/modelo/modelo_enfermedades3 - god.h5'
+model.load_weights(modelo_guardado)
 
 if __name__ == '__main__':
-    model = crear_modelo(43, 9)
-    modelo_guardado = r'ia/modelo/modelo_enfermedades3 - god.h5'
-    model.load_weights(modelo_guardado)
     PCapp.secret_key = '123'
     PCapp.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=6) 
     csrf.init_app(PCapp)
