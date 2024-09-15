@@ -1,0 +1,58 @@
+{% extends "layaouts/layaout.html" %}
+{% block title %}Resultados encuestas{% endblock %}
+{% block content %}
+
+<section class="sect-custom">
+
+  <!-- Título de la Encuesta -->
+  <h2 class="titulo-encuesta">Encuesta de Satisfacción</h2>
+
+  <!-- Tarjetas de Preguntas y Respuestas -->
+  <div class="encuesta-card">
+    <label for="pregunta-1" class="pregunta-label">1. ¿Cómo calificaría su nivel de satisfacción general con el servicio proporcionado por el psicólogo?</label>
+    <p class="respuesta-texto">Respuesta: {{resu.pregunta1Encu}}</p>
+  </div>
+
+  <div class="encuesta-card">
+    <label for="pregunta-2" class="pregunta-label">2. ¿El psicólogo escuchó atentamente sus preocupaciones y dudas durante las sesiones?</label>
+    <p class="respuesta-texto">Respuesta: {{resu.pregunta2Encu}}</p>
+  </div>
+
+  <div class="encuesta-card">
+    <label for="pregunta-3" class="pregunta-label">3. ¿Se sintió cómodo compartiendo sus pensamientos y sentimientos con el psicólogo?</label>
+    <p class="respuesta-texto">Respuesta: {{resu.pregunta3Encu}}</p>
+  </div>
+
+  <div class="encuesta-card">
+    <label for="pregunta-4" class="pregunta-label">4. ¿El psicólogo mostró empatía y comprensión hacia sus problemas?</label>
+    <p class="respuesta-texto">Respuesta: {{resu.pregunta4Encu}}</p>
+  </div>
+
+  <div class="encuesta-card">
+    <label for="pregunta-5" class="pregunta-label">5. ¿Sintió que el tratamiento fue efectivo para abordar sus problemas o preocupaciones?</label>
+    <p class="respuesta-texto">Respuesta: {{resu.pregunta5Encu}}</p>
+  </div>
+
+  <div class="encuesta-card">
+    <label for="pregunta-6" class="pregunta-label">6. ¿Cómo calificaría la calidad y la organización del psicólogo en cuanto a las citas y la comunicación?</label>
+    <p class="respuesta-texto">Respuesta: {{resu.pregunta6Encu}}</p>
+  </div>
+
+  <div class="encuesta-card">
+    <label for="pregunta-7" class="pregunta-label">7. ¿Recomendaría a este psicólogo a amigos o familiares que necesiten servicios de salud mental?</label>
+    <p class="respuesta-texto">Respuesta: {{resu.pregunta7Encu}}</p>
+  </div>
+
+  <div class="encuesta-card">
+    <label for="pregunta-8" class="pregunta-label">8. ¿Tiene algún comentario adicional o sugerencias para mejorar la experiencia con el psicólogo?</label>
+    <p class="respuesta-texto">Respuesta: {{resu.pregunta8Encu}}</p>
+  </div>
+
+  <!-- Botón de Acción (si es necesario) -->
+  <div class="text-center mt-4">
+    <a href="/VerEstadisticasPracticante/{{resu.idEncuPrac}}"class="boton-encuesta-custom">Regresar</a>
+  </div>
+
+</section>
+
+{% endblock %}

@@ -1,174 +1,147 @@
 console.log('estoy cargado');
 const surveyQuestions = [
     {
-        question: "¿Siente una preocupación excesiva sobre diferentes aspectos de su vida?",
-        name: "preocupacion_excesiva"
+        question: "¿Te sientes nervioso o ansioso con frecuencia sin razón aparente?",
+        name: "ansiedad_nervioso_ansioso"
     },
     {
-        question: "¿Se siente nervioso o está constantemente en alerta?",
-        name: "nerviosismo"
+        question: "¿Experimentas síntomas físicos como palpitaciones o sudoración cuando estás estresado?",
+        name: "ansiedad_sintomas_fisicos"
     },
     {
-        question: "¿Se siente fatigado la mayor parte del tiempo?",
-        name: "fatiga"
+        question: "¿Tiendes a preocuparte excesivamente por situaciones futuras?",
+        name: "ansiedad_preocupacion_excesiva"
     },
     {
-        question: "¿Tiene problemas de concentración?",
-        name: "problemas_concentracion"
+        question: "¿Evitas situaciones sociales por miedo a sentirte incómodo o juzgado?",
+        name: "ansiedad_evitar_social"
     },
     {
-        question: "¿Se irrita fácilmente?",
-        name: "irritabilidad"
+        question: "¿Tienes dificultades para conciliar el sueño debido a preocupaciones?",
+        name: "ansiedad_problemas_sueno"
     },
     {
-        question: "¿Siente tensión muscular?",
-        name: "tension_muscular"
+        question: "¿Has perdido interés en actividades que antes disfrutabas?",
+        name: "depresion_perdida_interes"
     },
     {
-        question: "¿Tiene problemas para conciliar el sueño?",
-        name: "problemas_sueno"
+        question: "¿Te sientes triste o desanimado la mayor parte del día?",
+        name: "depresion_tristeza"
     },
     {
-        question: "¿Experimenta sentimientos de tristeza profunda?",
-        name: "sentimientos_tristeza"
+        question: "¿Has experimentado cambios significativos en tus patrones de sueño o apetito?",
+        name: "depresion_cambios_sueno_apetito"
     },
     {
-        question: "¿Ha perdido interés en actividades que solía disfrutar?",
-        name: "perdida_interes"
+        question: "¿Te sientes sin energía o fatigado con frecuencia?",
+        name: "depresion_fatiga"
     },
     {
-        question: "¿Ha experimentado cambios en su apetito o peso recientemente?",
-        name: "cambios_apetito_peso"
+        question: "¿Tienes pensamientos de inutilidad o culpa excesiva?",
+        name: "depresion_inutilidad_culpa"
     },
     {
-        question: "¿Ha tenido pensamientos de suicidio?",
-        name: "pensamientos_suicidio"
+        question: "¿Te cuesta respetar las normas sociales o legales?",
+        name: "antisocial_respetar_normas"
     },
     {
-        question: "¿Tiene dificultades para mantener la atención en una tarea?",
-        name: "dificultad_atencion"
+        question: "¿Tienes dificultades para sentir empatía por los demás?",
+        name: "antisocial_falta_empatia"
     },
     {
-        question: "¿Se considera una persona hiperactiva?",
-        name: "hiperactividad"
+        question: "¿Actúas de manera impulsiva o irresponsable con frecuencia?",
+        name: "antisocial_impulsivo_irresponsable"
     },
     {
-        question: "¿Suele actuar impulsivamente?",
-        name: "impulsividad"
+        question: "¿Sientes indiferencia por los sentimientos o derechos de los demás?",
+        name: "antisocial_indiferencia_derechos"
     },
     {
-        question: "¿Encuentra dificultades para seguir instrucciones?",
-        name: "dificultades_instrucciones"
+        question: "¿Tiendes a manipular a otros para obtener beneficios personales?",
+        name: "antisocial_manipulacion"
     },
     {
-        question: "¿Experimenta temblores cuando está en reposo?",
-        name: "temblor_reposo"
+        question: "¿Te resulta difícil mantener la atención en clases o durante el estudio?",
+        name: "tdah_atencion"
     },
     {
-        question: "¿Siente rigidez muscular?",
-        name: "rigidez_muscular"
+        question: "¿Sueles perder objetos necesarios para tus actividades (como llaves, libros, etc.)?",
+        name: "tdah_perder_objetos"
     },
     {
-        question: "¿Ha notado lentitud en sus movimientos?",
-        name: "lentitud_movimientos"
+        question: "¿Te sientes inquieto o tienes dificultades para permanecer sentado por largos períodos?",
+        name: "tdah_inquietud"
     },
     {
-        question: "¿Tiene problemas de equilibrio o coordinación?",
-        name: "problemas_equilibrio_coordinacion"
+        question: "¿Interrumpes a otros o hablas en momentos inapropiados?",
+        name: "tdah_interrupcion"
     },
     {
-        question: "¿Tiene dificultades para hablar o escribir?",
-        name: "dificultad_hablar_escribir"
+        question: "¿Tienes problemas para organizar tareas y actividades?",
+        name: "tdah_organizacion"
     },
     {
-        question: "¿Ha experimentado pérdida de memoria recientemente?",
-        name: "perdida_memoria"
+        question: "¿Experimentas períodos de energía excesiva y menor necesidad de dormir?",
+        name: "bipolar_energia_excesiva"
     },
     {
-        question: "¿Encuentra dificultades para encontrar palabras en conversaciones?",
-        name: "dificultad_palabras_conversaciones"
+        question: "¿Has tenido episodios de tristeza profunda alternados con períodos de euforia?",
+        name: "bipolar_cambios_estado_animo"
     },
     {
-        question: "¿Se siente desorientado(a) en tiempo o espacio?",
-        name: "desorientacion_espacial_temporal"
+        question: "¿Notas cambios significativos en tu autoestima, pasando de muy alta a muy baja?",
+        name: "bipolar_cambios_autoestima"
     },
     {
-        question: "¿Ha experimentado cambios en su estado de ánimo o comportamiento?",
-        name: "cambios_estado_animo_comportamiento"
+        question: "¿Has tenido episodios de gastos excesivos o comportamientos impulsivos?",
+        name: "bipolar_gastos_impulsivos"
     },
     {
-        question: "¿Encuentra dificultades para realizar tareas cotidianas?",
-        name: "dificultad_tareas_cotidianas"
+        question: "¿Experimentas cambios rápidos en tus ideas o planes para el futuro?",
+        name: "bipolar_cambios_rapidos_ideas"
     },
     {
-        question: "¿Experimenta episodios de manía?",
-        name: "episodios_mania"
+        question: "¿Tienes pensamientos intrusivos y recurrentes que te causan ansiedad?",
+        name: "toc_pensamientos_intrusivos"
     },
     {
-        question: "¿Experimenta episodios de depresión?",
-        name: "episodios_depresion"
+        question: "¿Realizas rituales o acciones repetitivas para aliviar la ansiedad?",
+        name: "toc_rituales"
     },
     {
-        question: "¿Experimenta cambios bruscos en su humor o actividad?",
-        name: "cambios_bruscos_humor_actividad"
+        question: "¿Dedicas mucho tiempo a estas obsesiones o compulsiones, interfiriendo con tu vida diaria?",
+        name: "toc_interferencia_diaria"
     },
     {
-        question: "¿Experimenta obsesiones recurrentes?",
-        name: "obsesiones"
+        question: "¿Sientes la necesidad de comprobar las cosas repetidamente?",
+        name: "toc_comprobacion_repetida"
     },
     {
-        question: "¿Siente la necesidad de realizar compulsiones para aliviar la ansiedad?",
-        name: "compulsiones"
+        question: "¿Te resulta difícil controlar estos pensamientos o comportamientos?",
+        name: "toc_dificultad_control"
     },
     {
-        question: "¿Reconoce la ineficacia de sus intentos por controlar sus pensamientos o comportamientos obsesivos?",
-        name: "reconocimiento_ineficacia_control"
+        question: "¿Ciertos sonidos cotidianos (como masticar, respirar fuerte) te provocan una reacción emocional intensa?",
+        name: "misofonia_sensibilidad_sonidos"
     },
     {
-        question: "¿Se siente irritado(a) ante ciertos sonidos?",
-        name: "irritabilidad_misofonia"
+        question: "¿Evitas situaciones sociales debido a tu sensibilidad a ciertos sonidos?",
+        name: "misofonia_evitar_situaciones"
     },
     {
-        question: "¿Se enfada fácilmente debido a sonidos específicos?",
-        name: "enfado"
+        question: "¿Tu reacción a estos sonidos interfiere con tu capacidad para concentrarte en tus estudios?",
+        name: "misofonia_interferencia_concentracion"
     },
     {
-        question: "¿Experimenta ansiedad intensa ante ciertos sonidos?",
-        name: "ansiedad"
+        question: "¿Sientes ira o disgusto intenso cuando escuchas estos sonidos?",
+        name: "misofonia_ira_disgusto"
     },
     {
-        question: "¿Siente náuseas ante ciertos sonidos?",
-        name: "nauseas"
-    },
-    {
-        question: "¿Experimenta sudoración excesiva ante ciertos sonidos?",
-        name: "sudoracion"
-    },
-    {
-        question: "¿Siente la necesidad de escapar de ciertos sonidos?",
-        name: "necesidad_escapar"
-    },
-    {
-        question: "¿Ciertos sonidos desencadenan reacciones negativas en usted?",
-        name: "sonidos_desencadenantes"
-    },
-    {
-        question: "¿Ha violado los derechos de los demás, como engañar, robar o agredir físicamente?",
-        name: "violacion_derechos"
-    },
-    {
-        question: "¿Desprecia o viola las normas sociales y legales, mostrando indiferencia por la seguridad propia o de los demás?",
-        name: "desprecio_normas"
-    },
-    {
-        question: "¿Muestra irresponsabilidad consistente, como no cumplir con obligaciones laborales o financieras?",
-        name: "irresponsabilidad"
-    },
-    {
-        question: "¿Presenta falta de remordimiento, indiferencia o justificación de haber dañado, maltratado o robado a otras personas?",
-        name: "falta_remordimiento"
+        question: "¿Has notado que tu sensibilidad a ciertos sonidos ha aumentado con el tiempo?",
+        name: "misofonia_aumento_sensibilidad"
     }
 ];
+
 
 function generateSurvey() {
     const container = document.getElementById('survey-container');
@@ -191,7 +164,7 @@ function generateSurvey() {
                                     type="radio"
                                     name="${questionObj.name}"
                                     id="${questionObj.name}Si"
-                                    value="si"
+                                    value="2"
                                     required><span
                                     class="label-text">Sí</span>
                             </label>
@@ -200,8 +173,18 @@ function generateSurvey() {
                                     class="form-check-input"
                                     type="radio"
                                     name="${questionObj.name}"
+                                    id="${questionObj.name}Aveces"
+                                    value="1"
+                                    required><span
+                                    class="label-text">A veces</span>
+                            </label>
+                            <label class="toggle">
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="${questionObj.name}"
                                     id="${questionObj.name}No"
-                                    value="no"
+                                    value="0"
                                     required><span
                                     class="label-text">No</span>
                             </label>
@@ -260,7 +243,7 @@ $(document).ready(function () {
     resetZIndex();
     var current_fs, next_fs, previous_fs;
     var currentSubcardIndex = 0;
-    var totalSubcards = 9;
+    var totalSubcards = 7;
 
     function showSubcard(index, direction) {
         var currentSubcard = $('.subcard.activee');

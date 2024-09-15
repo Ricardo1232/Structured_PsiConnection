@@ -103,39 +103,65 @@ def eliminarCuenta(request, mysql, user):
 # FUNCION QUE DECODIFICA LOS CAMPOS PARA ACTIALIZAR EL DICCIONARIO
 def select_and_decode_atribute(datos, list_campo, encriptar):
     list_valor = []
-    for campo in  list_campo:
-        # SELECCIONA Y DECODIFICA EL CAMPO
+    for campo in list_campo:
         valor = datos.get(campo)
-        valor = encriptar.decrypt(valor)
-        valor = valor.decode()
-        
-        list_valor.append(valor)
-
-    # SE AGREGA A UN DICCIONARIO
+        if valor and isinstance(valor, str):
+            try:
+                valor_bytes = valor.encode('utf-8')
+                valor_desencriptado = encriptar.decrypt(valor_bytes).decode('utf-8')
+            except Exception as e:
+                # print(f"Error al desencriptar el campo {campo}: {e}")
+                valor_desencriptado = valor  # Dejar el valor original si falla
+        else:
+            # No intentar desencriptar si no es una cadena
+            valor_desencriptado = valor
+        list_valor.append(valor_desencriptado)
     dicc = {campo: valor for campo, valor in zip(list_campo, list_valor)}
-    return dicc 
+    return dicc
     
     
-def obtener_datos(user, consult, mysql, encriptar, tipo):
+    
+def obtener_datos(user, consult, mysql, encriptar, tipo, limit=None, offset=None):
     # SE SELECCIONA TODOS LOS DATOS DE LA BD POR SI SE LLEGA A NECESITAR
     with mysql.connection.cursor() as selector:
         if tipo == 1:
-            selector.execute(f"SELECT * FROM {consult[0]} WHERE {consult[1]}  IS NOT NULL")
+            query = f"SELECT * FROM {consult[0]} WHERE {consult[1]} IS NOT NULL"
+            if limit:
+                query += f" LIMIT {limit}"
+            selector.execute(query)
         elif tipo == 2:
-            selector.execute(f"SELECT * FROM {consult[0]} {consult[1]} INNER JOIN practicante PR ON {consult[2]} = PR.idPrac INNER JOIN paciente PA ON {consult[3]} = PA.idPaci WHERE {consult[4]}= %s",(consult[5],))
-            #seletda.execute(f"SELECT * FROM citas    C  INNER JOIN practicante PR ON C.idCitaPrac = PR.idPrac  INNER JOIN paciente PA ON C.idCitaPaci = PA.idPaci WHERE idCitaPaci=  %s",(idPaci,))
-            #legcEnc.execute(f"SELECT * FROM encuesta E  INNER JOIN practicante PR ON E.idEncuPrac = PR.idPrac  INNER JOIN paciente PA ON E.idEncuPaci = PA.idPaci WHERE idEncuPrac=  %s",(idPrac,))
+            query = f"""
+                SELECT * FROM {consult[0]} {consult[1]}
+                INNER JOIN practicante PR ON {consult[2]} = PR.idPrac
+                INNER JOIN paciente PA ON {consult[3]} = PA.idPaci
+                WHERE {consult[4]}= %s
+            """
+            if limit:
+                query += f" LIMIT {limit}"
+            selector.execute(query, (consult[5],))
         elif tipo == 3:
-            selector.execute(f"SELECT * FROM citas C INNER JOIN practicante P ON P.idPrac = C.idCitaPrac INNER JOIN paciente PA ON PA.idPaci = C.idCitaPaci WHERE P.idPrac=%s AND activoPrac IS NOT NULL AND estatusCita=%s",(consult[0], consult[1]))
+            query = f"""
+                SELECT * FROM citas C
+                INNER JOIN practicante P ON P.idPrac = C.idCitaPrac
+                INNER JOIN paciente PA ON PA.idPaci = C.idCitaPaci
+                WHERE P.idPrac=%s AND activoPrac IS NOT NULL AND estatusCita=%s
+            """
+            params = (consult[0], consult[1])
+            if limit:
+                query += " LIMIT %s"
+                params += (limit,)
+                if offset:
+                    query += " OFFSET %s"
+                    params += (offset,)
+            selector.execute(query, params)
         
-        user_records =  selector.fetchall()
+        user_records = selector.fetchall()
 
     # SE CREA UNA LISTA
     data_list = []
     
     # CON ESTE FOR, SE VAN OBTENIENDO LOS DATOS PARA POSTERIORMENTE DECODIFICARLOS
     for record in user_records:
-        
         # SE AGREGA A UN DICCIONARIO
         decrypted_data = select_and_decode_atribute(record, user, encriptar)
 
@@ -149,7 +175,6 @@ def obtener_datos(user, consult, mysql, encriptar, tipo):
     data_list = tuple(data_list)
         
     return user_records, data_list
-
 
 def crear_evento(dire_cita, tipo_cita, fecha_hora, correo_prac, correo_paci):
     """

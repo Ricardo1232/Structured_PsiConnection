@@ -36,13 +36,14 @@ import os.path
 import json
 import html
 
-
-
-from tensorflow.keras.models import Sequential
-from tensorflow.keras import regularizers
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, LeakyReLU,Input
+# Modulos para la red neuronal
+import tensorflow as tf
+from sklearn.preprocessing import StandardScaler
+import joblib
 import numpy as np
+
+scaler = StandardScaler()
+
 
 
 PCapp                                   = Flask(__name__)
@@ -323,145 +324,6 @@ def auth():
 
     return render_template('login.html')
 
-# SYMPTOMS = {
-#     "trastorno_ansiedad": [
-#         "preocupacion_excesiva", "nerviosismo", "fatiga", 
-#         "problemas_concentracion", "irritabilidad", "tension_muscular", 
-#         "problemas_sueno"
-#     ],
-#     "depresion": [
-#         "sentimientos_tristeza", "perdida_interes", "cambios_apetito_peso", 
-#         "problemas_sueno", "fatiga", "pensamientos_suicidio"
-#     ],
-#     "tdah": [
-#         "dificultad_atencion", "hiperactividad", "impulsividad", 
-#         "dificultades_instrucciones"
-#     ],
-#     "parkinson": [
-#         "temblor_reposo", "rigidez_muscular", "lentitud_movimientos", 
-#         "problemas_equilibrio_coordinacion", "dificultad_hablar_escribir"
-#     ],
-#     "alzheimer": [
-#         "perdida_memoria", "dificultad_palabras_conversaciones", 
-#         "desorientacion_espacial_temporal", "cambios_estado_animo_comportamiento", 
-#         "dificultad_tareas_cotidianas"
-#     ],
-#     "trastorno_bipolar": [
-#         "episodios_mania", "episodios_depresion", "cambios_bruscos_humor_actividad"
-#     ],
-#     "toc": [
-#         "obsesiones", "compulsiones", "reconocimiento_ineficacia_control"
-#     ],
-#     "misofonia": [
-#         "irritabilidad", "enfado", "ansiedad", "nauseas", "sudoracion", 
-#         "necesidad_escapar", "sonidos_desencadenantes"
-#     ],
-#     "trastorno_antisocial": [
-#         "desprecio_normas_sociales", "manipulacion_engano", "falta_empatia_remordimiento", 
-#         "comportamiento_impulsivo_agresivo", "incapacidad_relaciones_estables"
-#     ]
-# }
-
-
-
-# def count_symptoms(disorder_symptoms: List[str], reported_symptoms: List[str]) -> int:
-#     return sum(1 for symptom in disorder_symptoms if symptom in reported_symptoms)
-
-# def calculate_percentage(count: int, total: int) -> float:
-#     return (count / total) * 100
-
-# def diagnose(reported_symptoms: List[str]) -> Dict[str, float]:
-#     diagnoses_p = {}
-#     diagnoses_s = {}
-#     for disorder, symptoms in SYMPTOMS.items():
-#         count = count_symptoms(symptoms, reported_symptoms)
-#         percentage = calculate_percentage(count, len(symptoms))
-#         if percentage >= 80:
-#             diagnoses_p[disorder] = percentage
-#         if percentage >= 50 and percentage < 80:
-#             diagnoses_s[disorder] = percentage
-#     return diagnoses_p, diagnoses_s
-
-def crear_modelo(input_dim, output_dim):
-    model = Sequential()
-    model.add(Input(shape=(input_dim,)))
-    model.add(Dense(86, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
-
-    
-    model.add(Dense(86, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
-    model.add(LeakyReLU(negative_slope=0.01))
-    model.add(BatchNormalization())
-    model.add(Dropout(0.4))
-    
-    model.add(Dense(86, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
-    model.add(LeakyReLU(negative_slope=0.01))
-    model.add(BatchNormalization())
-    model.add(Dropout(0.3))
-    
-    model.add(Dense(output_dim, activation='sigmoid'))
-    model.compile(optimizer=Adam(learning_rate=0.0009), loss='binary_crossentropy', metrics=['accuracy'])
-    return model
-
-# Definición de enfermedades y síntomas
-enfermedades = {
-    "trastorno_ansiedad": [
-        "preocupacion_excesiva", "nerviosismo", "fatiga", "problemas_concentracion", 
-        "irritabilidad", "tension_muscular", "problemas_sueno"
-    ],
-    "depresion": [
-        "sentimientos_tristeza", "perdida_interes", "cambios_apetito_peso", 
-        "problemas_sueno", "fatiga", "pensamientos_suicidio"
-    ],
-    "tdah": [
-        "dificultad_atencion", "hiperactividad", "impulsividad", "dificultades_instrucciones"
-    ],
-    "parkinson": [
-        "temblor_reposo", "rigidez_muscular", "lentitud_movimientos", 
-        "problemas_equilibrio_coordinacion", "dificultad_hablar_escribir"
-    ],
-    "alzheimer": [
-        "perdida_memoria", "dificultad_palabras_conversaciones", 
-        "desorientacion_espacial_temporal", "cambios_estado_animo_comportamiento", 
-        "dificultad_tareas_cotidianas"
-    ],
-    "trastorno_bipolar": [
-        "episodios_mania", "episodios_depresion", "cambios_bruscos_humor_actividad"
-    ],
-    "toc": [
-        "obsesiones", "compulsiones", "reconocimiento_ineficacia_control"
-    ],
-    "misofonia": [
-        "irritabilidad_ruido", "enfado", "ansiedad", "nauseas", "sudoracion", 
-        "necesidad_escapar", "sonidos_desencadenantes"
-    ],
-    "trastorno_antisocial": [
-        "desprecio_normas_sociales", "manipulacion_engano", 
-        "falta_empatia_remordimiento", "comportamiento_impulsivo_agresivo", 
-        "incapacidad_relaciones_estables"
-    ]
-}
-
-
-todos_los_sintomas = [
-    "preocupacion_excesiva", "nerviosismo", "fatiga", "problemas_concentracion", "irritabilidad", "tension_muscular", "problemas_sueno",  # trastorno_ansiedad
-    "sentimientos_tristeza", "perdida_interes", "cambios_apetito_peso", "pensamientos_suicidio",  # depresion
-    "dificultad_atencion", "hiperactividad", "impulsividad", "dificultades_instrucciones",  # tdah
-    "temblor_reposo", "rigidez_muscular", "lentitud_movimientos", "problemas_equilibrio_coordinacion", "dificultad_hablar_escribir",  # parkinson
-    "perdida_memoria", "dificultad_palabras_conversaciones", "desorientacion_espacial_temporal", "cambios_estado_animo_comportamiento", "dificultad_tareas_cotidianas",  # alzheimer
-    "episodios_mania", "episodios_depresion", "cambios_bruscos_humor_actividad",  # trastorno_bipolar
-    "obsesiones", "compulsiones", "reconocimiento_ineficacia_control",  # toc
-    "irritabilidad_ruido", "enfado", "ansiedad", "nauseas", "sudoracion", "necesidad_escapar", "sonidos_desencadenantes",  # misofonia
-    "desprecio_normas_sociales", "manipulacion_engano", "falta_empatia_remordimiento", "comportamiento_impulsivo_agresivo", "incapacidad_relaciones_estables"  # trastorno_antisocial
-]
-
-
-# Función para crear un vector de síntomas
-def crear_vector_sintomas(symptom_list):
-    return [1 if symptom in symptom_list else 0 for symptom in todos_los_sintomas]
-
-
-
-
 
 @PCapp.route('/SurveyV2modcopy')
 @login_required
@@ -475,16 +337,35 @@ def survey_v2():
 @PCapp.route('/results', methods=['POST'])
 @require_post
 def results():
-    reported_symptoms = [symptom for symptom, value in request.form.items() if value == 'si']
-    vector_paciente = np.array([crear_vector_sintomas(reported_symptoms)])
+        # Extraer todas las respuestas del formulario utilizando los nombres de las preguntas del formulario
+    nombres_preguntas = [
+        "ansiedad_nervioso_ansioso", "ansiedad_sintomas_fisicos", "ansiedad_preocupacion_excesiva", 
+        "ansiedad_evitar_social", "ansiedad_problemas_sueno",
+        "depresion_perdida_interes", "depresion_tristeza", "depresion_cambios_sueno_apetito", 
+        "depresion_fatiga", "depresion_inutilidad_culpa",
+        "antisocial_respetar_normas", "antisocial_falta_empatia", "antisocial_impulsivo_irresponsable", 
+        "antisocial_indiferencia_derechos", "antisocial_manipulacion",
+        "tdah_atencion", "tdah_perder_objetos", "tdah_inquietud", 
+        "tdah_interrupcion", "tdah_organizacion",
+        "bipolar_energia_excesiva", "bipolar_cambios_estado_animo", "bipolar_cambios_autoestima", 
+        "bipolar_gastos_impulsivos", "bipolar_cambios_rapidos_ideas",
+        "toc_pensamientos_intrusivos", "toc_rituales", "toc_interferencia_diaria", 
+        "toc_comprobacion_repetida", "toc_dificultad_control",
+        "misofonia_sensibilidad_sonidos", "misofonia_evitar_situaciones", "misofonia_interferencia_concentracion", 
+        "misofonia_ira_disgusto", "misofonia_aumento_sensibilidad"
+    ]
+
+    # Extraer las respuestas en el orden correcto
+    reported_symptoms = [int(request.form.get(nombre, 0)) for nombre in nombres_preguntas]
+    print(reported_symptoms)  # Verificar que se reciben los 35 valores correctos
+    try:
+        diagnoses = predecir_trastornos(reported_symptoms)
+        print(f"Diagnóstico: {diagnoses}")
+    except ValueError as e:
+        print(f"Error en predecir_trastornos: {e}")
+        flash("Error en el procesamiento de las respuestas del formulario", 'danger')
+        return redirect(url_for('auth'))
     
-    predicciones = model.predict(vector_paciente)
-
-    # Convertir las predicciones a porcentajes
-    percentages = [float(p) * 100 for p in predicciones[0]]
-
-    # Mostrar el resultado en formato de diccionario
-    diagnoses = {enfermedad: round(float(porcentaje), 2) for enfermedad, porcentaje in zip(enfermedades.keys(), percentages)}
     print(f"Diagnóstico: {diagnoses}")
     
     try:
@@ -1306,15 +1187,15 @@ def obtener_horarios(idPrac):
 
 
 # ~~~~~~~~~~~~~~~~~~~ Ver Encuestas de Practicantes ~~~~~~~~~~~~~~~~~~~#
-@PCapp.route('/VerEncuestasPracticante/<string:idPrac>', methods=['GET', 'POST'])
+@PCapp.route('/VerEstadisticasPracticante/<string:idPrac>', methods=['GET', 'POST'])
 @login_required
 @verified_required
 @supervisor_required
-def verEncuestasPracticante(idPrac):
+def verEstadisticasPracticante(idPrac):
     # USAR SESSION PARA OBTENER EL ID DE SUPERVISOR
     id_Sup = session['idSup']
     
-    # SE MANDA A LLAMAR LA FUNCION PARA ENCRIPTAR
+    # SE MANDA A LLAMAR LA FUNCION PARA OBTENER EL OBJETO DE ENCRIPTACIÓN
     encriptar = encriptado()
     
     # Verificar que el practicante pertenece al supervisor
@@ -1325,14 +1206,21 @@ def verEncuestasPracticante(idPrac):
                 FROM practicante
                 WHERE idPrac = %s AND idSupPrac = %s
             """, (idPrac, id_Sup))
-            if cursor.fetchone() is None:
+            practicante = cursor.fetchone()
+            if practicante is None:
                 flash("No tienes permiso para ver estas encuestas.")
                 return redirect(url_for('home'))
     except Exception as e:
         print(f"Error al verificar el practicante: {e}")
         flash("Hubo un problema al verificar el practicante.")
         return redirect(url_for('home'))
-
+    
+    # Desencriptar datos del practicante
+    campos_encriptados = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac']
+    practicante_desencriptado = select_and_decode_atribute(practicante, campos_encriptados, encriptar)
+    practicante_desencriptado['fotoPrac'] = practicante['fotoPrac']  # Usar el valor original
+    practicante_desencriptado['idPrac'] = practicante['idPrac']
+    
     # Obtener total de horas registradas (asumiendo 1 hora por cita)
     with mysql.connection.cursor() as cursor:
         cursor.execute("""
@@ -1341,7 +1229,7 @@ def verEncuestasPracticante(idPrac):
             WHERE idCitaPrac = %s AND estatusCita = 4
         """, (idPrac,))
         totalHoras = cursor.fetchone()['totalHoras']
-
+    
     # Obtener total de citas completadas
     with mysql.connection.cursor() as cursor:
         cursor.execute("""
@@ -1350,7 +1238,7 @@ def verEncuestasPracticante(idPrac):
             WHERE idCitaPrac = %s AND estatusCita = 4
         """, (idPrac,))
         totalCitas = cursor.fetchone()['totalCitas']
-
+    
     # Obtener total de encuestas contestadas
     with mysql.connection.cursor() as cursor:
         cursor.execute("""
@@ -1359,25 +1247,133 @@ def verEncuestasPracticante(idPrac):
             WHERE idEncuPrac = %s
         """, (idPrac,))
         totalEncuestas = cursor.fetchone()['totalEncuestas']
-
-    # Obtener historial de citas
+    
+    # Obtener últimas 9 citas completadas
     list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
     list_consult = [idPrac, 4]  # Asumiendo que estatusCita 4 significa completada
-    praH, datosPracH = obtener_datos(list_campo, list_consult, mysql, encriptar, 3)
-
-    # Obtener encuestas del practicante
+    praH, datosPracH = obtener_datos(list_campo, list_consult, mysql, encriptar, 3, limit=9)
+    
+    # Obtener últimas 9 encuestas del practicante
     list_consult = ['encuesta', 'E', 'E.idEncuPrac', 'E.idEncuPaci', 'idEncuPrac', idPrac]
     list_campo = ['nombrePrac', 'apellidoPPrac', 'apellidoMPrac', 'nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
-    encu, datosEncu = obtener_datos(list_campo, list_consult, mysql, encriptar, 2)
+    encu, datosEncu = obtener_datos(list_campo, list_consult, mysql, encriptar, 2, limit=9)
     
-    return render_template('/sup/encuesta_practicante.html', 
-                           datosEncu=datosEncu, 
-                           datosPracH=datosPracH, 
-                           totalHoras=totalHoras,
-                           totalCitas=totalCitas,
-                           totalEncuestas=totalEncuestas,
-                           username=session['name'], 
-                           email=session['correoSup'])
+    # Obtener respuestas de encuestas
+    with mysql.connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT pregunta1Encu, pregunta2Encu, pregunta3Encu, pregunta4Encu,
+                pregunta5Encu, pregunta6Encu, pregunta7Encu, pregunta8Encu
+            FROM encuesta
+            WHERE idEncuPrac = %s
+        """, (idPrac,))
+        survey_responses = cursor.fetchall()
+    
+    # Initialize variables
+    question_scores = { '1': [], '2': [], '3': [], '4': [], '5': [], '6': [] }
+    question7_counts = { 'Si': 0, 'No': 0, 'No Aplica': 0 }
+    question8_comments = []
+    
+    # Process survey responses
+    for response in survey_responses:
+        # Process questions 1-6
+        for i in range(1, 7):
+            answer = response[f'pregunta{i}Encu']
+            if answer != 'No Aplica':
+                try:
+                    score = int(answer)
+                    question_scores[str(i)].append(score)
+                except ValueError:
+                    pass  # Ignore invalid answers
+        # Process question 7
+        answer_q7 = response['pregunta7Encu']
+        if answer_q7 in question7_counts:
+            question7_counts[answer_q7] +=1
+        else:
+            question7_counts[answer_q7] = 1  # In case there are other values
+        # Process question 8
+        comment = response['pregunta8Encu']
+        if comment.strip():
+            question8_comments.append(comment.strip())
+    
+    # Calculate averages for questions 1-6
+    question_averages = {}
+    for i in range(1, 7):
+        scores = question_scores[str(i)]
+        if scores:
+            avg = sum(scores)/len(scores)
+        else:
+            avg = 0  # If there are no scores, default to 0
+        question_averages[str(i)] = avg
+    
+    return render_template('/sup/verEstadisticasPracticante.html', 
+                        practitioner=practicante_desencriptado,
+                        datosEncu=datosEncu, 
+                        datosPracH=datosPracH, 
+                        totalHoras=totalHoras,
+                        totalCitas=totalCitas,
+                        totalEncuestas=totalEncuestas,
+                        question_averages=question_averages,
+                        question7_counts=question7_counts,
+                        question8_comments=question8_comments,
+                        username=session['name'], 
+                        email=session['correoSup'])
+
+
+@PCapp.route('/getHistorialCitas/<string:idPrac>', methods=['GET'])
+@login_required
+@verified_required
+@supervisor_required
+def getHistorialCitas(idPrac):
+    page = request.args.get('page', 1, type=int)
+    per_page = 9
+    offset = (page - 1) * per_page
+
+    encriptar = encriptado()
+
+    # Campos encriptados
+    list_campo = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci', 'direCita']
+
+    list_consult = [idPrac, 4]  # Asumiendo que estatusCita 4 significa completada
+    _, citas = obtener_datos(list_campo, list_consult, mysql, encriptar, 3, limit=per_page, offset=offset)
+
+    # Convertir citas a formato serializable
+    citas_serializable = []
+    for cita in citas:
+        # Formatear fecha y hora
+        cita['fechaCita'] = cita['fechaCita'].strftime('%Y-%m-%d') if cita['fechaCita'] else ''
+        cita['horaCita'] = str(cita['horaCita']) if cita['horaCita'] else ''
+        citas_serializable.append(cita)
+
+    return jsonify({'citas': citas_serializable, 'per_page': per_page})
+
+
+@PCapp.route('/getEncuestasPracticante/<string:idPrac>', methods=['GET'])
+@login_required
+@verified_required
+@supervisor_required
+def getEncuestasPracticante(idPrac):
+    page = request.args.get('page', 1, type=int)
+    per_page = 9
+    offset = (page - 1) * per_page
+
+    encriptar = encriptado()
+
+    # Campos que se van a obtener
+    list_campo = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci', 'correoPrac', 'idEncu']
+
+    list_consult = ['encuesta', 'E', 'E.idEncuPrac', 'E.idEncuPaci', 'idEncuPrac', idPrac]
+    _, encuestas = obtener_datos(list_campo, list_consult, mysql, encriptar, 2, limit=per_page, offset=offset)
+
+    # Convertir encuestas a formato serializable
+    encuestas_serializable = []
+    for encuesta in encuestas:
+        decrypted_data = select_and_decode_atribute(encuesta, list_campo, encriptar)
+        encuestas_serializable.append(decrypted_data)
+
+    return jsonify({'encuestas': encuestas_serializable, 'per_page': per_page})
+
+
+
 
 
 # ~~~~~~~~~~~~~~~~~~~ Ver Resultados de Encuestas ~~~~~~~~~~~~~~~~~~~#
@@ -1403,7 +1399,7 @@ def verResultadosEncuesta(idEncu):
             flash("No tienes permiso para ver estos resultados.", 'danger')
             return redirect(url_for('home'))
 
-        return render_template('resultados_encuestas.html', resu=encuesta, username=session['name'], email=session['correoSup'])
+        return render_template('/sup/resultados_encuestas.html', resu=encuesta, username=session['name'], email=session['correoSup'])
     
     except mysql.connector.Error as err:
         flash(f'Error al obtener los resultados de la encuesta: {err}', 'danger')
@@ -1411,7 +1407,7 @@ def verResultadosEncuesta(idEncu):
 
 
 # VER RESULTADOS DE SÍNTOMAS DEL PACIENTE
-# VERSION 1
+# VERSION 2
 @PCapp.route('/ResultadosSintomas/<int:idPaci>', methods=['GET', 'POST'])
 @login_required
 @verified_required
@@ -1452,43 +1448,63 @@ def resultadosSintomas(idPaci):
         # SE ACTUALIZA EL DICCIONARIO CON LOS DATOS DESENCRIPTADOS
         paci.update(datosPaci)
 
-        # SE OBTIENEN LOS SÍNTOMAS REPORTADOS Y EL DIAGNÓSTICO
-        respuestas = json.loads(paci['respuestas']) if paci['respuestas'] else {}
-        diagnostico = json.loads(paci['sint_pri']) if paci['sint_pri'] else {}
-        
-        # Obtener las preguntas completas del archivo JS
-        with open('static/js/surveyv2modcopy.js', 'r', encoding='utf-8') as file:
-            js_content = file.read()
-            questions_match = re.search(r'const surveyQuestions = (\[.*?\]);', js_content, re.DOTALL)
-            if questions_match:
-                questions_json = questions_match.group(1)
-                questions_json = questions_json.replace("'", '"')
-                questions_json = re.sub(r'(\w+):', r'"\1":', questions_json)
-                try:
-                    survey_questions = json.loads(questions_json)
-                    # Decodificar entidades HTML
-                    for question in survey_questions:
-                        question['question'] = html.unescape(question['question'])
-                except json.JSONDecodeError as e:
-                    print(f"Error al decodificar JSON: {e}")
-                    survey_questions = []
-            else:
-                survey_questions = []
+        # Obtener los síntomas reportados y el diagnóstico
+        respuestas = json.loads(paci['respuestas']) if paci['respuestas'] else []
+        diagnostico = json.loads(paci['sint_pri']) if paci['sint_pri'] else []
 
-        # Crear un diccionario con las preguntas completas
-        preguntas_completas = {q['name']: q['question'] for q in survey_questions}
+        # Preguntas definidas directamente en el código
+        preguntas = [
+            "¿Te sientes nervioso o ansioso con frecuencia sin razón aparente?",
+            "¿Experimentas síntomas físicos como palpitaciones o sudoración cuando estás estresado?",
+            "¿Tiendes a preocuparte excesivamente por situaciones futuras?",
+            "¿Evitas situaciones sociales por miedo a sentirte incómodo o juzgado?",
+            "¿Tienes dificultades para conciliar el sueño debido a preocupaciones?",
+            "¿Has perdido interés en actividades que antes disfrutabas?",
+            "¿Te sientes triste o desanimado la mayor parte del día?",
+            "¿Has experimentado cambios significativos en tus patrones de sueño o apetito?",
+            "¿Te sientes sin energía o fatigado con frecuencia?",
+            "¿Tienes pensamientos de inutilidad o culpa excesiva?",
+            "¿Te cuesta respetar las normas sociales o legales?",
+            "¿Tienes dificultades para sentir empatía por los demás?",
+            "¿Actúas de manera impulsiva o irresponsable con frecuencia?",
+            "¿Sientes indiferencia por los sentimientos o derechos de los demás?",
+            "¿Tiendes a manipular a otros para obtener beneficios personales?",
+            "¿Te resulta difícil mantener la atención en clases o durante el estudio?",
+            "¿Sueles perder objetos necesarios para tus actividades (como llaves, libros, etc.)?",
+            "¿Te sientes inquieto o tienes dificultades para permanecer sentado por largos períodos?",
+            "¿Interrumpes a otros o hablas en momentos inapropiados?",
+            "¿Tienes problemas para organizar tareas y actividades?",
+            "¿Experimentas períodos de energía excesiva y menor necesidad de dormir?",
+            "¿Has tenido episodios de tristeza profunda alternados con períodos de euforia?",
+            "¿Notas cambios significativos en tu autoestima, pasando de muy alta a muy baja?",
+            "¿Has tenido episodios de gastos excesivos o comportamientos impulsivos?",
+            "¿Experimentas cambios rápidos en tus ideas o planes para el futuro?",
+            "¿Tienes pensamientos intrusivos y recurrentes que te causan ansiedad?",
+            "¿Realizas rituales o acciones repetitivas para aliviar la ansiedad?",
+            "¿Dedicas mucho tiempo a estas obsesiones o compulsiones, interfiriendo con tu vida diaria?",
+            "¿Sientes la necesidad de comprobar las cosas repetidamente?",
+            "¿Te resulta difícil controlar estos pensamientos o comportamientos?",
+            "¿Ciertos sonidos cotidianos (como masticar, respirar fuerte) te provocan una reacción emocional intensa?",
+            "¿Evitas situaciones sociales debido a tu sensibilidad a ciertos sonidos?",
+            "¿Tu reacción a estos sonidos interfiere con tu capacidad para concentrarte en tus estudios?",
+            "¿Sientes ira o disgusto intenso cuando escuchas estos sonidos?",
+            "¿Has notado que tu sensibilidad a ciertos sonidos ha aumentado con el tiempo?"
+        ]
 
+        # Renderizar el template con los datos necesarios
         return render_template('/prac/resultados_sintomas.html', 
                                paciente=paci, 
-                               respuestas=respuestas,
+                               respuestas=respuestas,  # Pasar las respuestas directamente
+                               preguntas=preguntas,  # Pasar las preguntas directamente
                                diagnostico=diagnostico,
-                               preguntas_completas=preguntas_completas,
                                username=session['name'], 
                                email=session['correoPrac'], 
                                request=request)
     else:
         flash('Paciente no encontrado', 'error')
         return redirect(url_for('indexPracticantes'))
+
+
 
 #~~~~~~~~~~~~~~~~~~~ Eliminar Cita Paciente ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCitaPaciente', methods=["POST"])
@@ -2387,10 +2403,54 @@ def list_routes():
     for line in sorted(output):
         print(line)
 
+#################################################### Prediccion ########################################################
 
-model = crear_modelo(43, 9)
-modelo_guardado = r'ia/modelo/modelo_enfermedades3 - god.h5'
-model.load_weights(modelo_guardado)
+def predecir_trastornos(respuestas):
+    """
+    Toma un vector de respuestas y predice los trastornos.
+    - respuestas: lista o array de 35 elementos con valores 0, 1 o 2
+    """
+    # Verificar que las respuestas tengan la longitud correcta
+    if len(respuestas) != NUM_PREGUNTAS:
+        raise ValueError(f"Se esperaban {NUM_PREGUNTAS} respuestas, pero se recibieron {len(respuestas)}.")
+    
+    with open('ia2/optimal_thresholds/optimal_thresholds.json', 'r') as f:
+        optimal_thresholds_saved = json.load(f)
+
+    # Convertir los umbrales a numpy array si es necesario
+    optimal_thresholds_saved = np.array(optimal_thresholds_saved)
+    
+    # Convertir a numpy array y escalar
+    vector_entrada = np.array(respuestas).reshape(1, -1)
+    vector_entrada_escalado = loaded_scaler.transform(vector_entrada)    
+    
+    # Realizar la predicción
+    probabilidades_normalizadas = loaded_model.predict(vector_entrada_escalado)[0]
+    probabilidades = probabilidades_normalizadas * 100  # Desnormalizar a porcentaje
+    
+    # Convertir probabilidades a etiquetas binarias usando el umbral
+    predicciones_binarias = (probabilidades_normalizadas >= optimal_thresholds_saved).astype(int)
+    
+    resultados = []
+    for i, nombre in enumerate(NOMBRES_TRASTORNOS):
+        estado = "Presente" if predicciones_binarias[i] == 1 else "Ausente"
+        resultados.append(f"{nombre}: {estado} (Probabilidad: {probabilidades[i]:.2f})")
+    return resultados
+
+NUM_PREGUNTAS = 35  # Total de preguntas en el cuestionario
+NUM_TRASTORNOS = 7  # Número de trastornos a diagnosticar
+NOMBRES_TRASTORNOS = ['Ansiedad', 'Depresión', 'Antisocial', 'TDAH', 'Bipolar', 'TOC', 'Misofonía']
+
+model_save = 'ia2/model/modelo_trastornos_mentales_mlp_mejorado3_god.h5'
+scaler_save = 'ia2/scaler/scaler_trastornos_mentales3_god.pkl'
+
+loaded_model = tf.keras.models.load_model(model_save)
+loaded_scaler = joblib.load(scaler_save)
+loaded_model.compile(optimizer='adam',
+                   loss='mean_squared_error',  # Error Cuadrático Medio para regresión
+                   metrics=['mean_absolute_error'])  # Error Absoluto Medio
+
+#################################################### End Prediccion ########################################################
 
 if __name__ == '__main__':
     PCapp.secret_key = '123'

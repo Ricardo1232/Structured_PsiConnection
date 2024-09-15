@@ -651,45 +651,96 @@ hr {
 /* ----------------------------  End Input correo  ---------------------------- */
 
 /* -------------------------------- Card practicante -------------------------------- */
-
-.sectmycard2 {
+.sectmycard2-custom {
   width: 100%;
   display: flex;
-  gap: 3rem;
+  gap: 2rem; /* Disminuye la brecha entre tarjetas */
   flex-wrap: wrap;
-  padding: 0px 0px 80px 0px;
+  padding: 0px 0px 60px 0px; /* Reduce el padding inferior */
   justify-content: center;
   align-items: center;
   justify-items: center;
 }
 
-.link-card-practicante {
+.link-card-practicante-custom {
   z-index: 1;
   border-radius: 10px !important;
   width: 100%; /* Ajusta el ancho para adaptarse al contenedor */
-  max-width: 16rem; /*Ajusta el ancho máximo de las cards*/
-  background:  linear-gradient(183deg, #8bb8d4be 1%, #73ecf0d7 40%, #329cb1dd 80%);
-  padding: .7px 1.3px; /*Ajusta el grosor del borde del gradiente */
-  box-shadow: 0px 0px 24px -5px rgba(134, 182, 212, 0.663);
+  max-width: 16rem; /* Ajusta el ancho máximo de las cards */
+  background: linear-gradient(183deg, #8bb8d4be 1%, #73ecf0d7 40%, #329cb1dd 80%);
+  padding: 1.2px 1.7px; /* Ajusta el grosor del borde del gradiente */
+  box-shadow: 0px 8px 16px -5px rgba(134, 182, 212, 0.663);
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transición suave */
 }
 
-.link-card-practicante:hover {
-  -webkit-box-shadow: 0px 0px 24px -5px rgba(118, 205, 134, 0.545);
-  box-shadow: 0px 0px 24px -5px rgba(134, 182, 212, 0.663);
+.link-card-practicante-custom:hover {
+  -webkit-box-shadow: 0px 12px 24px -5px rgba(118, 205, 134, 0.745);
+  box-shadow: 0px 12px 24px -5px rgba(118, 205, 134, 0.745);
+  transform: translateY(-10px); /* Efecto de elevar */
 }
 
-.card-practicante {
+.card-practicante-custom {
   z-index: 1;
   padding: unset;
   width: 100%; /* Ajusta el ancho para adaptarse al contenedor */
   max-width: 16rem; /* Ajusta el ancho máximo de las cards */
-  height: 30rem; /* Ajusta el alto según sea necesario */
+  height: 26rem; /* Ajuste la altura de la tarjeta */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start; /* Alinea contenido al inicio */
   border-radius: 10px !important;
   overflow: hidden;
-  box-shadow: 0px 0px 24px -5px rgba(134, 182, 212, 0.663);
+  box-shadow: 0px 8px 16px -5px rgba(134, 182, 212, 0.663);
+  background-color: #fff; /* Fondo blanco para que resalte más */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transición suave */
+}
+
+.card-practicante-custom:hover {
+  box-shadow: 0px 12px 24px -5px rgba(134, 182, 212, 0.763);
+  transform: translateY(-10px); /* Efecto de elevar */
+}
+
+.card-practicante-custom .card-img-top-custom {
+  height: 12rem; /* Ajuste de la altura de la imagen */
+  object-fit: cover;
+  border-radius: 9px 9px 0 0;
+}
+
+.card-body-custom {
+  padding: 12px; /* Ajuste del padding interno */
+  background: #ffffff; /* Fondo blanco limpio */
+  text-align: center; /* Centra el texto */
+}
+
+.card-title-custom {
+  color: #007bff; /* Color para destacar el título */
+  font-weight: bold; /* Negrita para el título */
+  margin-bottom: 0.5rem; /* Reduce el margen inferior */
+}
+
+.text-center-custom {
+  margin-bottom: 0.4rem; /* Ajuste del margen inferior */
+  color: #333; /* Color de texto más oscuro */
+  font-size: 0.95rem; /* Ajuste del tamaño de fuente para compactar */
+}
+.img-practicante-cuadrado {
+  width: 100%; /* Hace que la imagen se ajuste al ancho del contenedor */
+  max-width: 250px; /* Tamaño máximo de ancho */
+  max-height: 150px; /* Tamaño máximo de altura */
+  object-fit: cover; /* Ajusta la imagen para cubrir el contenedor */
+  border-radius: 15px; /* Esquinas redondeadas */
+  border: 2px solid #ddd; /* Borde ligero */
+  display: block; /* Asegura que la imagen sea un bloque independiente */
+  margin: 0 auto; /* Centra la imagen */
+}
+
+.nombre-practicante {
+  font-size: 2rem; /* Ajuste del tamaño de fuente */
+  font-weight: bold; /* Texto en negrita */
+  word-wrap: break-word; /* Permite que las palabras largas se dividan en líneas */
+  line-height: 1.2; /* Altura de línea para mejorar la legibilidad */
+  margin-top: 0; /* Reduce el margen superior */
+  margin-bottom: 0; /* Reduce el margen inferior */
 }
 
 /* -------------------------------- End Card practicante -------------------------------- */
@@ -765,3 +816,77 @@ hr {
   z-index: 9999;
   color: #92c7a3;
 }
+
+/* -------------------------------- Encuesta practicante -------------------------------- */
+/* --- Estilos Mejorados para la Página de Encuesta --- */
+
+/* Estilo de la sección principal */
+.sect-custom {
+  width: 100%;
+  display: grid;
+  gap: 30px; /* Ajuste del espaciado entre elementos */
+  grid-template-columns: 1fr; /* Alinea elementos en una columna */
+  padding: 40px 30px; /* Menor padding para un ajuste más moderno */
+  background-color: #f9f9f9; /* Fondo más claro */
+  border-radius: 15px; /* Bordes suaves */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+  margin: 0 auto; /* Centrado */
+  max-width: 800px; /* Limita el ancho para mejorar la legibilidad */
+  margin-top: 6rem;
+  margin-bottom: 3rem;
+}
+
+/* Estilo de la tarjeta de encuesta */
+.encuesta-card {
+  background: #ffffff; /* Fondo blanco para la tarjeta */
+  border: 1px solid #e0e0e0; /* Borde suave */
+  border-radius: 10px; /* Bordes redondeados */
+  padding: 20px; /* Espaciado interno */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Sombra suave */
+  transition: transform 0.2s, box-shadow 0.2s; /* Transiciones suaves */
+}
+
+.encuesta-card:hover {
+  transform: translateY(-5px); /* Efecto de elevación */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra más profunda */
+}
+
+/* Estilo del título de la encuesta */
+.titulo-encuesta {
+  text-align: center; /* Centrado del texto */
+  font-size: 2rem; /* Tamaño de fuente */
+  /* color: #2E2C8E; Color del título */
+  /* margin-bottom: 1rem; Espaciado inferior */
+}
+
+/* Estilo del contenido de las preguntas */
+.pregunta-label {
+  margin-bottom: 1rem; /* Espaciado inferior */
+  font-weight: 600; /* Peso de fuente */
+  color: #333; /* Color del texto */
+}
+
+/* Estilo de las respuestas */
+.respuesta-texto {
+  margin-top: 0.5rem; /* Espaciado superior */
+  font-size: 1rem; /* Tamaño de fuente */
+  color: #555; /* Color del texto */
+}
+
+/* Estilo de botón */
+.boton-encuesta-custom {
+  transform: scaleX(1.2) scaleY(1.2); /* Tamaño del botón */
+  background-color: #2E2C8E; /* Color del botón */
+  color: #fff; /* Color del texto */
+  border: none; /* Sin borde */
+  padding: 10px 20px; /* Relleno del botón */
+  border-radius: 8px; /* Bordes redondeados */
+  transition: background-color 0.3s; /* Transición suave */
+}
+
+.boton-encuesta-custom:hover {
+  background-color: #1e1c6e; /* Cambio de color en hover */
+}
+
+/* -------------------------------- End Encuesta practicante -------------------------------- */
+

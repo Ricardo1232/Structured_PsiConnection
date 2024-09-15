@@ -1,45 +1,36 @@
-{% extends "layaouts/layaout.html" %} {% block title %}PsiConnection - Agendar
-cita{% endblock %} {% block content %}
+{% extends "layaouts/layaout.html" %}
+{% block title %}PsiConnection - Agendar cita{% endblock %}
+{% block content %}
 
 <section class="sect">
-
   <h2 class="text-center">Elija al practicante</h2>
-  <div class="sectmycard2 row">
+  <div class="sectmycard2-custom row">
 
     {% for cita in datosPrac %}
-    <a
-      href="{{ url_for('calendario', idPrac=cita.idPrac) }}"
-      class="link-card-practicante"
-    >
-      <div class="card card-practicante">
+    <a href="{{ url_for('calendario', idPrac=cita.idPrac) }}" class="link-card-practicante-custom">
+      <div class="card card-practicante-custom">
         <img
           src="{{ url_for('static', filename= 'img/' + cita.fotoPrac) }}"
-          class="card-img-top"
-          style="height: 12rem; object-fit: cover; border-radius: 9px 9px 0 0"
-          alt="..."
+          class="card-img-top-custom"
+          alt="Foto del practicante"
         />
-        <div class="card-body">
-          <h5 class="card-title text-center">Practicante</h5>
+        <div class="card-body-custom">
+          <h5 class="card-title-custom text-center-custom">Practicante</h5>
 
-          <p id="nombrePrac" class="text-center mt-2">{{cita.nombrePrac}}</p>
-          <p id="apellidoPPrac" class="text-center mt-2">
-            {{cita.apellidoPPrac}}
-          </p>
-          <p id="apellidoMPrac" class="text-center mt-2">
-            {{cita.apellidoMPrac}}
-          </p>
+          <p id="nombrePrac" class="text-center-custom mt-2">{{cita.nombrePrac}}</p>
+          <p id="apellidoPPrac" class="text-center-custom mt-2">{{cita.apellidoPPrac}}</p>
+          <p id="apellidoMPrac" class="text-center-custom mt-2">{{cita.apellidoMPrac}}</p>
 
-          <p id="correoPrac" class="text-center mt-2">{{cita.correoPrac}}</p>
-          <p id="correoPaci" class="text-center mt-2">{{cita.correoPaci}}</p>
+          <p id="correoPrac" class="text-center-custom mt-2">{{cita.correoPrac}}</p>
+          <p id="correoPaci" class="text-center-custom mt-2">{{cita.correoPaci}}</p>
 
-          <p id="idPaci" display="none;">{{cita.idPaci}}</p>
+          <p id="idPaci" style="display: none;">{{cita.idPaci}}</p>
         </div>
       </div>
     </a>
     {% endfor %}
-    
-  </div>
 
+  </div>
 </section>
 
 {% endblock %}

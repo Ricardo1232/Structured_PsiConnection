@@ -12,33 +12,32 @@
 
         <div class="row mt-4">
             <div class="col-md-12">
-                <h3>Síntomas Reportados</h3>
-                <p>A continuación se muestran los síntomas que el paciente ha reportado como presentes en su situación actual. Estos síntomas son el resultado de las respuestas afirmativas a las preguntas de la encuesta realizada:</p>
-                <ul>
-                    {% if respuestas is mapping %}
-                        {% for sintoma, valor in respuestas.items() %}
-                            {% if valor == 'si' %}
-                                <li>{{ preguntas_completas.get(sintoma, sintoma) }}</li>
+                <h3>Respuestas del Paciente a la Encuesta</h3>
+                <p>A continuación se muestran las respuestas del paciente a cada pregunta de la encuesta realizada. Las opciones posibles son: <strong>Sí</strong>, <strong>A veces</strong>, y <strong>No</strong>.</p>
+                <ol>
+                    {% for respuesta in respuestas %}
+                        {# Usar loop.index0 para obtener el índice del bucle #}
+                        <li><strong>{{ preguntas[loop.index0] }}:</strong> 
+                            {% if respuesta == 2 %}
+                                Sí
+                            {% elif respuesta == 1 %}
+                                A veces
+                            {% else %}
+                                No
                             {% endif %}
-                        {% endfor %}
-                    {% elif respuestas is iterable %}
-                        {% for sintoma in respuestas %}
-                            <li>{{ preguntas_completas.get(sintoma, sintoma) }}</li>
-                        {% endfor %}
-                    {% else %}
-                        <li>No se encontraron síntomas reportados</li>
-                    {% endif %}
-                </ul>
-                
+                        </li>
+                    {% endfor %}
+                </ol>
             </div>
         </div>
 
         <div class="row mt-4">
             <div class="col-md-12">
-                <h3>Diagnóstico</h3>
+                <h3>Diagnóstico Basado en las Respuestas</h3>
+                <p>El diagnóstico preliminar del paciente se basa en las probabilidades de la presencia de diferentes trastornos mentales. Los resultados se interpretan como sigue:</p>
                 <ul>
-                    {% for enfermedad, porcentaje in diagnostico.items() %}
-                        <li><strong>{{ enfermedad }}:</strong> {{ porcentaje|round(2) }}%</li>
+                    {% for resultado in diagnostico %}
+                        <li>{{ resultado }}</li>
                     {% endfor %}
                 </ul>
             </div>

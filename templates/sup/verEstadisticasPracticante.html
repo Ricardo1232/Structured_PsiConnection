@@ -1,0 +1,422 @@
+{% extends "layaouts/layaout.html" %}
+{% block title %}Estadísticas del Practicante{% endblock %}
+{% block content %}
+
+<style>
+  /* Estilos existentes */
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .card {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .badge {
+    font-size: 0.875rem;
+    padding: 0.5rem;
+  }
+
+  .bi {
+    font-size: 1rem;
+    color: #6c757d;
+  }
+
+  /* Nuevos estilos personalizados */
+  .mi-chart-container {
+    position: relative;
+    height: 300px; /* Ajusta este valor según tus necesidades */
+  }
+  .mi-card-body {
+    padding: 20px;
+  }
+  .mi-card {
+    max-width: 100%;
+  }
+
+  /* Estilos para la imagen del practicante */
+  .img-practicante-cuadrado {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  /* Restaurar colores del panel de resumen */
+  .card-resumen {
+    background-color: #f8f9fa;
+    color: #000;
+  }
+</style>
+
+<!-- Sección de Encabezado -->
+<br class="mt-5">
+<div class="container mt-5">
+  <div class="row align-items-center">
+    <div class="col-md-2 text-center">
+      <img
+        src="{{ url_for('static', filename='img/' + practitioner.fotoPrac) }}"
+        alt="Foto del Practicante"
+        class="img-fluid img-practicante-cuadrado"
+      >
+    </div>
+    <div class="col-md-10 mt-4">
+      <h3 class="nombre-practicante">
+        {{ practitioner.nombrePrac }} {{ practitioner.apellidoPPrac }} {{ practitioner.apellidoMPrac }}
+      </h3>
+    </div>
+  </div>
+</div>
+
+<!-- Sección de Gráficas -->
+<div class="container my-5">
+  <h2 class="mb-4">Resultados de las Encuestas</h2>
+
+  <div class="row">
+    <!-- Gráfica de Puntuación Promedio por Pregunta -->
+    <div class="col-md-6 mb-4">
+      <div class="mi-card h-100 shadow-sm">
+        <div class="mi-card-body">
+          <h5 class="card-title">Puntuación Promedio por Pregunta</h5>
+          <div class="mi-chart-container">
+            <canvas id="averageScoresChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfica de Respuestas de la Pregunta 7 -->
+    <div class="col-md-6 mb-4">
+      <div class="mi-card h-100 shadow-sm">
+        <div class="mi-card-body">
+          <h5 class="card-title">Respuestas de la Pregunta 7</h5>
+          <div class="mi-chart-container">
+            <canvas id="question7Chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfica de Resumen de Actividades -->
+  <div class="row">
+    <div class="col-md-12 mb-4">
+      <div class="mi-card h-100 shadow-sm">
+        <div class="mi-card-body">
+          <h5 class="card-title">Resumen de Actividades</h5>
+          <div class="mi-chart-container">
+            <canvas id="summaryChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Incluir la librería Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Script para crear las gráficas -->
+<script>
+  // Opciones comunes para las gráficas
+  const chartOptions = {
+      maintainAspectRatio: false,
+      responsive: true,
+      plugins: {
+          legend: {
+              position: 'bottom',
+          }
+      },
+  };
+
+  // Gráfica de Puntuación Promedio por Pregunta
+  var ctx = document.getElementById('averageScoresChart').getContext('2d');
+  var averageScoresChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+          labels: ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'],
+          datasets: [{
+              label: 'Promedio',
+              data: [
+                  {{ question_averages['1']|default(0) }},
+                  {{ question_averages['2']|default(0) }},
+                  {{ question_averages['3']|default(0) }},
+                  {{ question_averages['4']|default(0) }},
+                  {{ question_averages['5']|default(0) }},
+                  {{ question_averages['6']|default(0) }}
+              ],
+              backgroundColor: 'rgba(54, 162, 235, 0.7)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+              maxBarThickness: 40  // Limita el grosor máximo de las barras
+          }]
+      },
+      options: {
+          ...chartOptions,
+          scales: {
+              y: {
+                  beginAtZero: true,
+                  max: 5,
+                  ticks: {
+                      stepSize: 1
+                  }
+              }
+          }
+      }
+  });
+
+  // Gráfica de Respuestas de la Pregunta 7
+  var ctx2 = document.getElementById('question7Chart').getContext('2d');
+  var question7Chart = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+          labels: ['Sí', 'No', 'No Aplica'],
+          datasets: [{
+              data: [
+                  {{ question7_counts['Si']|default(0) }},
+                  {{ question7_counts['No']|default(0) }},
+                  {{ question7_counts['No Aplica']|default(0) }}
+              ],
+              backgroundColor: [
+                  'rgba(75, 192, 192, 0.7)',
+                  'rgba(255, 99, 132, 0.7)',
+                  'rgba(201, 203, 207, 0.7)'
+              ],
+              borderColor: [
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(201, 203, 207, 1)'
+              ],
+              borderWidth: 1
+          }]
+      },
+      options: chartOptions
+  });
+
+  // Gráfica de Resumen de Actividades
+  var ctx3 = document.getElementById('summaryChart').getContext('2d');
+  var summaryChart = new Chart(ctx3, {
+      type: 'bar',
+      data: {
+          labels: ['Horas Registradas', 'Citas Completadas', 'Encuestas Contestadas'],
+          datasets: [{
+              label: 'Totales',
+              data: [{{ totalHoras }}, {{ totalCitas }}, {{ totalEncuestas }}],
+              backgroundColor: [
+                  'rgba(255, 206, 86, 0.7)',
+                  'rgba(54, 162, 235, 0.7)',
+                  'rgba(255, 99, 132, 0.7)'
+              ],
+              borderColor: [
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 99, 132, 1)'
+              ],
+              borderWidth: 1,
+              maxBarThickness: 40
+          }]
+      },
+      options: {
+          ...chartOptions,
+          indexAxis: 'y',  // Gráfica de barras horizontales
+          scales: {
+              x: {
+                  beginAtZero: true,
+                  ticks: {
+                      stepSize: 1
+                  }
+              }
+          }
+      }
+  });
+</script>
+
+<div class="container pt-5 mt-5">
+  <!-- Panel Resumen -->
+  <div class="row mb-4">
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="card card-resumen text-white h-100">
+        <div class="card-body">
+          <h5 class="card-title">Horas Registradas</h5>
+          <h2 class="card-text">{{ totalHoras }} hora/s</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="card card-resumen text-white h-100">
+        <div class="card-body">
+          <h5 class="card-title">Citas Completadas</h5>
+          <h2 class="card-text">{{ totalCitas }} cita/s</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="card card-resumen text-white h-100">
+        <div class="card-body">
+          <h5 class="card-title">Encuestas Contestadas</h5>
+          <h2 class="card-text">{{ totalEncuestas }} encuesta/s</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historial de Citas -->
+  <div class="container my-5">
+    <h2 class="mb-4">Historial De Citas</h2>
+    <div class="row" id="historial-citas">
+      <!-- Aquí se cargarán las tarjetas de citas -->
+    </div>
+    <div class="text-center">
+      <button id="prev-citas" class="btn btn-secondary" disabled>Anterior</button>
+      <button id="next-citas" class="btn btn-primary">Siguiente</button>
+    </div>
+  </div>
+
+  <!-- Encuestas Practicante -->
+  <div class="container my-5">
+    <h2 class="mb-4">Encuestas Practicante</h2>
+    <div class="row" id="encuestas-practicante">
+      <!-- Aquí se cargarán las tarjetas de encuestas -->
+    </div>
+    <div class="text-center">
+      <button id="prev-encuestas" class="btn btn-secondary" disabled>Anterior</button>
+      <button id="next-encuestas" class="btn btn-primary">Siguiente</button>
+    </div>
+  </div>
+</div>
+
+<!-- Incluir jQuery para facilitar las operaciones AJAX -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+      var pageCitas = 1;
+      var pageEncuestas = 1;
+      var per_page = 9; // Asegúrate de que este valor coincida con el usado en el backend
+      var idPrac = "{{ practitioner.idPrac }}";
+
+      function cargarCitas() {
+          $.ajax({
+              url: "{{ url_for('getHistorialCitas', idPrac='') }}" + idPrac,
+              data: { page: pageCitas },
+              success: function(response) {
+                  var citas = response.citas;
+                  per_page = response.per_page;
+                  if (citas.length > 0) {
+                      $('#historial-citas').empty();
+                      $.each(citas, function(index, cita) {
+                          var tarjeta = `
+                              <div class="col-lg-4 col-md-6 mb-4">
+                                  <div class="card shadow-sm border-0 h-100">
+                                      <div class="card-body p-4">
+                                          <div class="d-flex justify-content-between align-items-center mb-3">
+                                              <h5 class="card-title mb-0">${cita.nombrePaci}</h5>
+                                              <span class="badge bg-primary">${cita.direCita}</span>
+                                          </div>
+                                          <div class="d-flex mb-2">
+                                              <i class="bi bi-calendar-date me-2"></i>
+                                              <p class="mb-0"><strong>Fecha:</strong> ${cita.fechaCita}</p>
+                                          </div>
+                                          <div class="d-flex mb-2">
+                                              <i class="bi bi-clock me-2"></i>
+                                              <p class="mb-0"><strong>Hora:</strong> ${cita.horaCita}</p>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          `;
+                          $('#historial-citas').append(tarjeta);
+                      });
+                      // Habilitar/deshabilitar botones
+                      $('#prev-citas').prop('disabled', pageCitas <= 1);
+                      if (citas.length < per_page) {
+                          $('#next-citas').prop('disabled', true);
+                      } else {
+                          $('#next-citas').prop('disabled', false);
+                      }
+                  } else {
+                      $('#historial-citas').empty();
+                      $('#next-citas').prop('disabled', true);
+                  }
+              }
+          });
+      }
+
+      function cargarEncuestas() {
+          $.ajax({
+              url: "{{ url_for('getEncuestasPracticante', idPrac='') }}" + idPrac,
+              data: { page: pageEncuestas },
+              success: function(response) {
+                  var encuestas = response.encuestas;
+                  per_page = response.per_page;
+                  if (encuestas.length > 0) {
+                      $('#encuestas-practicante').empty();
+                      $.each(encuestas, function(index, encuesta) {
+                          var tarjeta = `
+                              <div class="col-lg-4 col-md-6 mb-4">
+                                  <div class="card shadow-sm border-0 h-100">
+                                      <div class="card-body p-4">
+                                          <h5 class="card-title mb-3">Encuesta #${encuesta.idEncu}</h5>
+                                          <p><strong>Paciente:</strong> ${encuesta.nombrePaci} ${encuesta.apellidoPPaci} ${encuesta.apellidoMPaci}</p>
+                                          <p><strong>Correo del Practicante:</strong> ${encuesta.correoPrac}</p>
+                                          <a href="/VerResultadosEncuesta/${encuesta.idEncu}" class="btn btn-outline-primary btn-sm mt-3">Ver Encuesta</a>
+                                      </div>
+                                  </div>
+                              </div>
+                          `;
+                          $('#encuestas-practicante').append(tarjeta);
+                      });
+                      // Habilitar/deshabilitar botones
+                      $('#prev-encuestas').prop('disabled', pageEncuestas <= 1);
+                      if (encuestas.length < per_page) {
+                          $('#next-encuestas').prop('disabled', true);
+                      } else {
+                          $('#next-encuestas').prop('disabled', false);
+                      }
+                  } else {
+                      $('#encuestas-practicante').empty();
+                      $('#next-encuestas').prop('disabled', true);
+                  }
+              }
+          });
+      }
+
+      // Cargar la primera página al cargar la página
+      cargarCitas();
+      cargarEncuestas();
+
+      // Manejar el clic en los botones de paginación
+      $('#prev-citas').on('click', function() {
+          if (pageCitas > 1) {
+              pageCitas--;
+              cargarCitas();
+          }
+      });
+
+      $('#next-citas').on('click', function() {
+          pageCitas++;
+          cargarCitas();
+      });
+
+      $('#prev-encuestas').on('click', function() {
+          if (pageEncuestas > 1) {
+              pageEncuestas--;
+              cargarEncuestas();
+          }
+      });
+
+      $('#next-encuestas').on('click', function() {
+          pageEncuestas++;
+          cargarEncuestas();
+      });
+  });
+</script>
+
+{% endblock %}
