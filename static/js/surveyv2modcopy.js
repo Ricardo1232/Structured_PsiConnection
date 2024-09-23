@@ -1,192 +1,168 @@
 console.log('estoy cargado');
 const surveyQuestions = [
     {
-        question: "¿Te sientes nervioso o ansioso con frecuencia sin razón aparente?",
-        name: "ansiedad_nervioso_ansioso"
+        question: "En las últimas dos semanas ¿con qué frecuencia te has sentido triste vacío o sin esperanza durante la mayor parte del día?",
+        name: "depresion_sentirse_triste"
     },
     {
-        question: "¿Experimentas síntomas físicos como palpitaciones o sudoración cuando estás estresado?",
-        name: "ansiedad_sintomas_fisicos"
-    },
-    {
-        question: "¿Tiendes a preocuparte excesivamente por situaciones futuras?",
-        name: "ansiedad_preocupacion_excesiva"
-    },
-    {
-        question: "¿Evitas situaciones sociales por miedo a sentirte incómodo o juzgado?",
-        name: "ansiedad_evitar_social"
-    },
-    {
-        question: "¿Tienes dificultades para conciliar el sueño debido a preocupaciones?",
-        name: "ansiedad_problemas_sueno"
-    },
-    {
-        question: "¿Has perdido interés en actividades que antes disfrutabas?",
+        question: "En las últimas dos semanas ¿en qué medida has perdido interés o placer en casi todas las actividades que solías disfrutar como pasatiempos o reuniones sociales?",
         name: "depresion_perdida_interes"
     },
     {
-        question: "¿Te sientes triste o desanimado la mayor parte del día?",
-        name: "depresion_tristeza"
+        question: "En las últimas dos semanas ¿has notado algún cambio significativo en tu peso (ya sea pérdida o aumento de peso sin estar a dieta) o en tu apetito?",
+        name: "depresion_cambios_peso_apetito"
     },
     {
-        question: "¿Has experimentado cambios significativos en tus patrones de sueño o apetito?",
-        name: "depresion_cambios_sueno_apetito"
+        question: "En las últimas dos semanas ¿cómo describirías tus patrones de sueño (por ejemplo dificultad para dormir dormir demasiado o interrumpido)?",
+        name: "depresion_patrones_sueno"
     },
     {
-        question: "¿Te sientes sin energía o fatigado con frecuencia?",
-        name: "depresion_fatiga"
+        question: "En las últimas dos semanas ¿con qué frecuencia has experimentado fatiga o una pérdida de energía que afecta tu capacidad para realizar tareas diarias?",
+        name: "depresion_fatiga_energia"
     },
     {
-        question: "¿Tienes pensamientos de inutilidad o culpa excesiva?",
-        name: "depresion_inutilidad_culpa"
+        question: "En las últimas semanas ¿con qué frecuencia te has sentido preocupado o inquieto por cosas que están pasando en tu vida diaria como el trabajo la escuela o la familia?",
+        name: "ansiedad_preocupacion_diaria"
     },
     {
-        question: "¿Te cuesta respetar las normas sociales o legales?",
-        name: "antisocial_respetar_normas"
+        question: "¿Te resulta difícil controlar tus preocupaciones incluso cuando intentas distraerte o relajarte?",
+        name: "ansiedad_control_preocupacion"
     },
     {
-        question: "¿Tienes dificultades para sentir empatía por los demás?",
-        name: "antisocial_falta_empatia"
+        question: "En las últimas semanas ¿has sentido una sensación constante de estar en el borde o nervioso como si estuvieras en tensión todo el tiempo?",
+        name: "ansiedad_sensacion_nerviosa"
     },
     {
-        question: "¿Actúas de manera impulsiva o irresponsable con frecuencia?",
-        name: "antisocial_impulsivo_irresponsable"
+        question: "¿Te has sentido más cansado de lo habitual incluso si no has estado haciendo mucho esfuerzo físico?",
+        name: "ansiedad_fatiga_cansancio"
     },
     {
-        question: "¿Sientes indiferencia por los sentimientos o derechos de los demás?",
-        name: "antisocial_indiferencia_derechos"
+        question: "¿Te ha costado concentrarte en tus tareas diarias o en tus pensamientos porque sientes que tu mente está en blanco o te cuesta enfocarte?",
+        name: "ansiedad_dificultad_concentracion"
     },
     {
-        question: "¿Tiendes a manipular a otros para obtener beneficios personales?",
-        name: "antisocial_manipulacion"
+        question: "En las últimas semanas ¿con qué frecuencia has sentido nervios o miedo intenso antes de tener que participar en actividades sociales como conocer a nuevas personas o hablar en público?",
+        name: "ansiedad_miedo_social"
     },
     {
-        question: "¿Te resulta difícil mantener la atención en clases o durante el estudio?",
-        name: "tdah_atencion"
+        question: "¿Te has preocupado mucho sobre la posibilidad de hacer el ridículo o de ser juzgado negativamente por otros cuando estás en situaciones sociales?",
+        name: "ansiedad_preocupacion_evaluacion"
     },
     {
-        question: "¿Sueles perder objetos necesarios para tus actividades (como llaves, libros, etc.)?",
-        name: "tdah_perder_objetos"
+        question: "En las últimas semanas ¿has evitado eventos sociales o situaciones donde podría haber gente porque te sientes demasiado incómodo o ansioso?",
+        name: "ansiedad_evitar_social"
     },
     {
-        question: "¿Te sientes inquieto o tienes dificultades para permanecer sentado por largos períodos?",
-        name: "tdah_inquietud"
+        question: "¿Durante las interacciones sociales como charlar con amigos o familiares te has sentido tan incómodo o ansioso que te resulta difícil disfrutar del momento?",
+        name: "ansiedad_malestar_interacciones"
     },
     {
-        question: "¿Interrumpes a otros o hablas en momentos inapropiados?",
-        name: "tdah_interrupcion"
+        question: "¿Sientes que tu ansiedad en situaciones sociales afecta tu vida diaria como tu capacidad para hacer amigos tu desempeño en el trabajo o en la escuela o cómo te sientes en general?",
+        name: "ansiedad_impacto_vida_diaria"
     },
     {
-        question: "¿Tienes problemas para organizar tareas y actividades?",
-        name: "tdah_organizacion"
+        question: "¿Te resulta complicado concentrarte en tareas o actividades durante un tiempo prolongado como leer un libro o trabajar en un proyecto y a menudo te das cuenta de que tu mente se desvía?",
+        name: "tdah_dificultad_atencion"
     },
     {
-        question: "¿Experimentas períodos de energía excesiva y menor necesidad de dormir?",
-        name: "bipolar_energia_excesiva"
+        question: "¿Te pasa a menudo que olvidas cosas importantes como dónde dejaste las llaves o los deberes escolares y otros compromisos?",
+        name: "tdah_olvidar_cosas"
     },
     {
-        question: "¿Has tenido episodios de tristeza profunda alternados con períodos de euforia?",
-        name: "bipolar_cambios_estado_animo"
+        question: "¿Te cuesta trabajo organizar tus tareas y actividades como hacer una lista de cosas por hacer o mantenerte al día con tus responsabilidades?",
+        name: "tdah_dificultad_organizacion"
     },
     {
-        question: "¿Notas cambios significativos en tu autoestima, pasando de muy alta a muy baja?",
-        name: "bipolar_cambios_autoestima"
+        question: "¿Sueles interrumpir a los demás mientras están hablando o responder antes de que terminen de hacer una pregunta?",
+        name: "tdah_impulsividad_hablar"
     },
     {
-        question: "¿Has tenido episodios de gastos excesivos o comportamientos impulsivos?",
-        name: "bipolar_gastos_impulsivos"
+        question: "¿Te resulta difícil quedarte quieto o estar sentado en situaciones donde se espera que permanezcas tranquilo como en reuniones o en el cine?",
+        name: "tdah_hiperactividad"
     },
     {
-        question: "¿Experimentas cambios rápidos en tus ideas o planes para el futuro?",
-        name: "bipolar_cambios_rapidos_ideas"
+        question: "¿Te resulta fácil ignorar las reglas y normas ya sea en el trabajo en la escuela o en la vida cotidiana y hacer lo que te parece sin preocuparte mucho por las consecuencias para los demás?",
+        name: "antisocial_normas"
     },
     {
-        question: "¿Tienes pensamientos intrusivos y recurrentes que te causan ansiedad?",
-        name: "toc_pensamientos_intrusivos"
+        question: "¿Con qué frecuencia has encontrado que engañas o manipulas a otras personas para obtener lo que quieres incluso si eso significa mentir o usar excusas?",
+        name: "antisocial_engaño_manipulacion"
     },
     {
-        question: "¿Realizas rituales o acciones repetitivas para aliviar la ansiedad?",
-        name: "toc_rituales"
+        question: "¿A menudo tomas decisiones impulsivas sin pensar mucho en las consecuencias como gastar dinero sin planificación o actuar de manera arriesgada?",
+        name: "antisocial_impulsividad"
     },
     {
-        question: "¿Dedicas mucho tiempo a estas obsesiones o compulsiones, interfiriendo con tu vida diaria?",
-        name: "toc_interferencia_diaria"
+        question: "¿Te resulta común tener conflictos o pelear con otras personas ya sea en casa en el trabajo o en otros lugares y sientes que te enojas fácilmente?",
+        name: "antisocial_agresividad_conflictos"
     },
     {
-        question: "¿Sientes la necesidad de comprobar las cosas repetidamente?",
-        name: "toc_comprobacion_repetida"
-    },
-    {
-        question: "¿Te resulta difícil controlar estos pensamientos o comportamientos?",
-        name: "toc_dificultad_control"
-    },
-    {
-        question: "¿Ciertos sonidos cotidianos (como masticar, respirar fuerte) te provocan una reacción emocional intensa?",
-        name: "misofonia_sensibilidad_sonidos"
-    },
-    {
-        question: "¿Evitas situaciones sociales debido a tu sensibilidad a ciertos sonidos?",
-        name: "misofonia_evitar_situaciones"
-    },
-    {
-        question: "¿Tu reacción a estos sonidos interfiere con tu capacidad para concentrarte en tus estudios?",
-        name: "misofonia_interferencia_concentracion"
-    },
-    {
-        question: "¿Sientes ira o disgusto intenso cuando escuchas estos sonidos?",
-        name: "misofonia_ira_disgusto"
-    },
-    {
-        question: "¿Has notado que tu sensibilidad a ciertos sonidos ha aumentado con el tiempo?",
-        name: "misofonia_aumento_sensibilidad"
+        question: "Cuando haces algo que lastima a alguien o causa problemas ¿sientes que no te importa mucho o simplemente piensas que ellos deberían haberse hecho cargo de la situación?",
+        name: "antisocial_falta_remordimientos"
     }
 ];
 
 
+
+// Variable global para llevar el índice de la subcard actual
+let currentSubcardIndex = 0;
+const totalSubcards = 5; // Tenemos 5 páginas de preguntas
+
+// Función para generar la encuesta
 function generateSurvey() {
     const container = document.getElementById('survey-container');
-    const form = document.getElementById('surveyForm');
     let subcardHtml = '';
 
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < totalSubcards; i++) { // 5 páginas
         subcardHtml += `
         <div class="subcard mb-4 ${i === 0 ? 'activee' : ''}" id="subcard-${i}">
-            <h5>Pagina ${i + 1}</h5>
-            ${surveyQuestions.slice(i * 5, (i + 1) * 5).map((questionObj, index) => `
-                <div class="form-group">
+            <h5>Página ${i + 1}</h5>
+            ${surveyQuestions.slice(i * 5, (i + 1) * 5).map((questionObj) => `
+                <div class="custom-form-group">
                     <div class="justify-content-center form-check">
                         <label>${questionObj.question}</label>
                         <br>
-                        <div class="radio-container d-inline">
+                        <div class="custom-radio-container">
+                            <!-- Opciones de radio -->
                             <label class="toggle mr-3">
                                 <input
                                     class="form-check-input"
                                     type="radio"
                                     name="${questionObj.name}"
-                                    id="${questionObj.name}Si"
-                                    value="2"
-                                    required><span
-                                    class="label-text">Sí</span>
-                            </label>
-                            <label class="toggle">
-                                <input
-                                    class="form-check-input"
-                                    type="radio"
-                                    name="${questionObj.name}"
-                                    id="${questionObj.name}Aveces"
-                                    value="1"
-                                    required><span
-                                    class="label-text">A veces</span>
-                            </label>
-                            <label class="toggle">
-                                <input
-                                    class="form-check-input"
-                                    type="radio"
-                                    name="${questionObj.name}"
-                                    id="${questionObj.name}No"
                                     value="0"
-                                    required><span
-                                    class="label-text">No</span>
+                                    required><span class="label-text">Nunca</span>
+                            </label>
+                            <label class="toggle mr-3">
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="${questionObj.name}"
+                                    value="1"
+                                    required><span class="label-text">De vez en cuando</span>
+                            </label>
+                            <label class="toggle mr-3">
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="${questionObj.name}"
+                                    value="2"
+                                    required><span class="label-text">A menudo</span>
+                            </label>
+                            <label class="toggle mr-3">
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="${questionObj.name}"
+                                    value="3"
+                                    required><span class="label-text">Casi siempre</span>
+                            </label>
+                            <label class="toggle">
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="${questionObj.name}"
+                                    value="4"
+                                    required><span class="label-text">Siempre</span>
                             </label>
                         </div>
                     </div>
@@ -197,19 +173,31 @@ function generateSurvey() {
     }
 
     container.innerHTML = subcardHtml;
-
-
 }
 
-// Call this function when the page loads
-document.addEventListener('DOMContentLoaded', generateSurvey);
+// Función para validar las preguntas de la página actual
+function validatePage(currentPage) {
+    const subcard = document.querySelector(`#subcard-${currentPage}`);
+    let allAnswered = true;
 
-function validateSurvey() {
+    const questions = subcard.querySelectorAll('.custom-form-group');
+    questions.forEach(question => {
+        const radios = question.querySelectorAll('input[type="radio"]:checked');
+        if (radios.length === 0) {
+            allAnswered = false;
+        }
+    });
+
+    return allAnswered;
+}
+
+// Función para validar que todas las preguntas han sido respondidas
+function validateAllQuestions() {
     const subcards = document.querySelectorAll('.subcard');
     let allAnswered = true;
 
     subcards.forEach(subcard => {
-        const questions = subcard.querySelectorAll('.form-group');
+        const questions = subcard.querySelectorAll('.custom-form-group');
         questions.forEach(question => {
             const radios = question.querySelectorAll('input[type="radio"]:checked');
             if (radios.length === 0) {
@@ -221,84 +209,101 @@ function validateSurvey() {
     return allAnswered;
 }
 
+// Función para enviar el formulario
 function submitForm() {
-    if (validateSurvey()) {
-        // Mostrar la última tarjeta
-        $('.card').removeClass('show').addClass('previous');
-        $('.card:last-child').removeClass('previous').addClass('show');
+    // Mostrar la última tarjeta
+    $('.card').removeClass('show').addClass('previous');
+    $('.card:last-child').removeClass('previous').addClass('show');
 
-        // Esperar 5 segundos antes de enviar el formulario
-        setTimeout(() => {
-            document.getElementById('surveyForm').submit();
-        }, 5000);
+    // Esperar 5 segundos antes de enviar el formulario
+    setTimeout(() => {
+        document.getElementById('surveyForm').submit();
+    }, 5000);
+}
+
+// Función para desplazarse al inicio de la página
+function scrollToTop() {
+    document.body.scrollTop = 0; // Para Safari
+    document.documentElement.scrollTop = 0; // Para Chrome, Firefox, IE y Opera
+}
+
+// Función para actualizar la barra de progreso
+function updateProgress(currentPage, totalPages) {
+    const progress = (currentPage / totalPages) * 100;
+    document.querySelector('.progress').style.width = `${progress}%`;
+}
+
+// Función para mostrar la subcard (página de preguntas) específica
+function showSubcard(index, direction) {
+    const currentSubcard = $('.subcard.activee');
+    const nextSubcard = $(`#subcard-${index}`);
+
+    currentSubcard.removeClass('activee').addClass('previous');
+    nextSubcard.removeClass('previous').addClass('activee');
+
+    updateProgress(index + 1, totalSubcards);
+    currentSubcardIndex = index;
+    updateButtons();
+
+    scrollToTop();
+}
+
+// Función para cambiar de tarjeta
+function changeCard(current, next, direction) {
+    current.removeClass('show').addClass('previous');
+    next.removeClass('previous').addClass('show');
+
+    // Asegurarse de que la tarjeta activa tenga el z-index más alto
+    $('.card').css('z-index', 1);
+    next.css('z-index', 2);
+}
+
+// Función para restablecer el z-index
+function resetZIndex() {
+    $('.card').css('z-index', 1);
+    $('.card:first-child').css('z-index', 2);
+}
+
+// Función para actualizar los botones
+function updateButtons() {
+    const currentCardIndex = $('.card').index($('.card.show'));
+
+    if (currentCardIndex === 0) {
+        $('.prev').hide();
+        $('#next1').show();
+        $('#next2, #next3').hide();
+        $('.progress-container').hide(); // Ocultar barra de progreso en la primera tarjeta
+    } else if (currentCardIndex === 1) {
+        $('.prev').show();
+        $('#next1').hide();
+        $('#next2').show().text(currentSubcardIndex === totalSubcards - 1 ? 'CONFIRMAR' : 'SIGUIENTE');
+        $('#next3').hide();
+        $('.progress-container').show(); // Mostrar barra de progreso en las páginas de preguntas
+    } else if (currentCardIndex === 2) {
+        $('.prev').show();
+        $('#next1, #next2').hide();
+        $('#next3').show();
+        $('.progress-container').hide(); // Ocultar barra de progreso en la página de confirmación
+        scrollToTop(); // Llamar a scrollToTop al llegar a la página de confirmación
     } else {
-        alert("Por favor, responda todas las preguntas antes de continuar.");
+        $('.prev, #next1, #next2, #next3').hide();
+        $('.progress-container').hide(); // Ocultar barra de progreso en otras tarjetas
     }
 }
 
+// Document Ready
 $(document).ready(function () {
     console.log('ready');
     generateSurvey();
     updateButtons();
     resetZIndex();
+
     var current_fs, next_fs, previous_fs;
-    var currentSubcardIndex = 0;
-    var totalSubcards = 7;
 
-    function showSubcard(index, direction) {
-        var currentSubcard = $('.subcard.activee');
-        var nextSubcard = $(`#subcard-${index}`);
+    // Inicializar la barra de progreso
+    updateProgress(1, totalSubcards);
 
-        if (direction === 'next') {
-            currentSubcard.removeClass('activee').addClass('previous');
-            nextSubcard.removeClass('previous').addClass('activee');
-        } else {
-            currentSubcard.removeClass('activee');
-            nextSubcard.removeClass('previous').addClass('activee');
-        }
-
-        currentSubcardIndex = index;
-        updateButtons();
-    }
-
-    function updateButtons() {
-        if ($('.card.show').index() === 0) {
-            $('.prev').hide();
-            $('#next1').show();
-            $('#next2, #next3').hide();
-        } else if ($('.card.show').index() === 1) {
-            $('.prev').show();
-            $('#next1').hide();
-            $('#next2').show().text(currentSubcardIndex === totalSubcards - 1 ? 'CONFIRMAR' : 'SIGUIENTE');
-            $('#next3').hide();
-        } else if ($('.card.show').index() === 2) {
-            $('.prev').show();
-            $('#next1, #next2').hide();
-            $('#next3').show();
-        } else {
-            $('.prev, #next1, #next2, #next3').hide();
-        }
-    }
-
-    function changeCard(current, next, direction) {
-        if (direction === 'next') {
-            current.removeClass('show').addClass('previous');
-            next.removeClass('previous').addClass('show');
-        } else {
-            next.removeClass('previous').addClass('show');
-            current.removeClass('show').addClass('previous');
-        }
-
-        // Asegurarse de que la tarjeta activa tenga el z-index más alto
-        $('.card').css('z-index', 1);
-        next.css('z-index', 2);
-    }
-
-    function resetZIndex() {
-        $('.card').css('z-index', 1);
-        $('.card:first-child').css('z-index', 2);
-    }
-
+    // Evento al hacer clic en los botones "next"
     $(".next").click(function () {
         var id = $(this).attr('id');
 
@@ -308,17 +313,19 @@ $(document).ready(function () {
             changeCard(current_fs, next_fs, 'next');
             showSubcard(0, 'next');
         } else if (id === "next2") {
+            if (!validatePage(currentSubcardIndex)) {
+                alert("Por favor, responda todas las preguntas antes de continuar.");
+                return;
+            }
             if (currentSubcardIndex < totalSubcards - 1) {
                 showSubcard(currentSubcardIndex + 1, 'next');
-            } else if (validateSurvey()) {
+            } else {
                 current_fs = $(this).closest('.card');
                 next_fs = current_fs.next();
                 changeCard(current_fs, next_fs, 'next');
-            } else {
-                alert("Por favor, responda todas las preguntas antes de continuar.");
             }
         } else if (id === "next3") {
-            if (validateSurvey()) {
+            if (validateAllQuestions()) {
                 submitForm();
             } else {
                 alert("Por favor, responda todas las preguntas antes de continuar.");
@@ -328,7 +335,7 @@ $(document).ready(function () {
         updateButtons();
     });
 
-
+    // Evento al hacer clic en los botones "prev"
     $(".prev").click(function () {
         current_fs = $(this).closest('.card');
         var currentCardIndex = $('.card').index(current_fs);
@@ -336,7 +343,7 @@ $(document).ready(function () {
         if (currentCardIndex === 2) { // Si estamos en la card de CONFIRMACION
             previous_fs = current_fs.prev();
             changeCard(current_fs, previous_fs, 'prev');
-            showSubcard(totalSubcards - 1, 'prev'); // Mostrar la última subcard de la encuesta
+            showSubcard(totalSubcards - 1, 'prev'); // Mostrar la última subcard
         } else if (currentSubcardIndex > 0) {
             showSubcard(currentSubcardIndex - 1, 'prev');
         } else {
@@ -350,31 +357,12 @@ $(document).ready(function () {
         updateButtons();
     });
 
+    // Evento al hacer clic en el botón "next3"
     $("#next3").click(function () {
-        submitForm();
+        if (validateAllQuestions()) {
+            submitForm();
+        } else {
+            alert("Por favor, responda todas las preguntas antes de continuar.");
+        }
     });
-
-    // Inicializar los botones
-    updateButtons();
 });
-
-function validateSurvey() {
-    const subcards = document.querySelectorAll('.subcard');
-    let allAnswered = true;
-
-    subcards.forEach(subcard => {
-        const questions = subcard.querySelectorAll('.form-group');
-        questions.forEach(question => {
-            const radios = question.querySelectorAll('input[type="radio"]:checked');
-            if (radios.length === 0) {
-                allAnswered = false;
-            }
-        });
-    });
-
-    return allAnswered;
-}
-
-
-
-

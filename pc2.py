@@ -37,14 +37,9 @@ import json
 import html
 
 # Modulos para la red neuronal
-import tensorflow as tf
-from sklearn.preprocessing import StandardScaler
 import joblib
 import numpy as np
-
-scaler = StandardScaler()
-
-
+from tensorflow.keras.models import load_model
 
 PCapp                                   = Flask(__name__)
 mysql                                   = MySQL(PCapp)
@@ -337,29 +332,37 @@ def survey_v2():
 @PCapp.route('/results', methods=['POST'])
 @require_post
 def results():
-        # Extraer todas las respuestas del formulario utilizando los nombres de las preguntas del formulario
+    # Extraer todas las respuestas del formulario utilizando los nombres de las preguntas del formulario
     nombres_preguntas = [
-        "ansiedad_nervioso_ansioso", "ansiedad_sintomas_fisicos", "ansiedad_preocupacion_excesiva", 
-        "ansiedad_evitar_social", "ansiedad_problemas_sueno",
-        "depresion_perdida_interes", "depresion_tristeza", "depresion_cambios_sueno_apetito", 
-        "depresion_fatiga", "depresion_inutilidad_culpa",
-        "antisocial_respetar_normas", "antisocial_falta_empatia", "antisocial_impulsivo_irresponsable", 
-        "antisocial_indiferencia_derechos", "antisocial_manipulacion",
-        "tdah_atencion", "tdah_perder_objetos", "tdah_inquietud", 
-        "tdah_interrupcion", "tdah_organizacion",
-        "bipolar_energia_excesiva", "bipolar_cambios_estado_animo", "bipolar_cambios_autoestima", 
-        "bipolar_gastos_impulsivos", "bipolar_cambios_rapidos_ideas",
-        "toc_pensamientos_intrusivos", "toc_rituales", "toc_interferencia_diaria", 
-        "toc_comprobacion_repetida", "toc_dificultad_control",
-        "misofonia_sensibilidad_sonidos", "misofonia_evitar_situaciones", "misofonia_interferencia_concentracion", 
-        "misofonia_ira_disgusto", "misofonia_aumento_sensibilidad"
+        "depresion_sentirse_triste", "depresion_perdida_interes", "depresion_cambios_peso_apetito", 
+        "depresion_patrones_sueno", "depresion_fatiga_energia", 
+        "ansiedad_preocupacion_diaria", "ansiedad_control_preocupacion", "ansiedad_sensacion_nerviosa", 
+        "ansiedad_fatiga_cansancio", "ansiedad_dificultad_concentracion", 
+        "ansiedad_miedo_social", "ansiedad_preocupacion_evaluacion", "ansiedad_evitar_social", 
+        "ansiedad_malestar_interacciones", "ansiedad_impacto_vida_diaria", 
+        "tdah_dificultad_atencion", "tdah_olvidar_cosas", "tdah_dificultad_organizacion", 
+        "tdah_impulsividad_hablar", "tdah_hiperactividad", 
+        "antisocial_normas", "antisocial_engaño_manipulacion", "antisocial_impulsividad", 
+        "antisocial_agresividad_conflictos", "antisocial_falta_remordimientos"
     ]
 
-    # Extraer las respuestas en el orden correcto
-    reported_symptoms = [int(request.form.get(nombre, 0)) for nombre in nombres_preguntas]
-    print(reported_symptoms)  # Verificar que se reciben los 35 valores correctos
+
+        # Extraer las respuestas del formulario
     try:
-        diagnoses = predecir_trastornos(reported_symptoms)
+        reported_symptoms = [int(request.form.get(nombre, 0)) for nombre in nombres_preguntas]
+    except ValueError:
+        flash("Error: Todas las respuestas deben ser valores numéricos.", 'danger')
+        return redirect(url_for('auth'))
+    print(reported_symptoms)  # Verificar que se reciben los 25 valores correctos
+    
+        # Verificar que todas las respuestas sean valores entre 0 y 4
+    if len(reported_symptoms) != len(nombres_preguntas) or not all(0 <= resp <= 4 for resp in reported_symptoms):
+        flash("Error: Respuestas fuera de rango. Por favor selecciona valores entre 0 y 4.", 'danger')
+        return redirect(url_for('auth'))
+
+    
+    try:
+        diagnoses = predecir_trastornos(loaded_model, loaded_scaler, reported_symptoms)
         print(f"Diagnóstico: {diagnoses}")
     except ValueError as e:
         print(f"Error en predecir_trastornos: {e}")
@@ -371,6 +374,7 @@ def results():
     try:
         # Serializar el diccionario a JSON
         diagnoses_json = json.dumps(diagnoses)
+        reported_symptoms_json = json.dumps(reported_symptoms)
         print("Diagnoses JSON:", diagnoses_json)
     except TypeError as e:
         print(f"Error de serialización a JSON: {e}")
@@ -388,7 +392,6 @@ def results():
     cur = mysql.connection.cursor()
     try:
         # Convertir reported_symptoms a una cadena JSON
-        reported_symptoms_json = json.dumps(reported_symptoms)
         
         cur.execute("UPDATE paciente SET sint_pri = %s, veriSurvey = %s, respuestas = %s WHERE correoPaci = %s",
                     (diagnoses_json, 1, reported_symptoms_json, correo_paciente))
@@ -1452,50 +1455,40 @@ def resultadosSintomas(idPaci):
         respuestas = json.loads(paci['respuestas']) if paci['respuestas'] else []
         diagnostico = json.loads(paci['sint_pri']) if paci['sint_pri'] else []
 
-        # Preguntas definidas directamente en el código
+        # Preguntas actualizadas para coincidir con la encuesta
         preguntas = [
-            "¿Te sientes nervioso o ansioso con frecuencia sin razón aparente?",
-            "¿Experimentas síntomas físicos como palpitaciones o sudoración cuando estás estresado?",
-            "¿Tiendes a preocuparte excesivamente por situaciones futuras?",
-            "¿Evitas situaciones sociales por miedo a sentirte incómodo o juzgado?",
-            "¿Tienes dificultades para conciliar el sueño debido a preocupaciones?",
-            "¿Has perdido interés en actividades que antes disfrutabas?",
-            "¿Te sientes triste o desanimado la mayor parte del día?",
-            "¿Has experimentado cambios significativos en tus patrones de sueño o apetito?",
-            "¿Te sientes sin energía o fatigado con frecuencia?",
-            "¿Tienes pensamientos de inutilidad o culpa excesiva?",
-            "¿Te cuesta respetar las normas sociales o legales?",
-            "¿Tienes dificultades para sentir empatía por los demás?",
-            "¿Actúas de manera impulsiva o irresponsable con frecuencia?",
-            "¿Sientes indiferencia por los sentimientos o derechos de los demás?",
-            "¿Tiendes a manipular a otros para obtener beneficios personales?",
-            "¿Te resulta difícil mantener la atención en clases o durante el estudio?",
-            "¿Sueles perder objetos necesarios para tus actividades (como llaves, libros, etc.)?",
-            "¿Te sientes inquieto o tienes dificultades para permanecer sentado por largos períodos?",
-            "¿Interrumpes a otros o hablas en momentos inapropiados?",
-            "¿Tienes problemas para organizar tareas y actividades?",
-            "¿Experimentas períodos de energía excesiva y menor necesidad de dormir?",
-            "¿Has tenido episodios de tristeza profunda alternados con períodos de euforia?",
-            "¿Notas cambios significativos en tu autoestima, pasando de muy alta a muy baja?",
-            "¿Has tenido episodios de gastos excesivos o comportamientos impulsivos?",
-            "¿Experimentas cambios rápidos en tus ideas o planes para el futuro?",
-            "¿Tienes pensamientos intrusivos y recurrentes que te causan ansiedad?",
-            "¿Realizas rituales o acciones repetitivas para aliviar la ansiedad?",
-            "¿Dedicas mucho tiempo a estas obsesiones o compulsiones, interfiriendo con tu vida diaria?",
-            "¿Sientes la necesidad de comprobar las cosas repetidamente?",
-            "¿Te resulta difícil controlar estos pensamientos o comportamientos?",
-            "¿Ciertos sonidos cotidianos (como masticar, respirar fuerte) te provocan una reacción emocional intensa?",
-            "¿Evitas situaciones sociales debido a tu sensibilidad a ciertos sonidos?",
-            "¿Tu reacción a estos sonidos interfiere con tu capacidad para concentrarte en tus estudios?",
-            "¿Sientes ira o disgusto intenso cuando escuchas estos sonidos?",
-            "¿Has notado que tu sensibilidad a ciertos sonidos ha aumentado con el tiempo?"
+            "En las últimas dos semanas, ¿con qué frecuencia te has sentido triste, vacío o sin esperanza durante la mayor parte del día?",
+            "En las últimas dos semanas, ¿en qué medida has perdido interés o placer en casi todas las actividades que solías disfrutar, como pasatiempos o reuniones sociales?",
+            "En las últimas dos semanas, ¿has notado algún cambio significativo en tu peso (ya sea pérdida o aumento de peso sin estar a dieta) o en tu apetito?",
+            "En las últimas dos semanas, ¿cómo describirías tus patrones de sueño (por ejemplo, dificultad para dormir, dormir demasiado o interrumpido)?",
+            "En las últimas dos semanas, ¿con qué frecuencia has experimentado fatiga o una pérdida de energía que afecta tu capacidad para realizar tareas diarias?",
+            "En las últimas semanas, ¿con qué frecuencia te has sentido preocupado o inquieto por cosas que están pasando en tu vida diaria, como el trabajo, la escuela o la familia?",
+            "¿Te resulta difícil controlar tus preocupaciones incluso cuando intentas distraerte o relajarte?",
+            "En las últimas semanas, ¿has sentido una sensación constante de estar en el borde o nervioso, como si estuvieras en tensión todo el tiempo?",
+            "¿Te has sentido más cansado de lo habitual incluso si no has estado haciendo mucho esfuerzo físico?",
+            "¿Te ha costado concentrarte en tus tareas diarias o en tus pensamientos porque sientes que tu mente está en blanco o te cuesta enfocarte?",
+            "En las últimas semanas, ¿con qué frecuencia has sentido nervios o miedo intenso antes de tener que participar en actividades sociales, como conocer a nuevas personas o hablar en público?",
+            "¿Te has preocupado mucho sobre la posibilidad de hacer el ridículo o de ser juzgado negativamente por otros cuando estás en situaciones sociales?",
+            "En las últimas semanas, ¿has evitado eventos sociales o situaciones donde podría haber gente porque te sientes demasiado incómodo o ansioso?",
+            "¿Durante las interacciones sociales, como charlar con amigos o familiares, te has sentido tan incómodo o ansioso que te resulta difícil disfrutar del momento?",
+            "¿Sientes que tu ansiedad en situaciones sociales afecta tu vida diaria, como tu capacidad para hacer amigos, tu desempeño en el trabajo o en la escuela, o cómo te sientes en general?",
+            "¿Te resulta complicado concentrarte en tareas o actividades durante un tiempo prolongado, como leer un libro o trabajar en un proyecto, y a menudo te das cuenta de que tu mente se desvía?",
+            "¿Te pasa a menudo que olvidas cosas importantes, como dónde dejaste las llaves o los deberes escolares y otros compromisos?",
+            "¿Te cuesta trabajo organizar tus tareas y actividades, como hacer una lista de cosas por hacer o mantenerte al día con tus responsabilidades?",
+            "¿Sueles interrumpir a los demás mientras están hablando o responder antes de que terminen de hacer una pregunta?",
+            "¿Te resulta difícil quedarte quieto o estar sentado en situaciones donde se espera que permanezcas tranquilo, como en reuniones o en el cine?",
+            "¿Te resulta fácil ignorar las reglas y normas, ya sea en el trabajo, en la escuela o en la vida cotidiana, y hacer lo que te parece sin preocuparte mucho por las consecuencias para los demás?",
+            "¿Con qué frecuencia has encontrado que engañas o manipulas a otras personas para obtener lo que quieres, incluso si eso significa mentir o usar excusas?",
+            "¿A menudo tomas decisiones impulsivas sin pensar mucho en las consecuencias, como gastar dinero sin planificación o actuar de manera arriesgada?",
+            "¿Te resulta común tener conflictos o pelear con otras personas, ya sea en casa, en el trabajo o en otros lugares, y sientes que te enojas fácilmente?",
+            "Cuando haces algo que lastima a alguien o causa problemas, ¿sientes que no te importa mucho o simplemente piensas que ellos deberían haberse hecho cargo de la situación?"
         ]
 
         # Renderizar el template con los datos necesarios
         return render_template('/prac/resultados_sintomas.html', 
                                paciente=paci, 
                                respuestas=respuestas,  # Pasar las respuestas directamente
-                               preguntas=preguntas,  # Pasar las preguntas directamente
+                               preguntas=preguntas,  # Pasar las preguntas actualizadas
                                diagnostico=diagnostico,
                                username=session['name'], 
                                email=session['correoPrac'], 
@@ -1503,6 +1496,7 @@ def resultadosSintomas(idPaci):
     else:
         flash('Paciente no encontrado', 'error')
         return redirect(url_for('indexPracticantes'))
+
 
 
 
@@ -2405,50 +2399,63 @@ def list_routes():
 
 #################################################### Prediccion ########################################################
 
-def predecir_trastornos(respuestas):
+def predecir_trastornos(modelo, scaler, respuestas):
     """
     Toma un vector de respuestas y predice los trastornos.
-    - respuestas: lista o array de 35 elementos con valores 0, 1 o 2
+
+    Parámetros:
+    - modelo: Modelo de Keras entrenado.
+    - scaler: Escalador de datos.
+    - respuestas: lista o array de 25 elementos con valores 0, 1, 2, 3, 4.
+
+    Retorna:
+    - resultados: lista de strings con los resultados de las predicciones.
     """
     # Verificar que las respuestas tengan la longitud correcta
     if len(respuestas) != NUM_PREGUNTAS:
         raise ValueError(f"Se esperaban {NUM_PREGUNTAS} respuestas, pero se recibieron {len(respuestas)}.")
     
-    with open('ia2/optimal_thresholds/optimal_thresholds.json', 'r') as f:
-        optimal_thresholds_saved = json.load(f)
-
-    # Convertir los umbrales a numpy array si es necesario
-    optimal_thresholds_saved = np.array(optimal_thresholds_saved)
-    
-    # Convertir a numpy array y escalar
+    # Convertir a numpy array y escalar usando el escalador cargado
     vector_entrada = np.array(respuestas).reshape(1, -1)
-    vector_entrada_escalado = loaded_scaler.transform(vector_entrada)    
+    vector_entrada_normalizado = scaler.transform(vector_entrada)
     
     # Realizar la predicción
-    probabilidades_normalizadas = loaded_model.predict(vector_entrada_escalado)[0]
-    probabilidades = probabilidades_normalizadas * 100  # Desnormalizar a porcentaje
-    
+    probabilidades_normalizadas = modelo.predict(vector_entrada_normalizado)[0]
+    probabilidades = probabilidades_normalizadas * 100  # Convertir a porcentaje
+
     # Convertir probabilidades a etiquetas binarias usando el umbral
-    predicciones_binarias = (probabilidades_normalizadas >= optimal_thresholds_saved).astype(int)
+    predicciones_binarias = (probabilidades_normalizadas >= UMBRAL_PROBABILIDAD).astype(int)
     
     resultados = []
     for i, nombre in enumerate(NOMBRES_TRASTORNOS):
         estado = "Presente" if predicciones_binarias[i] == 1 else "Ausente"
-        resultados.append(f"{nombre}: {estado} (Probabilidad: {probabilidades[i]:.2f})")
+        resultados.append(f"{nombre}: {estado} (Probabilidad: {probabilidades[i]:.2f}%)")
+    
     return resultados
 
-NUM_PREGUNTAS = 35  # Total de preguntas en el cuestionario
-NUM_TRASTORNOS = 7  # Número de trastornos a diagnosticar
-NOMBRES_TRASTORNOS = ['Ansiedad', 'Depresión', 'Antisocial', 'TDAH', 'Bipolar', 'TOC', 'Misofonía']
+NUM_PREGUNTAS = 25
+NOMBRES_TRASTORNOS = [
+    'Depresivo Mayor',
+    'Trastorno de Ansiedad Generalizada (TAG)',
+    'Trastorno de Ansiedad Social',
+    'Trastorno por Déficit de Atención',
+    'Trastorno Antisocial de la Personalidad'
+]
+UMBRAL_PROBABILIDAD = 0.76  # Umbral estándar para clasificación binaria
 
-model_save = 'ia2/model/modelo_trastornos_mentales_mlp_mejorado3_god.h5'
-scaler_save = 'ia2/scaler/scaler_trastornos_mentales3_god.pkl'
+# Definir los índices de preguntas por cada trastorno
+indices_trastornos = [
+    range(0, 5),   # Preguntas para Trastorno Depresivo Mayor
+    range(5, 10),  # Preguntas para Trastorno de Ansiedad Generalizada
+    range(10, 15), # Preguntas para Trastorno de Ansiedad Social
+    range(15, 20), # Preguntas para Trastorno por Déficit de Atención
+    range(20, 25)  # Preguntas para Trastorno Antisocial de la Personalidad
+]
+model_save = 'ia3/model/modelo_trastornos_cognitivos_huber.keras'
+scaler_save = 'ia3/scaler/scaler_trastornos_cognitivos_huber.joblib'
 
-loaded_model = tf.keras.models.load_model(model_save)
+loaded_model  = load_model(model_save)
 loaded_scaler = joblib.load(scaler_save)
-loaded_model.compile(optimizer='adam',
-                   loss='mean_squared_error',  # Error Cuadrático Medio para regresión
-                   metrics=['mean_absolute_error'])  # Error Absoluto Medio
 
 #################################################### End Prediccion ########################################################
 

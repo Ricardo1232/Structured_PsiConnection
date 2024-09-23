@@ -12,6 +12,15 @@
     <div class="container-fluid px-1 py-5 mx-auto">
         <div class="row d-flex justify-content-center text-center">
             <div class="col-lg-9 col-md-10">
+
+
+                              <!-- Barra de progreso -->
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress"></div>
+                    </div>
+                </div>
+
                 <form id="surveyForm" action="{{ url_for('results') }}" method="POST">
                     <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
 
@@ -120,9 +129,9 @@
                                 <div id="survey-container">
                                     <!-- Subcards will be dynamically inserted here -->
                                 </div>
-                                <button type="button" class="btn btn-success custom-btn-success rounded-0 mb-5 prev">ATRAS</button>
-                                <button id="next2" type="button" class="btn btn-success custom-btn-success rounded-0 mb-5 next" onclick="validateSurvey()">CONFIRMAR</button>                            
-                        </div>
+                                <button type="button" class="btn btn-success custom-btn-success rounded-0 mb-5 prev">ATRÁS</button>
+                                <button id="next2" type="button" class="btn btn-success custom-btn-success rounded-0 mb-5 next">CONFIRMAR</button>
+                            </div>
                     </div>
 
                     <div class="card b-0 rounded-5">

@@ -13,18 +13,23 @@
         <div class="row mt-4">
             <div class="col-md-12">
                 <h3>Respuestas del Paciente a la Encuesta</h3>
-                <p>A continuación se muestran las respuestas del paciente a cada pregunta de la encuesta realizada. Las opciones posibles son: <strong>Sí</strong>, <strong>A veces</strong>, y <strong>No</strong>.</p>
+                <p>A continuación se muestran las respuestas del paciente a cada pregunta de la encuesta realizada. Las opciones posibles son: <strong>Siempre</strong>, <strong>Casi siempre</strong>, <strong>A menudo</strong>, <strong>De vez en cuando</strong> y <strong>Nunca</strong>.</p>
                 <ol>
                     {% for respuesta in respuestas %}
                         {# Usar loop.index0 para obtener el índice del bucle #}
                         <li><strong>{{ preguntas[loop.index0] }}:</strong> 
-                            {% if respuesta == 2 %}
-                                Sí
+                            {% if respuesta == 4 %}
+                                Siempre
+                            {% elif respuesta == 3 %}
+                                Casi siempre
+                            {% elif respuesta == 2 %}
+                                A menudo
                             {% elif respuesta == 1 %}
-                                A veces
-                            {% else %}
-                                No
+                                De vez en cuando
+                            {% elif respuesta == 0 %}
+                                Nunca
                             {% endif %}
+
                         </li>
                     {% endfor %}
                 </ol>
