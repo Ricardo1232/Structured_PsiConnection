@@ -46,7 +46,7 @@ mysql                                   = MySQL(PCapp)
 csrf=CSRFProtect()
 PCapp.config['MYSQL_HOST']              = 'localhost'
 PCapp.config['MYSQL_USER']              = 'root'
-PCapp.config['MYSQL_PASSWORD']          = 'root'
+PCapp.config['MYSQL_PASSWORD']          = ''
 PCapp.config['MYSQL_DB']                = 'psiconnection'
 PCapp.config['MYSQL_CURSORCLASS']       = 'DictCursor'
 PCapp.config['UPLOAD_FOLDER']           = './static/img/'
@@ -310,7 +310,7 @@ def auth():
             
             # Enviar el código de verificación por correo electrónico
             msg = Message('Código de verificación', sender=PCapp.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = render_template('(/layaouts/layoutmail.html', name=name ,  verification_code=verification_code)
+            msg.body = render_template('/layaouts/layoutmail.html', name=name ,  verification_code=verification_code)
             msg.html = render_template('/layaouts/layoutmail.html', name=name ,  verification_code=verification_code)
             mail.send(msg)
             
@@ -1681,7 +1681,6 @@ def agendarCita():
     return render_template('/paci/agenda_cita copy.html', datosPrac = datosPrac, username=session['name'], email=session['correoPaci'])
 
 
-
 #~~~~~~~~~~~~~~~~~~~ Eliminar Cita Pracicante ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCitaPracticante', methods=["GET", "POST"])
 @require_post
@@ -2479,9 +2478,7 @@ if __name__ == '__main__':
 # ¿Por qué los pájaros no usan Facebook?
 # Porque ya tienen Twitter.
 
-# ¿Por qué los pájaros no usan computadoras?
-# Porque les da miedo el ratón.
-
+#E we, se me esta bajando la presion
 
 #E we, cuanto es 2 + 2?  = △⃒⃘
 
