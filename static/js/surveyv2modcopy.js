@@ -1,4 +1,144 @@
 console.log('estoy cargado');
+
+let model = null;
+
+// Cargar el modelo de TensorFlow.js lentamente y solo cuando sea necesario
+async function loadModel() {
+    try {
+        console.log('Cargando modelo...');
+        model = await tf.loadGraphModel('/static/model/model.json');
+        console.log('Modelo cargado correctamente');
+        return model;
+    } catch (error) {
+        console.error('Error cargando el modelo:', error);
+        alert('Ocurrió un problema cargando el modelo. Intenta nuevamente más tarde.');
+        return null;
+    }
+}
+
+// Función para obtener las respuestas del formulario
+function getSurveyResponses() {
+    const responseArray = [];
+    surveyQuestions.forEach((questionObj) => {
+        const selectedOption = document.querySelector(`input[name="${questionObj.name}"]:checked`);
+        if (selectedOption) {
+            responseArray.push(parseInt(selectedOption.value, 10));
+        }
+    });
+    return responseArray;
+}
+
+// Validar respuestas del formulario
+function validateResponses(responses) {
+    if (responses.length !== surveyQuestions.length) return false;
+    for (const value of responses) {
+        if (value < 0 || value > 4 || isNaN(value)) return false;
+    }
+    return true;
+}
+
+// Realizar predicción con el modelo
+async function predictWithModel(responses) {
+    if (!model) {
+        await loadModel(); // Espera a que se cargue el modelo
+    }
+    try {
+        console.log('Realizando predicción...');
+        console.log('Respuestas:', responses);
+        console.log('Dimensiones:', responses.length);
+
+        // Asegúrate de que responses tenga exactamente 25 elementos
+        if (responses.length !== 25) {
+            throw new Error('El arreglo de respuestas debe tener exactamente 25 elementos.');
+        }
+
+        // Convertir las respuestas a tipo flotante, si es necesario
+        const inputTensor = tf.tensor2d([responses], [1, 25], 'float32'); // Crear tensor de entrada con tipo 'float32'
+
+        // Realizar la predicción usando predict en lugar de execute
+        const prediction = model.predict(inputTensor);
+
+        // Convertir la predicción a un array y mostrar en consola
+        const predictedValues = await prediction.array();
+
+        // Redondear las predicciones a tres decimales
+        const roundedPredictions = predictedValues[0].map(value => parseFloat(value.toFixed(3)));
+
+        console.log('Valores predichos (redondeados a 3 decimales):', roundedPredictions);
+
+        // Liberar memoria del tensor de entrada
+        inputTensor.dispose();
+
+        return roundedPredictions;
+    } catch (error) {
+        console.error('Error en la predicción:', error);
+        return null;
+    }
+}
+
+
+
+// Integrar predicción al flujo de la encuesta y enviar datos
+async function handlePredictionAndSubmit() {
+    const responses = getSurveyResponses();
+    if (!validateResponses(responses)) {
+        alert('Por favor, asegúrate de responder todas las preguntas con valores válidos (0 a 4).');
+        return;
+    }
+
+    const predictions = await predictWithModel(responses);
+    if (predictions === null) {
+        alert('Ocurrió un problema al realizar la predicción. Por favor, intenta de nuevo.');
+        return;
+    }
+
+    // Mostrar la animación de carga
+    $('.card').removeClass('show').addClass('previous');
+    $('.card:last-child').removeClass('previous').addClass('show');
+
+    // Esperar 5 segundos antes de realizar el envío
+    setTimeout(() => {
+        submitFormData(responses, predictions);
+    }, 5000);
+}
+
+// Enviar el formulario, respuestas y predicciones al backend
+async function submitFormData(responses, predictions) {
+    const dataToSend = {
+        responses: responses,
+        predictions: predictions
+    };
+
+    try {
+        const response = await fetch('/results', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+            },
+            body: JSON.stringify(dataToSend)
+        });
+
+        // Si el estado de la respuesta es 200 (OK) o 302 (Found), redirigir a la nueva URL
+        if (response.ok || response.status === 302) {
+            window.location.href = response.url;  // Redirigir a la URL que indique el backend
+        } else {
+            console.error('Error en el envío del formulario:', response.statusText);
+            alert('Ocurrió un problema al enviar el formulario. Inténtalo nuevamente.');
+        }
+    } catch (error) {
+        console.error('Error al enviar los datos al backend:', error);
+        alert('Ocurrió un error en la conexión con el servidor.');
+    }
+}
+
+
+// Reemplazar la función submitForm en tu script existente con esta
+function submitForm() {
+    handlePredictionAndSubmit();
+}
+
+
 const surveyQuestions = [
     {
         question: "En las últimas dos semanas ¿con qué frecuencia te has sentido triste vacío o sin esperanza durante la mayor parte del día?",
@@ -209,17 +349,6 @@ function validateAllQuestions() {
     return allAnswered;
 }
 
-// Función para enviar el formulario
-function submitForm() {
-    // Mostrar la última tarjeta
-    $('.card').removeClass('show').addClass('previous');
-    $('.card:last-child').removeClass('previous').addClass('show');
-
-    // Esperar 5 segundos antes de enviar el formulario
-    setTimeout(() => {
-        document.getElementById('surveyForm').submit();
-    }, 5000);
-}
 
 // Función para desplazarse al inicio de la página
 function scrollToTop() {

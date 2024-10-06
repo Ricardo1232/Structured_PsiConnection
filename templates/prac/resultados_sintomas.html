@@ -43,20 +43,30 @@
         <div class="row mt-4">
             <div class="col-md-12">
                 <div class="card shadow mb-4">
-                    <div class="card-header text-white">
+                    <div class="card-header">
                         <h3 class="mb-0">Diagnóstico Basado en las Respuestas</h3>
                     </div>
                     <div class="card-body">
                         <p class="card-text">El diagnóstico preliminar del paciente se basa en las probabilidades de la presencia de diferentes trastornos mentales. Los resultados se interpretan como sigue:</p>
                         <ul class="list-group list-group-flush">
-                            {% for resultado in diagnostico %}
-                                <li class="list-group-item">{{ resultado }}</li>
+                            {% for trastorno, porcentaje in diagnostico.items() %}
+                                {% set valor_porcentaje = porcentaje.replace('%', '')|float %}
+                                <li class="list-group-item" style="{% if valor_porcentaje >= 76 %}border-left: 4px solid #90ee90;{% else %}border-left: 4px solid #d3d3d3;{% endif %} padding-left: 10px;">
+                                    {{ trastorno }}: 
+                                    {% if valor_porcentaje >= 76 %}
+                                        <strong>Presente (Probabilidad: {{ porcentaje }})</strong>
+                                    {% else %}
+                                        <em>Ausente (Probabilidad: {{ porcentaje }})</em>
+                                    {% endif %}
+                                </li>
                             {% endfor %}
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
+        
+        
 
         <div class="row mt-4">
             <div class="col-md-12">

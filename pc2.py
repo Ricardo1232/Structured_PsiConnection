@@ -39,14 +39,15 @@ import html
 # Modulos para la red neuronal
 import joblib
 import numpy as np
-from tensorflow.keras.models import load_model
+import torch
+import torch.nn as nn
 
 PCapp                                   = Flask(__name__)
 mysql                                   = MySQL(PCapp)
 csrf=CSRFProtect()
 PCapp.config['MYSQL_HOST']              = 'localhost'
 PCapp.config['MYSQL_USER']              = 'root'
-PCapp.config['MYSQL_PASSWORD']          = ''
+PCapp.config['MYSQL_PASSWORD']          = 'root'
 PCapp.config['MYSQL_DB']                = 'psiconnection'
 PCapp.config['MYSQL_CURSORCLASS']       = 'DictCursor'
 PCapp.config['UPLOAD_FOLDER']           = './static/img/'
@@ -328,11 +329,32 @@ def auth():
 def survey_v2():
     return render_template('/paci/SurveyV2modcopy.html')
 
-#Version 2
+def formatear_respuesta_trastornos(raw_diagnoses):
+    """
+    Formatea las predicciones del modelo en un formato legible para guardarlo en la base de datos.
+
+    Parámetros:
+    - raw_diagnoses: Lista de las predicciones del modelo. Ejemplo: [0.8, 0.1, 0.05, ...]
+
+    Retorna:
+    - Diccionario con los nombres de los trastornos como claves y sus porcentajes como valores.
+    """
+    NOMBRES_TRASTORNOS = [
+        "Depresión", "Ansiedad", "TDAH", "Trastorno de Personalidad Antisocial", "Trastorno Bipolar"
+    ]  # Definir los nombres de los trastornos correspondientes a las predicciones
+
+    # Crear un diccionario con el nombre del trastorno y su probabilidad formateada
+    resultados_formateados = {}
+    for i, nombre in enumerate(NOMBRES_TRASTORNOS):
+        resultados_formateados[nombre] = f"{raw_diagnoses[i] * 100:.1f}%"
+
+    return resultados_formateados
+
+#Version 3
 @PCapp.route('/results', methods=['POST'])
 @require_post
 def results():
-    # Extraer todas las respuestas del formulario utilizando los nombres de las preguntas del formulario
+    # Nombres de las preguntas del formulario
     nombres_preguntas = [
         "depresion_sentirse_triste", "depresion_perdida_interes", "depresion_cambios_peso_apetito", 
         "depresion_patrones_sueno", "depresion_fatiga_energia", 
@@ -346,196 +368,81 @@ def results():
         "antisocial_agresividad_conflictos", "antisocial_falta_remordimientos"
     ]
 
+    # Extraer las respuestas y predicciones enviadas desde el frontend
+    try:
+        data = request.get_json()  # Obtener el cuerpo de la solicitud en formato JSON
+        print("Datos recibidos:", data)  # Depurar para ver la estructura de los datos recibidos
 
-        # Extraer las respuestas del formulario
-    try:
-        reported_symptoms = [int(request.form.get(nombre, 0)) for nombre in nombres_preguntas]
-    except ValueError:
-        flash("Error: Todas las respuestas deben ser valores numéricos.", 'danger')
-        return redirect(url_for('auth'))
-    print(reported_symptoms)  # Verificar que se reciben los 25 valores correctos
-    
-        # Verificar que todas las respuestas sean valores entre 0 y 4
-    if len(reported_symptoms) != len(nombres_preguntas) or not all(0 <= resp <= 4 for resp in reported_symptoms):
-        flash("Error: Respuestas fuera de rango. Por favor selecciona valores entre 0 y 4.", 'danger')
-        return redirect(url_for('auth'))
+        # Extraer 'responses' y 'predictions' del JSON recibido
+        responses_list = data.get('responses', [])
+        predictions_list = data.get('predictions', [])
 
-    
-    try:
-        diagnoses = predecir_trastornos(loaded_model, loaded_scaler, reported_symptoms)
-        print(f"Diagnóstico: {diagnoses}")
-    except ValueError as e:
-        print(f"Error en predecir_trastornos: {e}")
-        flash("Error en el procesamiento de las respuestas del formulario", 'danger')
-        return redirect(url_for('auth'))
-    
-    print(f"Diagnóstico: {diagnoses}")
-    
-    try:
-        # Serializar el diccionario a JSON
+        # Validar que las respuestas y las predicciones no estén vacías
+        if not responses_list or not predictions_list:
+            flash("Error: No se recibieron respuestas o predicciones válidas.", 'danger')
+            return redirect(url_for('auth'))
+
+        # Depurar para asegurar que se recibieron correctamente
+        print(f"Respuestas del formulario: {responses_list}")
+        print(f"Predicciones recibidas: {predictions_list}")
+
+        # Formatear las predicciones recibidas
+        diagnoses = formatear_respuesta_trastornos(predictions_list)
+        print(f"Diagnóstico formateado: {diagnoses}")
+
+        # Serializar las respuestas y predicciones a JSON para guardar en la base de datos
         diagnoses_json = json.dumps(diagnoses)
-        reported_symptoms_json = json.dumps(reported_symptoms)
-        print("Diagnoses JSON:", diagnoses_json)
-    except TypeError as e:
-        print(f"Error de serialización a JSON: {e}")
-        flash("Error al procesar los datos", 'danger')
+        reported_symptoms_json = json.dumps(responses_list)
+
+    except (ValueError, TypeError, KeyError) as e:
+        flash("Error en el procesamiento de las respuestas o predicciones recibidas.", 'danger')
+        print(f"Error en el procesamiento de las respuestas o predicciones: {e}")
         return redirect(url_for('auth'))
-    
+
+    # Obtener el correo del paciente desde la sesión
     correo_paciente = session.get('correoPaci')
-    print(f"Correo del paciente: {correo_paciente}")
-    
     if not correo_paciente:
-        flash("Error: No se pudo identificar al paciente", 'danger')
+        flash("Error: No se pudo identificar al paciente.", 'danger')
         return redirect(url_for('auth'))
-    
+
     # Guardar los resultados en la base de datos
     cur = mysql.connection.cursor()
     try:
-        # Convertir reported_symptoms a una cadena JSON
-        
-        cur.execute("UPDATE paciente SET sint_pri = %s, veriSurvey = %s, respuestas = %s WHERE correoPaci = %s",
-                    (diagnoses_json, 1, reported_symptoms_json, correo_paciente))
+        # Guardar las respuestas y las predicciones en la base de datos
+        cur.execute(
+            "UPDATE paciente SET sint_pri = %s, veriSurvey = %s, respuestas = %s WHERE correoPaci = %s",
+            (diagnoses_json, 1, reported_symptoms_json, correo_paciente)
+        )
         mysql.connection.commit()
         
-        print("Diagnoses JSON guardado:", diagnoses_json)
-        print("Reported Symptoms guardados:", reported_symptoms_json)
-        print("veriSurvey guardado: 1")
-        
+        print("Datos guardados correctamente en la base de datos.")
+
         # Verificar que los datos se guardaron correctamente
         cur.execute("SELECT sint_pri, veriSurvey, respuestas FROM paciente WHERE correoPaci = %s", (correo_paciente,))
         result = cur.fetchone()
         if result:
-            print("Datos guardados en la BD:")
-            print(f"sint_pri: {result['sint_pri']}")
-            print(f"veriSurvey: {result['veriSurvey']}")
-            print(f"respuestas: {result['respuestas']}")
+            print(f"sint_pri guardado: {result['sint_pri']}")
+            print(f"veriSurvey guardado: {result['veriSurvey']}")
+            print(f"respuestas guardadas: {result['respuestas']}")
         else:
-            print("No se encontraron datos guardados para este paciente")
-    
-        # Guardar los síntomas reportados en la sesión para uso futuro si es necesario
-        session['reported_symptoms'] = reported_symptoms
+            print("No se encontraron datos guardados para este paciente.")
+
+        # Guardar los datos en la sesión para uso futuro
+        session['reported_symptoms'] = responses_list
         session['diagnoses'] = diagnoses_json
         session['survey'] = 1
-    
-        flash("Encuesta completada con éxito", 'success')
+
+        flash("Encuesta completada con éxito.", 'success')
+
     except MySQLdb.Error as e:
         print(f"Error MySQL al guardar los resultados: {e}")
-        flash(f"Error al guardar los resultados de la encuesta: {e}", 'danger')
+        flash("Error al guardar los resultados de la encuesta en la base de datos.", 'danger')
         mysql.connection.rollback()
     finally:
-        cur.close()      
-          
+        cur.close()
+
     return redirect(url_for('indexPacientes'))
-
-# Version 1
-# @PCapp.route('/results', methods=['POST'])
-# @require_post
-# def results():
-#         reported_symptoms = [symptom for symptom, value in request.form.items() if value == 'si']
-#         vector_paciente = np.array([crear_vector_sintomas(reported_symptoms)])
-        
-#         predicciones = model.predict(vector_paciente)
-
-#         # Convertir las predicciones a porcentajes
-#         percentages = [float(p) * 100 for p in predicciones[0]]
-
-#         # Mostrar el resultado en formato de diccionario
-#         diagnoses = {enfermedad: round(float(porcentaje), 2) for enfermedad, porcentaje in zip(enfermedades.keys(), percentages)}
-#         print(f"{diagnoses}")
-#         # diagnoses_p, diagnoses_s = diagnose(reported_symptoms)
-#         # print(diagnoses_p)
-#         # print(diagnoses_s)
-        
-        
-#         try:
-#             # Serializar el diccionario a JSON
-#             diagnoses_json = json.dumps(diagnoses)
-#             print("Diagnoses JSON:", diagnoses_json)
-#         except TypeError as e:
-#             print(f"Error de serialización a JSON: {e}")
-#             flash("Error al procesar los datos", 'danger')
-#             return redirect(url_for('auth'))
-        
-#         correo_paciente = session.get('correoPaci')
-#         print(correo_paciente)
-        
-#         if not correo_paciente:
-#             flash("Error: No se pudo identificar al paciente", 'danger')
-#             return redirect(url_for('auth'))
-        
-        
-#         # Guardar los resultados en la base de datos
-#         cur = mysql.connection.cursor()
-#         try:
-#             cur.execute("UPDATE paciente SET sint_pri = %s, veriSurvey = %s, respuestas = %s WHERE correoPaci = %s",
-#                         (str(diagnoses_json), 1, reported_symptoms, correo_paciente))
-#             mysql.connection.commit()
-            
-#             print("Diagnoses JSON:")
-#             print(diagnoses_json)
-            
-#             print("Reported Symptoms:")
-#             print(reported_symptoms)
-            
-            
-        
-#             # Guardar los síntomas reportados en la sesión para uso futuro si es necesario
-#             session['reported_symptoms'] = reported_symptoms
-#             session['diagnoses'] = diagnoses_json
-#             # session['diagnoses_s'] = diagnoses_s
-#             session['survey'] = 1
-        
-        
-#             flash("Encuesta completada con éxito", 'success')
-#         except MySQLdb.Error as e:
-#             flash(f"Error al guardar los resultados de la encuesta: {e}", 'danger')
-#             mysql.connection.rollback()
-#         finally:
-#             cur.close()      
-              
-#         return redirect(url_for('indexPacientes'))
-    
-    
-#Version anterior
-# @PCapp.route('/results', methods=['POST'])
-# @require_post
-# def results():
-#         reported_symptoms = [symptom for symptom, value in request.form.items() if value == 'si']
-#         print(f"{reported_symptoms}")
-#         diagnoses_p, diagnoses_s = diagnose(reported_symptoms)
-#         print(diagnoses_p)
-#         print(diagnoses_s)
-        
-#         correo_paciente = session.get('correoPaci')
-#         print(correo_paciente)
-        
-#         if not correo_paciente:
-#             flash("Error: No se pudo identificar al paciente", 'danger')
-#             return redirect(url_for('auth'))        
-        
-#         # Guardar los resultados en la base de datos
-#         cur = mysql.connection.cursor()
-#         try:
-#             cur.execute("UPDATE paciente SET sint_pri = %s, sint_sec = %s, veriSurvey = %s WHERE correoPaci = %s",
-#                         (str(diagnoses_p), str(diagnoses_s), 1, correo_paciente))
-#             mysql.connection.commit()
-        
-#             # Guardar los síntomas reportados en la sesión para uso futuro si es necesario
-#             session['reported_symptoms'] = reported_symptoms
-#             session['diagnoses_p'] = diagnoses_p
-#             session['diagnoses_s'] = diagnoses_s
-#             session['survey'] = 1
-        
-        
-#             flash("Encuesta completada con éxito", 'success')
-#         except MySQLdb.Error as e:
-#             flash(f"Error al guardar los resultados de la encuesta: {e}", 'danger')
-#             mysql.connection.rollback()
-#         finally:
-#             cur.close()      
-              
-#         return redirect(url_for('indexPacientes'))
-    
+  
 @PCapp.route('/verify', methods=['GET', 'POST'])
 def verify():
     if 'login' not in session:
@@ -1085,19 +992,6 @@ def contestarEncuesta():
     return redirect(url_for('indexPacientes'))
 
 
-# ~~~~~~~~~~~~~~~~~~~ Calendario V1 ~~~~~~~~~~~~~~~~~~~#
-# @PCapp.route('/Calendario/<string:idPrac>', methods=['GET'])
-# def calendario(idPrac):
-#     with mysql.connection.cursor() as cursor:
-#         cursor.execute("DELETE FROM horario WHERE fecha < CURDATE()")
-#         mysql.connection.commit()
-#         cursor.execute('SELECT idPrac, correoPrac FROM practicante WHERE idPrac = %s', (idPrac,))
-#         practicante = cursor.fetchone()
-    
-#     if practicante:
-#         return render_template('calendario.html', idPrac=practicante['idPrac'],  correoPrac=practicante['correoPrac'], username=session['name'], email=session['correoPaci'])
-
-
 def generar_horarios(practicante_id, mysql, num_days=21):
     # Fecha de inicio
     start_date = datetime.datetime.now()
@@ -1454,6 +1348,7 @@ def resultadosSintomas(idPaci):
         # Obtener los síntomas reportados y el diagnóstico
         respuestas = json.loads(paci['respuestas']) if paci['respuestas'] else []
         diagnostico = json.loads(paci['sint_pri']) if paci['sint_pri'] else []
+        print(diagnostico)
 
         # Preguntas actualizadas para coincidir con la encuesta
         preguntas = [
@@ -2103,26 +1998,6 @@ def editarCuentaPacienteAdm():
     flash('Cuenta editada con exito.')
     return redirect(url_for('verPacientesAdm'))
 
-#Esto para que sirve?
-# ~~~~~~~~~~~~~~~~~~~ Editar Pacientes Supervisor ~~~~~~~~~~~~~~~~~~~#
-# @PCapp.route('/EditarCuentaPacienteSup', methods=["GET", "POST"])
-# @require_post
-# def editarCuentaPacienteSup():
-#     #SE MANDA A LLAMRA LA FUNCION PARA ENCRIPTAR
-#     encriptar = encriptado()
-    
-#     # SE CREAN LISTAS DE LOS DATOS REQUERIDOS
-#     list_campos = ['nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
-#     list_campos_consulta = ['idPaci', 'paciente', 'nombrePaci', 'apellidoPPaci', 'apellidoMPaci']
-    
-#     # SE RECIBE LA INFORMACION
-#     nombrePaciCC, apellidoPPaciCC , apellidoMAdCC =  get_information_3_attributes(encriptar, request, list_campos)
-   
-#     consult_edit(request, mysql, list_campos_consulta, nombrePaciCC, apellidoPPaciCC, apellidoMAdCC)
-    
-#     flash('Cuenta editada con exito.')
-#     return redirect(url_for('verPaciente'))
-
 #~~~~~~~~~~~~~~~~~~~ Eliminar Pacientes ~~~~~~~~~~~~~~~~~~~#
 @PCapp.route('/EliminarCuentaPacienteAdm', methods=["GET", "POST"])
 @require_post
@@ -2379,84 +2254,170 @@ def status_401(error):
 def status_404(error):
     return render_template('404.html'), 404
 
-@PCapp.cli.command()
-def list_routes():
-    import urllib
-    output = []
-    for rule in app.url_map.iter_rules():
-        options = {}
-        for arg in rule.arguments:
-            options[arg] = "[{0}]".format(arg)
 
-        methods = ','.join(rule.methods)
-        url = url_for(rule.endpoint, **options)
-        line = urllib.parse.unquote("{:50s} {:20s} {}".format(rule.endpoint, methods, url))
-        output.append(line)
-
-    for line in sorted(output):
-        print(line)
 
 #################################################### Prediccion ########################################################
+# class MiModelo(nn.Module):
+#     def __init__(self):
+#         super(MiModelo, self).__init__()
+#         self.fc1 = nn.Linear(25, 375)
+#         self.elu1 = nn.ELU()
+#         self.dropout1 = nn.Dropout(0.4)
 
-def predecir_trastornos(modelo, scaler, respuestas):
-    """
-    Toma un vector de respuestas y predice los trastornos.
+#         self.fc2 = nn.Linear(375, 250)
+#         self.elu2 = nn.ELU()
+#         self.dropout2 = nn.Dropout(0.5)
 
-    Parámetros:
-    - modelo: Modelo de Keras entrenado.
-    - scaler: Escalador de datos.
-    - respuestas: lista o array de 25 elementos con valores 0, 1, 2, 3, 4.
+#         self.fc3 = nn.Linear(250, 100)
+#         self.elu3 = nn.ELU()
+#         self.dropout3 = nn.Dropout(0.3)
 
-    Retorna:
-    - resultados: lista de strings con los resultados de las predicciones.
-    """
-    # Verificar que las respuestas tengan la longitud correcta
-    if len(respuestas) != NUM_PREGUNTAS:
-        raise ValueError(f"Se esperaban {NUM_PREGUNTAS} respuestas, pero se recibieron {len(respuestas)}.")
+#         self.fc4 = nn.Linear(100, 5)
+#         self.sigmoid = nn.Sigmoid()
+
+#     def forward(self, x):
+#         x = self.fc1(x)
+#         x = self.elu1(x)
+#         x = self.dropout1(x)
+
+#         x = self.fc2(x)
+#         x = self.elu2(x)
+#         x = self.dropout2(x)
+
+#         x = self.fc3(x)
+#         x = self.elu3(x)
+#         x = self.dropout3(x)
+
+#         x = self.fc4(x)
+#         x = self.sigmoid(x)
+#         return x
+
+# # Configuración
+# NUM_PREGUNTAS = 25
+# UMBRAL_PROBABILIDAD = 0.76
+
+# # Cargar el modelo y el escalador
+# RUTA_MODELO = 'torch/modelo_trastornos.pth'  # Ajusta la ruta según corresponda
+# RUTA_ESCALADOR = 'torch/scaler_trastornos_cognitivos.joblib'  # Ajusta la ruta según corresponda
+
+# # Cargar el modelo y el escalador
+# def cargar_modelo_y_escalador():
+#     print("Cargando el modelo y el escalador...")
+#     modelo = MiModelo()
+#     modelo.load_state_dict(torch.load(RUTA_MODELO, map_location=torch.device('cpu')))
+#     modelo.eval()  # Configurar el modelo en modo evaluación
+#     scaler = joblib.load(RUTA_ESCALADOR)
+#     print("Modelo y escalador cargados exitosamente.")
+#     return modelo, scaler
+
+# # Cargar el modelo y el escalador una vez al iniciar la aplicación
+# loaded_model, loaded_scaler = cargar_modelo_y_escalador()
+
+# def predecir_trastornos(modelo, scaler, respuestas):
+#     """
+#     Toma un vector de respuestas y predice los trastornos.
+
+#     Parámetros:
+#     - modelo: Modelo de PyTorch entrenado.
+#     - scaler: Escalador de datos.
+#     - respuestas: lista o array de 25 elementos con valores 0, 1, 2, 3, 4.
+
+#     Retorna:
+#     - diagnoses: diccionario con los trastornos y sus probabilidades.
+#     """
+#     NUM_PREGUNTAS = 25
+#     NOMBRES_TRASTORNOS = [
+#         'Depresivo Mayor',
+#         'Trastorno de Ansiedad Generalizada (TAG)',
+#         'Trastorno de Ansiedad Social',
+#         'Trastorno por Déficit de Atención',
+#         'Trastorno Antisocial de la Personalidad'
+#     ]
+#     UMBRAL_PROBABILIDAD = 0.76  # Umbral estándar para clasificación binaria
+
+#     # Verificar que las respuestas tengan la longitud correcta
+#     if len(respuestas) != NUM_PREGUNTAS:
+#         raise ValueError(f"Se esperaban {NUM_PREGUNTAS} respuestas, pero se recibieron {len(respuestas)}.")
+
+#     # Convertir a numpy array y escalar usando el escalador cargado
+#     vector_entrada = np.array(respuestas).reshape(1, -1)
+#     vector_entrada_normalizado = scaler.transform(vector_entrada)
+
+#     # Convertir a tensor de PyTorch y realizar la predicción
+#     tensor_entrada = torch.tensor(vector_entrada_normalizado, dtype=torch.float32)
+#     with torch.no_grad():
+#         probabilidades_normalizadas = modelo(tensor_entrada).numpy()[0]
+
+#     probabilidades = probabilidades_normalizadas * 100  # Convertir a porcentaje
+
+#     # Convertir probabilidades a etiquetas binarias usando el umbral
+#     predicciones_binarias = (probabilidades_normalizadas >= UMBRAL_PROBABILIDAD).astype(int)
+
+#     diagnoses = {}
+#     for i, nombre in enumerate(NOMBRES_TRASTORNOS):
+#         estado = "Presente" if predicciones_binarias[i] == 1 else "Ausente"
+#         diagnoses[nombre] = {
+#             'estado': estado,
+#             'probabilidad': round(float(probabilidades[i]), 2)
+#         }
+
+#     return diagnoses
+
+
+# def predecir_trastornos(modelo, scaler, respuestas):
+#     """
+#     Toma un vector de respuestas y predice los trastornos.
+
+#     Parámetros:
+#     - modelo: Modelo de Keras entrenado.
+#     - scaler: Escalador de datos.
+#     - respuestas: lista o array de 25 elementos con valores 0, 1, 2, 3, 4.
+
+#     Retorna:
+#     - resultados: lista de strings con los resultados de las predicciones.
+#     """
+#     # Verificar que las respuestas tengan la longitud correcta
+#     if len(respuestas) != NUM_PREGUNTAS:
+#         raise ValueError(f"Se esperaban {NUM_PREGUNTAS} respuestas, pero se recibieron {len(respuestas)}.")
     
-    # Convertir a numpy array y escalar usando el escalador cargado
-    vector_entrada = np.array(respuestas).reshape(1, -1)
-    vector_entrada_normalizado = scaler.transform(vector_entrada)
+#     # Convertir a numpy array y escalar usando el escalador cargado
+#     vector_entrada = np.array(respuestas).reshape(1, -1)
+#     vector_entrada_normalizado = scaler.transform(vector_entrada)
     
-    # Realizar la predicción
-    probabilidades_normalizadas = modelo.predict(vector_entrada_normalizado)[0]
-    probabilidades = probabilidades_normalizadas * 100  # Convertir a porcentaje
+#     # Realizar la predicción
+#     probabilidades_normalizadas = modelo.predict(vector_entrada_normalizado)[0]
+#     probabilidades = probabilidades_normalizadas * 100  # Convertir a porcentaje
 
-    # Convertir probabilidades a etiquetas binarias usando el umbral
-    predicciones_binarias = (probabilidades_normalizadas >= UMBRAL_PROBABILIDAD).astype(int)
+#     # Convertir probabilidades a etiquetas binarias usando el umbral
+#     predicciones_binarias = (probabilidades_normalizadas >= UMBRAL_PROBABILIDAD).astype(int)
     
-    resultados = []
-    for i, nombre in enumerate(NOMBRES_TRASTORNOS):
-        estado = "Presente" if predicciones_binarias[i] == 1 else "Ausente"
-        resultados.append(f"{nombre}: {estado} (Probabilidad: {probabilidades[i]:.2f}%)")
+#     resultados = []
+#     for i, nombre in enumerate(NOMBRES_TRASTORNOS):
+#         estado = "Presente" if predicciones_binarias[i] == 1 else "Ausente"
+#         resultados.append(f"{nombre}: {estado} (Probabilidad: {probabilidades[i]:.2f}%)")
     
-    return resultados
+#     return resultados
 
-NUM_PREGUNTAS = 25
-NOMBRES_TRASTORNOS = [
-    'Depresivo Mayor',
-    'Trastorno de Ansiedad Generalizada (TAG)',
-    'Trastorno de Ansiedad Social',
-    'Trastorno por Déficit de Atención',
-    'Trastorno Antisocial de la Personalidad'
-]
-UMBRAL_PROBABILIDAD = 0.76  # Umbral estándar para clasificación binaria
+# NUM_PREGUNTAS = 25
+# NOMBRES_TRASTORNOS = [
+#     'Depresivo Mayor',
+#     'Trastorno de Ansiedad Generalizada (TAG)',
+#     'Trastorno de Ansiedad Social',
+#     'Trastorno por Déficit de Atención',
+#     'Trastorno Antisocial de la Personalidad'
+# ]
+# UMBRAL_PROBABILIDAD = 0.76  # Umbral estándar para clasificación binaria
 
-# Definir los índices de preguntas por cada trastorno
-indices_trastornos = [
-    range(0, 5),   # Preguntas para Trastorno Depresivo Mayor
-    range(5, 10),  # Preguntas para Trastorno de Ansiedad Generalizada
-    range(10, 15), # Preguntas para Trastorno de Ansiedad Social
-    range(15, 20), # Preguntas para Trastorno por Déficit de Atención
-    range(20, 25)  # Preguntas para Trastorno Antisocial de la Personalidad
-]
-model_save = 'ia3/model/modelo_trastornos_cognitivos_huber.keras'
-scaler_save = 'ia3/scaler/scaler_trastornos_cognitivos_huber.joblib'
+# model_save = 'ia3/model/modelo_trastornos_cognitivos_huber.keras'
+# scaler_save = 'ia3/scaler/scaler_trastornos_cognitivos_huber.joblib'
 
-loaded_model  = load_model(model_save)
-loaded_scaler = joblib.load(scaler_save)
+# loaded_model  = load_model(model_save)
+# loaded_scaler = joblib.load(scaler_save)
 
 #################################################### End Prediccion ########################################################
+
+
+
 
 if __name__ == '__main__':
     PCapp.secret_key = '123'
