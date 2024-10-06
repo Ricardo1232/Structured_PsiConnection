@@ -1,0 +1,18 @@
+tensorflowjs instala por defecto la dependencia: 
+
+tensorflow_decision_forests
+
+Esta libreria da problemas con la conversion de tensorflow a tensorflowjs
+
+Por lo tanto, se necesita commetar la importancion de esta misma la cual se 
+encuetra en la siguiente ruta del entorno virtual o tus paquetes:
+
+\lib\site-packages\tensorflowjs\converters\tf_saved_model_conversion_v2.py
+
+# import tensorflow_decision_forests
+
+
+
+Comando usado para hacer la conversion de tensorflow a tensorflowjs
+                                                                                                                                                    #Carpeta de tensorflow       #Carpeta destino
+tensorflowjs_converter --input_format=tf_saved_model --output_format=tfjs_graph_model --signature_name=serving_default --saved_model_tags=serve "./modelo_con_escalador_tf" "./modelo_con_escalador_tfjs"
